@@ -1,0 +1,113 @@
+Example:
+    class Company {
+        private List<String> addressList;
+        //
+        @TransientGetter
+        public List<String> getAddressList() {return addressList;}
+        public void setAddressList(List<String> addressList) {this.addressList = addressList;}
+        //
+        public String[] getAddressListAsArray() {return addressList.toArray();}
+        public void setAddressListAsArray(String[] addressListAsArray) {this.addressList = Arrays.asList(addressListAsArray);}
+    }
+
+*) JdkTypes:
+    byte, ... 
+    Byte, ...
+    Class, String, Date, File, InetAddress, Properties
+    ArrayList, LinkedList, HashMap, TreeMap, IdentityHashMap, LinkedHashSet, HashSet, TreeSet,
+    Hashtable, Vector
+
+    writeX-> ?Enum, Object, Region, Stack,
+    DS-> Inet4Address, Inet6Address,
+
+    arrays of every dimentions of previous classes
+
+*) static getter type:
+
+*) rt getter type:
+
+*) PRINCIPLES:
+    - надежность - задача построить систему которая
+        1) никогда не кидает исключений при десериализации
+        ???2) никогда не кидает исключений при сериализации (или таки есть исключения бросаемые в реалтайме? как на счет диспечеризации DS?)
+    - размер - производит настолько малые объекты насколько возможно
+    - скорость - процесс сериализации и десериализации протекает с максимальной скоростью
+    - минимальное выделение памяти в процессе сер/десер
+
+*) ПРЕДНАЗНАЧЕНИЕ
+    - автоматическая генерация DS
+*) ОСОБЕННОСТИ
+    - generate + compile classes
+*) SPRING INTEGRATION (+ ВЗАИМОЖЕЙСТВИЕ С ИХ ПРОЕКТОМ ПО ИНТЕГРАЦИИ)
+*) ПРИНЦИП ИСПОЛЬЗОВАНИЯ (2 АННОТАЦИИ, ДАТЬ ВСЕ КЛАССЫ, ВИД БИНА)
+    @SerializedClass
+        - для каждого объекта который будет передаваться его тип должен быть маркирован и зарегистрирован
+        - для марканого чилда данные парента передадутся внезависимости отмаркан парент или нет
+        - аннотация @SerializedClass не наследуется
+        - поле может быть немарканного типа, но значение - марканного (пример: Figure: {@SerClass-Oval, @SerClass-Rect})
+        - (это нормально - поле немарканного типа, значение марканного, т.е. не ожидается, что искусственно маркируются предки)
+        - поле может быть конкретным классом, абстрактным, интерфейсом (???enum, ???collection) //todo: really?
+    @TransientGetter
+        ? маркать можно ?ТОЛЬКО? корректный геттер //todo: really?
+        ? маркать можно корректный геттер ?ТОЛЬКО? сериализуемого класса //todo: really?
+        - маркать можно любой корректный геттер сериализуемого класса //todo: really?
+        - аннотация @TransientGetter не наследуется
+        - поле может быть марканного/немарканного типа, но при сериализации учтется только макканнось/немарканность значения //todo: wtf?
+    How to get sources of generated classes?
+        //todo: doc
+
+
+
+*) ПРИНЦИП РАБОТЫ
+    - bean validation
+        - проверяется валидность класса (public, @SC, ?enum ?collection)
+        - проверяется валидность конструктора
+            - public
+            - no-arg
+            - does not throws any checked exception        
+        - ищутся все методы начинающиеся на get*
+        - проверяется валидность getter-ов
+            - public
+            - no-arg
+            - not void/return some type
+            - throws no checked exception
+            - exist setter
+                - public
+                - the same name
+                - the same arg type (Integer/int - diff types)
+                - return void
+        - ко всем геттерам ищутся сеттеры (по имени)
+        - проверяется валидность сеттеров-ов
+        - P.S. we don't support conventions for array/List (java code conventions)        
+    - bean serialization
+    ? when we use DS as type-dispatcher?
+*) НАСТРОЙКА ПАРАМЕТРОВ
+*) INTERNAL ARCHITECTURE
+
+
+*) PROJECT STRUCTURE + TEST/BUILD PROCESS
+    - structure:
+        <groupId>com.griddynamics.gemfire.serialization</groupId>
+        <artifactId>gemfire-serialization-core</artifactId> - CORE
+        <artifactId>gemfire-serialization-spring</artifactId> - SPRING
+        <artifactId>gemfire-serialization-performance</artifactId> - PERFORMANCE
+        <artifactId>gemfire-serialization-examples</artifactId> - EXAMPLES
+    - test:
+        - mvn clean test //todo:
+    - build:
+        - mvn clean package //todo:
+            CORE: core/target/gemfire-serialization-core-{version}.jar //todo: version exist?
+                - "library jar" without dependencies //todo: really?
+            SPRING: core/target/gemfire-serialization-spring-{version}.jar //todo: version exist?
+                - "library jar" without dependencies //todo: really?
+            PERFORMANCE: core/target/gemfire-serialization-performance-{version}.jar //todo: version exist?
+                - executable jar contained all dependencies
+                - run: java -jar gemfire-serialization-performance-0.1.jar
+            EXAMPLES:
+                core/target/gemfire-serialization-examples-web-server-{version}.jar //todo: no version now
+                core/target/gemfire-serialization-examples-web-client-{version}.jar //todo: no version now
+                core/target/gemfire-serialization-examples-console-server-{version}.jar //todo: no version now
+                core/target/gemfire-serialization-examples-console-client-{version}.jar //todo: no version now
+//todo: perf - don't unpack libs
+//todo: examples - now don't build console cl/server
+

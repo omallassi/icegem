@@ -1,0 +1,114 @@
+*) PUBLIC API
+    CORE:
+    - com.griddynamics.gemfire.serialization:
+        - HierarchyRegistry
+    - com.griddynamics.gemfire.serialization.codegen:
+        - DataSerializerGenerator
+        - CodeGenerationListener
+        - SOUTCodeGenerationListener
+    SPRING:
+    - com.griddynamics.gemfire.serialization.spring
+        - GemFireBeanRegistry
+            USING:
+                - Example (bean from applicationContext.xml):
+                <bean id="gemFireBeanRegistry"
+                      scope="singleton"
+                      class="com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry">
+                    <property name="scanPackages">
+                        <list>
+                            <value>com.my.company.beans</value>
+                        </list>
+                    </property>
+                    <property name="registeredClasses">
+                        <list>
+                            <value>com.other.company.bean.Company</value>
+                            <value>com.other.company.bean.Address</value>
+                            <value>com.other.company.bean.Person</value>
+                        </list>
+                    </property>
+                </bean>
+                - bean of type GemFireBeanRegistry must be "singleton" - for initializing during spring app startup
+                - all classes from "scanPackages" property
+
+*) Errors during registering classes (processed by you code) -
+    - javassist.CannotCompileException
+        - potential reason: you try second time generate DtaSerializer for the same class
+    - java.io.InvalidClassException
+        - potential reason: class for witch you try generate DataSerializer in not correct CUSTOM CLASS (see def of correct CUSTOM CLASS)
+        - potential reason: class for witch you try generate DataSerializer contains getter that return class for with you do not generate DS (for example: java.sql.Date or some bean from your package)
+
+*) Errors during runtime (processed by GemFire serialization subsystem) -
+    - java.lang.StackOverflowError
+        - potential reason: you try serialize cyclic object graph (out rt-support limit ??? to ??? depth)
+    - com.gemstone.gemfire.ToDataException
+        - potential reason: ???
+    - java.io.NotSerializableException (message: "... is not DataSerializable and Java Serialization is disallowed")
+        - potential reason: some "type erasure data structure" (like field of type Object or List) contains not CC not RTAllowed class
+
+*) CUSTOM CLASSES:
+    class MUST BE:
+        - public
+        - @SerializedClass marked
+        - top level, not {nested, inner, local, anonymous}
+    class MUST HAVE constructor that:
+        - public
+        - no-arg
+        - doesn't throws any ex
+    getter/setter:
+        every potential getter MUST BE:
+            - no-arg
+            - doesn't throws any ex
+            ? doesn't parametrized
+            - has setter
+                - has name "set" + getterName.substring(3, 4).toUpperCase() + getterName.substring(4)
+                - public
+                - 1 arg
+                - return void
+                - doesn't throws any ex
+                - setter arg .getClass() must be equal (==) to .getClass() of getter return value
+                ? doesn't parametrized
+        DEF: potential getter == method that
+            - public
+            - start from "get"
+            - has at least 1 chars after "get" in name
+            - next char after "get" - in upper case
+            - hasn't @TransientGetter
+        getter types MUST BE:
+            - or Jdk static-class
+            - or allowed custom static-class (rt-cc + parent interface/class of registered)
+
+*) RT:getter can return:
+    Jdk:
+        - byte, ...
+        - Byte, ...
+        - Class, String, Date, File, Inet4Address, Inet6Address, Properties
+        - ArrayList, LinkedList, HashMap, TreeMap, IdentityHashMap, LinkedHashSet, HashSet, TreeSet,
+        - Hashtable, Vector, Stack, Region
+    Custom classes
+
+*) STATIC:getter can return:
+    - RT
+    // - List, Map, Set, RandomAccess,
+    // - InetAddress
+    // - Enum, Object, Cloneable, Serializable
+    - all parent interfaces/classes of Jdk
+    - all parent interfaces/classes of custom classes 
+
+*) DEF:
+    - potential getter
+    - rt-allowed jdk type
+        - byte, ...
+        - Byte, ...
+        - Class, String, Date, File, Inet4Address, Inet6Address, Properties
+        - ArrayList, LinkedList, HashMap, TreeMap, IdentityHashMap, LinkedHashSet, HashSet, TreeSet,
+        - Hashtable, Vector, Stack, Region
+        - array of any dims of previous classes
+    - ct-allowed jdk type
+        - rt-allowed jdk types
+        - any parent interface/class of rt-allowed jdk types ()
+            - Number, Comparable, Serializable
+            - GenericDeclaration, Type, AnnotatedElement, CharSequence, Date, File, InetAddress
+            - AbstractList, AbstractCollection, List, Collection, Iterable, RandomAccess, AbstractSequentialList, Deque, Queue, AbstractMap, Map, NavigableMap, SortedMap, IdentityHashMap, Set, AbstractSet, NavigableSet, SortedSet
+            - Dictionary, Stack, ConcurrentMap        
+    - rt-allowed custom type
+    - ct-allowed custom type

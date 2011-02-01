@@ -1,0 +1,20 @@
+GemFire serialization
+
+components: GemFire6.5 + Spring-GemFire
+арх: DataSerializable Replaceble DataSerializator Instantiator
+как распространяются сериализаторы + инстантиаторы
+base types serialized by GF
+ideas:
+    - GF dont use bits only bytes -> bigger output byte[]
+    - null: writeObject, writeXXX(Date/Integer)
+    - DS.writeObject
+    - DS.writeObjectAsBA - ?
+    - java.util.Date -> -1L - error
+    - short codes for base classes
+    - сжатие int (class code, array size)
+    - how packed Bean[], List<Bean>
+    - using OOS (not changed to JBoss ser for example (or can?))
+
+1. sizes:
+    Bean {}
+    Bean {}
