@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.griddynamics.gemfire.serialization</groupId>
+    <artifactId>root</artifactId>
+    <version>0.1</version>
+    <packaging>pom</packaging>
+    <name>ROOT</name>
+
+    <modules>
+        <module>gemfire-serialization-core</module>
+        <module>gemfire-serialization-examples</module>
+        <module>gemfire-serialization-performance</module>
+        <module>gemfire-serialization-spring</module>
+    </modules>
+
+    <repositories>
+        <repository>
+            <id>spring-maven-milestone-repo</id>
+            <name>Springframework Maven Repository</name>
+            <url>http://maven.springframework.org/milestone</url>
+        </repository>
+
+        <repository>
+            <id>gemfire-release-repo</id>
+            <name>GemFire Release Repository</name>
+            <url>http://dist.gemstone.com/maven/release/</url>
+        </repository>
+
+        <!--<repository>-->
+            <!--<id>jboss-repo</id>-->
+            <!--<name>JBoss Repository</name>-->
+            <!--<url>http://repository.jboss.org/maven2/</url>-->
+        <!--</repository>-->
+
+        <repository>
+            <id>TestNG-extensions-repo</id>
+            <name>TestNG-extensions Repository</name>
+            <url>http://www.e-hoffman.org/released/repo/</url>
+        </repository>        
+    </repositories>
+
+</project>

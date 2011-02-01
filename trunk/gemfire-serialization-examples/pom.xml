@@ -1,0 +1,236 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.griddynamics.gemfire.serialization</groupId>
+    <artifactId>gemfire-serialization-examples</artifactId>
+    <name>Examples</name>
+    <version>0.1</version>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.griddynamics.gemfire.serialization</groupId>
+            <artifactId>gemfire-serialization-core</artifactId>
+            <version>0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.griddynamics.gemfire.serialization</groupId>
+            <artifactId>gemfire-serialization-spring</artifactId>
+            <version>0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.gemstone.gemfire</groupId>
+            <artifactId>gemfire</artifactId>
+            <version>6.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-asm</artifactId>
+            <version>3.0.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>3.0.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>3.0.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>3.0.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>3.0.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>3.0.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>3.0.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.8.0.GA</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--<dependency>-->
+        <!--<groupId>log4j</groupId>-->
+        <!--<artifactId>log4j</artifactId>-->
+        <!--<version>1.2.14</version>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <!--<repositories>-->
+    <!--<repository>-->
+    <!--<id>spring-maven-milestone</id>-->
+    <!--<name>Springframework Maven Repository</name>-->
+    <!--<url>http://maven.springframework.org/milestone</url>-->
+    <!--</repository>-->
+
+    <!--<repository>-->
+    <!--<id>gemfire-release-repo</id>-->
+    <!--<name>GemFire Release Repository</name>-->
+    <!--<url>http://dist.gemstone.com/maven/release/</url>-->
+    <!--</repository>-->
+    <!--</repositories>-->
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+
+            <!-- WEB-SERVER.WAR + WEB-CLIENT.WAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1-beta-1</version>
+                <executions>
+                    <execution>
+                        <id>war-server</id>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                        <configuration>
+                            <webXml>src/main/config/server/web.xml</webXml>
+                            <warName>gemfire-serialization-examples-web-server-0.1</warName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>war-client</id>
+                        <goals>
+                            <goal>war</goal>
+                        </goals>
+                        <configuration>
+                            <webXml>src/main/config/client/web.xml</webXml>
+                            <warName>gemfire-serialization-examples-web-client-0.1</warName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- helper for jars -->
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        &lt;!&ndash;<id>unpack-dependencies</id>&ndash;&gt;
+                        <id>copy-dependencies</id>
+                        <goals>
+                            &lt;!&ndash;<goal>unpack-dependencies</goal>&ndash;&gt;
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <excludeTransitive>true</excludeTransitive>
+                            <outputDirectory>${project.build.directory}/classes2</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+
+            <!-- CONSOLE-SERVER.JAR + CONSOLE-CLIENT.JAR -->
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <executions>
+                    <execution>
+                        <id>console-client</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                &lt;!&ndash;<include>**/*</include>&ndash;&gt;
+                                <include>**/classes/*</include>
+                                <include>**/classes2/*</include>
+                            </includes>
+                            <classesDirectory>${project.build.directory}</classesDirectory>
+                            <finalName>gemfire-serialization-examples-console-client-0.1</finalName>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.griddynamics.gemfire.serialization.example.console.ConsoleClient
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>console-server</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                &lt;!&ndash;<include>**/*</include>&ndash;&gt;
+                                &lt;!&ndash;<include>**/classes/*</include>&ndash;&gt;
+                                <include>${project.build.directory}/classes2</include>
+                            </includes>
+                            <classesDirectory>${project.build.directory}/classes</classesDirectory>
+                            <finalName>gemfire-serialization-examples-console-server-0.1</finalName>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.griddynamics.gemfire.serialization.example.console.ConsoleServer
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+
+        </plugins>
+    </build>
+
+</project>
