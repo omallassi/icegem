@@ -1,11 +1,11 @@
 package com.griddynamics.gemfire.serialization.perf.impl;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 2)
+@AutoSerializable(dataSerializerID = 2)
 public class FlatFatPerfBean implements java.io.Serializable {
     private int ip0;
     private int ip1;

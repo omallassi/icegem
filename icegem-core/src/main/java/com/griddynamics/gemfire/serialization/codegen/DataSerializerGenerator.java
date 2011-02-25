@@ -1,8 +1,7 @@
 package com.griddynamics.gemfire.serialization.codegen;
 
 import com.griddynamics.gemfire.serialization.Configuration;
-import com.griddynamics.gemfire.serialization.SerializedClass;
-import com.gemstone.gemfire.DataSerializer;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 import javassist.CannotCompileException;
 import javassist.ClassClassPath;
 import javassist.ClassPool;
@@ -133,16 +132,16 @@ public class DataSerializerGenerator {
             Introspector.checkClassIsSerialized(clazz);
         }
 
-        // check classes do not contain duplicated @SerializedClass.dataSerializerID
+        // check classes do not contain duplicated @AutoSerializable.dataSerializerID
         checkDataSerializerIDIsUnique(classList);
     }
 
     private static void checkDataSerializerIDIsUnique(List<Class<?>> classList) throws InvalidClassException {
         for (Class<?> clazz : classList) {
-            SerializedClass annotation = clazz.getAnnotation(SerializedClass.class);
+            AutoSerializable annotation = clazz.getAnnotation(AutoSerializable.class);
             int dataSerializerID = annotation.dataSerializerID();
             if (dataSerializerID2ClassNameMap.containsKey(dataSerializerID)) {
-                throw new InvalidClassException("Classes " + dataSerializerID2ClassNameMap.get(dataSerializerID) + " and " + clazz.getName() + " contain duplicated value of @SerializedClass.dataSerializerID: " + dataSerializerID); // todo: right ex type?
+                throw new InvalidClassException("Classes " + dataSerializerID2ClassNameMap.get(dataSerializerID) + " and " + clazz.getName() + " contain duplicated value of @AutoSerializable.dataSerializerID: " + dataSerializerID); // todo: right ex type?
             }
             dataSerializerID2ClassNameMap.put(dataSerializerID, clazz.getName());
         }

@@ -1,6 +1,6 @@
 package com.griddynamics.gemfire.serialization._jdktypes;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 import java.io.File;
 import java.net.Inet4Address;
@@ -27,7 +27,7 @@ import java.util.Vector;
  * @author igolovach
  */
 
-@SerializedClass(dataSerializerID = 644648778)
+@AutoSerializable(dataSerializerID = 644648778)
 public class JdkTypesBean {
     //todo: Region, Enum, Number?
     // common

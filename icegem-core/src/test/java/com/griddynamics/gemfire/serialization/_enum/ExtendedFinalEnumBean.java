@@ -1,11 +1,11 @@
 package com.griddynamics.gemfire.serialization._enum;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 1232325233)
+@AutoSerializable(dataSerializerID = 1232325233)
 public enum ExtendedFinalEnumBean {
     X("aaa"), Y("bbb"), Z("ccc");
 

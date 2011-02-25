@@ -1,11 +1,11 @@
 package com.griddynamics.gemfire.serialization._inheritance.serializedclass.pareninterface;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 9543346)
+@AutoSerializable(dataSerializerID = 9543346)
 public class MarkedChildOfNotMarkedParent implements ParentNotMarked {
     private int childData;
 

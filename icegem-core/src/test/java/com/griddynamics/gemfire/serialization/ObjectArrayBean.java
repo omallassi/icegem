@@ -4,7 +4,7 @@ package com.griddynamics.gemfire.serialization;
  * @author igolovach
  */
 
-@SerializedClass(dataSerializerID = 9)
+@AutoSerializable(dataSerializerID = 9)
 public class ObjectArrayBean {
     private Object[] objArr;
 

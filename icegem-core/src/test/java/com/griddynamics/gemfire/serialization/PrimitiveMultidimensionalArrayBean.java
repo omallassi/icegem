@@ -4,7 +4,7 @@ package com.griddynamics.gemfire.serialization;
  * @author igolovach
  */
 
-@SerializedClass(dataSerializerID = 832455745)
+@AutoSerializable(dataSerializerID = 832455745)
 public class PrimitiveMultidimensionalArrayBean {
     private boolean[][][] booleanArray;
     private byte[][][] byteArray;

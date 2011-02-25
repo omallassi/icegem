@@ -7,7 +7,7 @@ package com.griddynamics.gemfire.serialization;
  * @author igolovach
  */
 
-@SerializedClass(dataSerializerID = 12)
+@AutoSerializable(dataSerializerID = 12)
 public class PrimitiveBean {
     private boolean _boolean;
     private byte _byte;

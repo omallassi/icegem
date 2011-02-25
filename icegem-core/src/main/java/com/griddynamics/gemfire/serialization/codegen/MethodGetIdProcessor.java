@@ -1,7 +1,6 @@
 package com.griddynamics.gemfire.serialization.codegen;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
-import javassist.CannotCompileException;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 import static com.griddynamics.gemfire.serialization.codegen.CodeGenUtils.tab;
 
@@ -15,9 +14,9 @@ public class MethodGetIdProcessor {
 
     public String process(XClass element) {
 
-        SerializedClass annotation = element.getType().getAnnotation(SerializedClass.class);
+        AutoSerializable annotation = element.getType().getAnnotation(AutoSerializable.class);
         if (annotation == null) {
-            throw new IllegalArgumentException("Called " + MethodGetIdProcessor.class.getSimpleName() + ".process(...) for not serialized class " + element.getType() + " (this class do not marked by @SerializedClass)."); //todo: right ex type?
+            throw new IllegalArgumentException("Called " + MethodGetIdProcessor.class.getSimpleName() + ".process(...) for not serialized class " + element.getType() + " (this class do not marked by @AutoSerializable)."); //todo: right ex type?
         }
         int dataSerializerID = annotation.dataSerializerID();
 

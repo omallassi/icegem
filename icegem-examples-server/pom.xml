@@ -18,14 +18,14 @@
 
 		<dependency>
 			<groupId>com.griddynamics.gemfire.serialization</groupId>
-			<artifactId>gemfire-serialization-core</artifactId>
+			<artifactId>icegem-core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.griddynamics.gemfire.serialization</groupId>
-			<artifactId>gemfire-serialization-spring</artifactId>
+			<artifactId>icegem-spring</artifactId>
 			<version>0.1-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>

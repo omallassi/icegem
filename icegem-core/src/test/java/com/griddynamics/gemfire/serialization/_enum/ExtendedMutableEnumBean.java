@@ -1,12 +1,12 @@
 package com.griddynamics.gemfire.serialization._enum;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * Strange but valid class.
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 989798231)
+@AutoSerializable(dataSerializerID = 989798231)
 public enum ExtendedMutableEnumBean {
     K("aaa"), L("bbb"), M("ccc");
 

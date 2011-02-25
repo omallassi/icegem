@@ -7,7 +7,7 @@ package com.griddynamics.gemfire.serialization;
  * @author igolovach
  */
 
-@SerializedClass(dataSerializerID = 14)
+@AutoSerializable(dataSerializerID = 14)
 public class WrapperBean {
     private Boolean Boolean_;
     private Byte Byte_;

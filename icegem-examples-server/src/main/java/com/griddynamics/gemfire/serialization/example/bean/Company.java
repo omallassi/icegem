@@ -1,6 +1,6 @@
 package com.griddynamics.gemfire.serialization.example.bean;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 import com.griddynamics.gemfire.serialization.TransientGetter;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -8,7 +8,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 2)
+@AutoSerializable(dataSerializerID = 2)
 public class Company extends ParentCompany {
     private Integer id;
     private String name;
