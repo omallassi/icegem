@@ -15,7 +15,7 @@ public class FromDataFieldWrapperProcessor implements FromDataProcessor {
     private final String wrapperClassName;
     private final String dataInputMethod;
 
-    FromDataFieldWrapperProcessor(String wrapperClassName, String dataInputMethod) {
+    public FromDataFieldWrapperProcessor(String wrapperClassName, String dataInputMethod) {
         this.wrapperClassName = wrapperClassName;
         this.dataInputMethod = dataInputMethod;
     }
