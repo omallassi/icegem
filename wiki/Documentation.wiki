@@ -44,7 +44,7 @@ spring-icegem.jar has usefull class to register all files with annotation @AutoS
                     <list>                        <value>com.griddynamics.gemfire.serialization.test.domain</value>
                     </list>
                 </property>
-3. add javassist.jar, icegem-core.jar to ClassPath
+3. add javassist.jar, icegem-core.jar to ClassPath.
 
 
 = High-Level build =
@@ -58,10 +58,10 @@ spring-icegem.jar has usefull class to register all files with annotation @AutoS
 
 To use  library without spring-icegem.jar
 
-1. add javassist.jar, icegem-core.jar to ClassPath
+1. add javassist.jar, icegem-core.jar to ClassPath.
 
-2. call HierarchyRegistry.registerAll with two arguments: class loader and list of annotated classes with @AutoSerilizable
+2. call HierarchyRegistry.registerAll with two arguments: class loader and list of annotated classes with @AutoSerilizable.
 
 = Mix @AutoSerializable and  DataSerializable =
 
-you can use as DataSerilizable objects as annotated with @AutoSerializable in a project
+you can use as DataSerilizable objects as annotated with @AutoSerializable in a project.
