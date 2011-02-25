@@ -1,13 +1,12 @@
-#summary Documentation.
+#summary Documentation draft.
 
-= Table of Contents =
-  # Introduction
-  # Model objects constraints
-  # Architecture and implementation
-  # Performance characteristics
-  # Usage instruction (Integrtion in spring)
-  # Build description
-  # Special cases (auto and manual serialization)
+<wiki:toc max_depth="1" />
+
+  * Architecture and implementation
+  * Performance characteristics
+  * Usage instruction (Integrtion in spring)
+  * Build description
+  * Special cases (auto and manual serialization)
 
  Appendix
     * Supported types.
