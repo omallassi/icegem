@@ -14,7 +14,7 @@ public class ToDataFieldWrapperProcessor implements ToDataProcessor {
     private final String unwrapMethod;
     private final String dataOutputMethod;
 
-    ToDataFieldWrapperProcessor(String unwrapMethod, String dataOutputMethod) {
+    public ToDataFieldWrapperProcessor(String unwrapMethod, String dataOutputMethod) {
         this.unwrapMethod = unwrapMethod;
         this.dataOutputMethod = dataOutputMethod;
     }

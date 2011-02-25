@@ -1,34 +1,13 @@
 package com.griddynamics.gemfire.serialization.codegen.impl;
 
 import com.griddynamics.gemfire.serialization.codegen.XField;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPBoolProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPByteProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPCharProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPDoubleProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPFloatProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPIntProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPLongProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitive.ToDataFieldPShortProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldBooleanArrayProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldByteArrayProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldCharArrayProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldDoubleArrayProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldFloatArrayProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldIntArrayProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldLongArrayProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.ToDataFieldShortArrayProcessor;
+import com.griddynamics.gemfire.serialization.codegen.impl.primitive.*;
+import com.griddynamics.gemfire.serialization.codegen.impl.primitivearray.*;
 import com.griddynamics.gemfire.serialization.codegen.impl.system.ToDataFieldCalendarProcessor;
 import com.griddynamics.gemfire.serialization.codegen.impl.system.ToDataFieldConcreteEnumProcessor;
 import com.griddynamics.gemfire.serialization.codegen.impl.system.ToDataFieldDateProcessor;
 import com.griddynamics.gemfire.serialization.codegen.impl.system.ToDataFieldStringProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWBooleanProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWByteProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWCharacterProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWDoubleProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWFloatProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWIntegerProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWLongProcessor;
-import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.ToDataFieldWShortProcessor;
+import com.griddynamics.gemfire.serialization.codegen.impl.wrapper.*;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -49,32 +28,32 @@ public class ToDataFieldProcessor {
 
     public ToDataFieldProcessor() {  //todo: what if different CLs?
         // primitive
-        map.put(boolean.class, new ToDataFieldPBoolProcessor());
-        map.put(byte.class, new ToDataFieldPByteProcessor());
-        map.put(char.class, new ToDataFieldPCharProcessor());
-        map.put(short.class, new ToDataFieldPShortProcessor());
-        map.put(int.class, new ToDataFieldPIntProcessor());
-        map.put(long.class, new ToDataFieldPLongProcessor());
-        map.put(float.class, new ToDataFieldPFloatProcessor());
-        map.put(double.class, new ToDataFieldPDoubleProcessor());
+        map.put(boolean.class, new ToDataPrimitiveProcessor("writeBoolean"));
+        map.put(byte.class, new ToDataPrimitiveProcessor("writeByte"));
+        map.put(char.class, new ToDataPrimitiveProcessor("writeChar"));
+        map.put(short.class, new ToDataPrimitiveProcessor("writeShort"));
+        map.put(int.class, new ToDataPrimitiveProcessor("writeInt"));
+        map.put(long.class, new ToDataPrimitiveProcessor("writeLong"));
+        map.put(float.class, new ToDataPrimitiveProcessor("writeFloat"));
+        map.put(double.class, new ToDataPrimitiveProcessor("writeDouble"));
         // wrapper
-        map.put(Boolean.class, new ToDataFieldWBooleanProcessor());
-        map.put(Byte.class, new ToDataFieldWByteProcessor());
-        map.put(Character.class, new ToDataFieldWCharacterProcessor());
-        map.put(Short.class, new ToDataFieldWShortProcessor());
-        map.put(Integer.class, new ToDataFieldWIntegerProcessor());
-        map.put(Long.class, new ToDataFieldWLongProcessor());
-        map.put(Float.class, new ToDataFieldWFloatProcessor());
-        map.put(Double.class, new ToDataFieldWDoubleProcessor());
+        map.put(Boolean.class, new ToDataFieldWrapperProcessor("booleanValue", "writeBoolean"));
+        map.put(Byte.class, new ToDataFieldWrapperProcessor("byteValue", "writeByte"));
+        map.put(Character.class, new ToDataFieldWrapperProcessor("charValue", "writeChar"));
+        map.put(Short.class, new ToDataFieldWrapperProcessor("shortValue", "writeShort"));
+        map.put(Integer.class, new ToDataFieldWrapperProcessor("intValue", "writeInt"));
+        map.put(Long.class, new ToDataFieldWrapperProcessor("longValue", "writeLong"));
+        map.put(Float.class, new ToDataFieldWrapperProcessor("floatValue", "writeFloat"));
+        map.put(Double.class, new ToDataFieldWrapperProcessor("doubleValue", "writeDouble"));
         // primitive[]
-        map.put(boolean[].class, new ToDataFieldBooleanArrayProcessor());
-        map.put(byte[].class, new ToDataFieldByteArrayProcessor());
-        map.put(short[].class, new ToDataFieldShortArrayProcessor());
-        map.put(char[].class, new ToDataFieldCharArrayProcessor());
-        map.put(int[].class, new ToDataFieldIntArrayProcessor());
-        map.put(long[].class, new ToDataFieldLongArrayProcessor());
-        map.put(float[].class, new ToDataFieldFloatArrayProcessor());
-        map.put(double[].class, new ToDataFieldDoubleArrayProcessor());
+        map.put(boolean[].class, new ToDataFieldPrimitiveArrayProcessor("writeBooleanArray"));
+        map.put(byte[].class, new ToDataFieldPrimitiveArrayProcessor("writeByteArray"));
+        map.put(short[].class, new ToDataFieldPrimitiveArrayProcessor("writeShortArray"));
+        map.put(char[].class, new ToDataFieldPrimitiveArrayProcessor("writeCharArray"));
+        map.put(int[].class, new ToDataFieldPrimitiveArrayProcessor("writeIntArray"));
+        map.put(long[].class, new ToDataFieldPrimitiveArrayProcessor("writeLongArray"));
+        map.put(float[].class, new ToDataFieldPrimitiveArrayProcessor("writeFloatArray"));
+        map.put(double[].class, new ToDataFieldPrimitiveArrayProcessor("writeDoubleArray"));
         // system
         map.put(String.class, new ToDataFieldStringProcessor());
         map.put(Date.class, new ToDataFieldDateProcessor());
