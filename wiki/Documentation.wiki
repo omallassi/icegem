@@ -1,0 +1,30 @@
+#summary Documentation.
+
+= Table of Contents =
+  # Introduction
+  # Model objects constraints
+  # Architecture and implementation
+  # Performance characteristics
+  # Usage instruction (Integrtion in spring)
+  # Build description
+  # Special cases (auto and manual serialization)
+
+ Appendix
+    * Supported types.
+
+
+= Introduction =
+
+Icegem is an extension for Gemfire(tm) which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It supports versioning of the model clases, cases where part of the objects are already implementing serialization and guarantees best performance in compare with standart java serialization. 
+
+
+= Model objects constraints =
+
+Icegem imposes some constraints on model classes. Which are:
+  * Model class should have public parameterless constructor, which doesn't declare it could throw any excaption.
+  * If model class extends another class implicitly, superclass should either conform with point 'a' or it should be serializable as well.
+  * It's nested classes should not be serializable.
+  * A getter name start with "get", take 0 parameters, returns a value and is not parameterized. 
+  * A setter name start with "set", takes 1 parameter and not be parameterized. 
+
+Also object should not contain cyclic references.
