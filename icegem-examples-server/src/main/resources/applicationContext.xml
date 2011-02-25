@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <bean id="gemFireBeanRegistry"
+          scope="singleton"
+          class="com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry">
+        <!--<property name="registeredClasses">-->
+            <!--<list>-->
+                <!--<value>com.griddynamics.gemfire.serialization.example.bean.Company</value>-->
+                <!--<value>com.griddynamics.gemfire.serialization.example.bean.Address</value>-->
+                <!--<value>com.griddynamics.gemfire.serialization.example.bean.Person</value>-->
+            <!--</list>-->
+        <!--</property>-->
+        <property name="scanPackages">
+            <list>
+                <value>com.griddynamics.gemfire.serialization.example.bean</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>
