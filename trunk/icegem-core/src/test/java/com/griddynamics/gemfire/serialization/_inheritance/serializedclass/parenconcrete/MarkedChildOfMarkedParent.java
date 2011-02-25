@@ -1,11 +1,11 @@
 package com.griddynamics.gemfire.serialization._inheritance.serializedclass.parenconcrete;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 17)
+@AutoSerializable(dataSerializerID = 17)
 public class MarkedChildOfMarkedParent extends ParentMarked {
     private int childData;
 

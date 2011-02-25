@@ -1,12 +1,12 @@
 package com.griddynamics.gemfire.serialization._jdktypes;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * @author igolovach
  */
 
-@SerializedClass(dataSerializerID = 344367690)
+@AutoSerializable(dataSerializerID = 344367690)
 public class DisallowedSqlDateBean {
     private java.sql.Date date;
 

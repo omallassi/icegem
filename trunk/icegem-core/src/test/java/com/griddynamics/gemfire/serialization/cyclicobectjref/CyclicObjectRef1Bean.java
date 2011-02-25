@@ -1,12 +1,12 @@
 package com.griddynamics.gemfire.serialization.cyclicobectjref;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * @author igolovach
  */
 
-@SerializedClass(dataSerializerID = 4)
+@AutoSerializable(dataSerializerID = 4)
 public class CyclicObjectRef1Bean {
     private CyclicObjectRef1Bean next;
 

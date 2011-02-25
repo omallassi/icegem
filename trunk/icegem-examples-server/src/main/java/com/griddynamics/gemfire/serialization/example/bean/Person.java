@@ -1,13 +1,13 @@
 package com.griddynamics.gemfire.serialization.example.bean;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 3)
+@AutoSerializable(dataSerializerID = 3)
 public class Person {
     private int age;
     private String firstName;

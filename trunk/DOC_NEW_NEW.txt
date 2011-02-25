@@ -48,7 +48,7 @@
 *) CUSTOM CLASSES:
     class MUST BE:
         - public
-        - @SerializedClass marked
+        - @AutoSerializable marked
         - top level, not {nested, inner, local, anonymous}
     class MUST HAVE constructor that:
         - public

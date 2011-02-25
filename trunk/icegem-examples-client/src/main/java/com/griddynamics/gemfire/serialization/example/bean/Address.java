@@ -1,13 +1,13 @@
 package com.griddynamics.gemfire.serialization.example.bean;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 1)
+@AutoSerializable(dataSerializerID = 1)
 public class Address extends ParentAddress {
     private String street;
     private String zipCode;

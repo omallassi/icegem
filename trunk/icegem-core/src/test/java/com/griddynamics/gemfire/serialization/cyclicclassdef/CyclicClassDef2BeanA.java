@@ -1,6 +1,6 @@
 package com.griddynamics.gemfire.serialization.cyclicclassdef;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * Class with field of the other type.
@@ -8,7 +8,7 @@ import com.griddynamics.gemfire.serialization.SerializedClass;
  *
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 2)
+@AutoSerializable(dataSerializerID = 2)
 public class CyclicClassDef2BeanA {
     private int data;
     private CyclicClassDef2BeanB next;

@@ -1,6 +1,6 @@
 package com.griddynamics.gemfire.serialization.codegen;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 import com.griddynamics.gemfire.serialization.TransientGetter;
 
 import java.io.InvalidClassException;
@@ -226,8 +226,8 @@ public class Introspector { //todo: move to CodeGenUtils
     }
 
     protected static void checkClassIsAnnotationMarked(final Class<?> clazz) throws InvalidClassException {
-        if (clazz.getAnnotation(SerializedClass.class) == null) {
-            throw new InvalidClassException("Class " + clazz.getName() + " do not contains annotation @" + SerializedClass.class.getSimpleName());
+        if (clazz.getAnnotation(AutoSerializable.class) == null) {
+            throw new InvalidClassException("Class " + clazz.getName() + " do not contains annotation @" + AutoSerializable.class.getSimpleName());
         }
     }
 

@@ -19,7 +19,7 @@
 		<!-- COMPILE -->
 		<dependency>
 			<groupId>com.griddynamics.gemfire.serialization</groupId>
-			<artifactId>gemfire-serialization-core</artifactId>
+			<artifactId>icegem-core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>

@@ -1,7 +1,7 @@
 package com.griddynamics.gemfire.serialization.spring;
 
 import com.griddynamics.gemfire.serialization.HierarchyRegistry;
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 import javassist.CannotCompileException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -44,9 +44,9 @@ public class GemFireBeanRegistry implements InitializingBean {
         List<Class<?>> classesFromPackages = new ArrayList<Class<?>>();
 
         for (String pack : scanPackages) {
-            logger.info("Scan package " + pack + " for classes marked by @SerializedClass");
+            logger.info("Scan package " + pack + " for classes marked by @AutoSerializable");
             ClassPathScanningCandidateComponentProvider ppp = new ClassPathScanningCandidateComponentProvider(false);
-            ppp.addIncludeFilter(new AnnotationTypeFilter(SerializedClass.class));
+            ppp.addIncludeFilter(new AnnotationTypeFilter(AutoSerializable.class));
             Set<BeanDefinition> candidateComponents = ppp.findCandidateComponents(pack);
             for (BeanDefinition beanDefinition : candidateComponents) {
                 String className = beanDefinition.getBeanClassName();

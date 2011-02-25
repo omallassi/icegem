@@ -1,11 +1,11 @@
 package com.griddynamics.gemfire.serialization._inheritance.transientgetter;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 5552)
+@AutoSerializable(dataSerializerID = 5552)
 public class NotMarkedChildOfMarkedParent extends MarkedParent {
 
     @Override

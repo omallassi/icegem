@@ -1,13 +1,13 @@
 package com.griddynamics.gemfire.serialization._enum;
 
-import com.griddynamics.gemfire.serialization.SerializedClass;
+import com.griddynamics.gemfire.serialization.AutoSerializable;
 
 import java.util.List;
 
 /**
  * @author igolovach
  */
-@SerializedClass(dataSerializerID = 102)
+@AutoSerializable(dataSerializerID = 102)
 public class FieldEnumBean {
     private SimpleEnumBean simpleEnumBean;
     private ExtendedFinalEnumBean extendedFinalEnumBean;
