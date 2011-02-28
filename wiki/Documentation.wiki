@@ -3,9 +3,6 @@
 <wiki:toc max_depth="1" />
 
   * Performance characteristics
-  * Usage instruction (Integrtion in spring)
-  * Build description
-  * Special cases (auto and manual serialization)
 
  Appendix
     * Supported types.
@@ -68,39 +65,47 @@ Class generation is performed with the help of [http://www.csg.is.titech.ac.jp/~
 
 Introspector performs tasks of checking class validity. 
 
-= Spring Integration =
+= Usage instructions =
+
+There are two ways of integrating Icegem into progect - via spring and manually. Both cases described below:
+
+== Spring Integration ==
 
 spring-icegem.jar has useful class to register all files with annotation @AutoSerializable. to use it, you need register it in spring like:
 
-1. define bean with class  com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry
+  # define bean with class  com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry
         e.g. 
-    <bean id="icegem"  class="com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry" scope="singleton">
-      ....
-    </bean>
-2. set property which point to domain model package
+{{{
+<bean id="icegem"  class="com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry" scope="singleton">
+    ...
+</bean>
+}}}
+  # set property which point to domain model package
         e.g.
-                <property name="scanPackages">
-                    <list>                        <value>com.griddynamics.gemfire.serialization.test.domain</value>
-                    </list>
-                </property>
-3. add javassist.jar, icegem-core.jar to ClassPath.
+{{{
+<property name="scanPackages">
+    <list>
+        <value>com.griddynamics.gemfire.serialization.test.domain</value>
+    </list>
+</property>
+}}}
+  # add javassist.jar, icegem-core.jar to ClassPath.
 
-
-= High-Level build =
-
-1. getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
-
-2. building artifacts: mvn install
-        p.s. to build a single module: cd module_folder, mvn install
-
-= Lib without Spring integration =
+== Lib without Spring integration ==
 
 To use  library without spring-icegem.jar
 
-1. add javassist.jar, icegem-core.jar to ClassPath.
+  # add javassist.jar, icegem-core.jar to ClassPath
+  # call HierarchyRegistry.registerAll with two arguments: class loader and list of annotated classes with @AutoSerilizable
 
-2. call HierarchyRegistry.registerAll with two arguments: class loader and list of annotated classes with @AutoSerilizable.
 
-= Mix @AutoSerializable and  DataSerializable =
+= Build description=
+
+  # getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
+
+  # building artifacts: mvn install
+        p.s. to build a single module: cd module_folder, mvn install
+
+= Special cases (mixing auto and manual serialization) =
 
 you can use as DataSerilizable objects as annotated with @AutoSerializable in a project.
