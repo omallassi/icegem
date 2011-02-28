@@ -10,7 +10,7 @@
 
 = Introduction =
 
-Icegem is an extension for Gemfire(tm) which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It supports versioning of the model classes, cases where part of the objects are already implementing serialization and guarantees best performance in compare with standard java serialization. 
+Icegem is an extension for GemFire^tm^ which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the model classes and cases where part of the objects are already implementing serialization. 
 
 
 = Model objects constraints =
@@ -67,7 +67,7 @@ Introspector performs tasks of checking class validity.
 
 = Usage instructions =
 
-There are two ways of integrating Icegem into progect - via spring and manually. Both cases described below:
+There are two ways of integrating Icegem into progect - via spring and manually. Both cases are described below:
 
 == Spring Integration ==
 
