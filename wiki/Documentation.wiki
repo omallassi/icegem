@@ -38,7 +38,7 @@ The architecture of Icegem consists of the four main components:
 
 === GemFireBeanRegistry ===
 
-It resides in icegem-spring module, apart from core functionality. And it is just convenient utility for spring-based projects which helps to find all classes for which serialization is required. In short GemFireBeanRegistry scans model packages for classes annotated with @AutoSerialized annotation, creates DataSerializers for them and registeres them with GemFire, so no additional job is required. Usage details you can find below in [Documentation#Spring Integration] section. There is also section, describes how to use Icegem without icegem-spring - [Documentation#Lib_without_Spring_integration]
+It resides in icegem-spring module, apart from core functionality. And it is just convenient utility for spring-based projects which helps to find all classes for which serialization is required. In short GemFireBeanRegistry scans model packages for classes annotated with @AutoSerialized annotation, creates DataSerializers for them and registeres them with GemFire, so no additional job is required. Usage details you can find below in [Documentation#Spring_Integration Spring Integration] section. There is also section, describes how to use Icegem without icegem-spring - [Documentation#Lib_without_Spring_integration Lib without Spring integration]
 
 = Spring Integration =
 
