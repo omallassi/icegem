@@ -10,7 +10,7 @@
 
 = Introduction =
 
-Icegem is an extension for Gemfire(tm) which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It supports versioning of the model clases, cases where part of the objects are already implementing serialization and guarantees best performance in compare with standart java serialization. 
+Icegem is an extension for Gemfire(tm) which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It supports versioning of the model classes, cases where part of the objects are already implementing serialization and guarantees best performance in compare with standard java serialization. 
 
 
 = Model objects constraints =
