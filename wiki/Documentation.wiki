@@ -108,4 +108,4 @@ To use  library without spring-icegem.jar
 
 = Special cases (mixing auto and manual serialization) =
 
-In a project you can use both annotated classes and casual serilizable classes (implementing DataSerilizable/Serializable or extending DataSerilizer)
+In a project you can use both annotated classes and casual serializable classes (implementing DataSerializable/Serializable or extending DataSerilizer)
