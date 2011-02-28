@@ -10,7 +10,7 @@
 
     <parent>
         <groupId>com.griddynamics.gemfire.serialization</groupId>
-        <artifactId>root</artifactId>
+        <artifactId>icegem-root</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
 
