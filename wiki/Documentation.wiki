@@ -108,4 +108,4 @@ To use  library without spring-icegem.jar
 
 = Special cases (mixing auto and manual serialization) =
 
-you can use as DataSerilizable objects as annotated with @AutoSerializable in a project.
+In a project you can use both annotated classes and casual serilizable classes (implementing DataSerilizable/Serializable or extending DataSerilizer)
