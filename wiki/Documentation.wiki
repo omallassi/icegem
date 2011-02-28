@@ -2,7 +2,6 @@
 
 <wiki:toc max_depth="1" />
 
-  * Architecture and implementation
   * Performance characteristics
   * Usage instruction (Integrtion in spring)
   * Build description
@@ -20,18 +19,30 @@ Icegem is an extension for Gemfire(tm) which provides serialization mechanism fo
 = Model objects constraints =
 
 Icegem imposes some constraints on model classes. Which are:
-  * Model class should have public parameterless constructor, which doesn't declare it could throw any excaption.
-  * If model class extends another class implicitly, superclass should either conform with point 'a' or it should be serializable as well.
+  * Model class should have public parameterless constructor, which doesn't declare it could throw any exception.
+  * If model class extends another class implicitly, superclass should either conform with previous constraint or it should be serializable as well.
   * It's nested classes should not be serializable.
-  * A getter name start with "get", take 0 parameters, returns a value and is not parameterized. 
-  * A setter name start with "set", takes 1 parameter and not be parameterized. 
+  * A getter name start with "get", take 0 parameters, returns a value and is not parametrized. 
+  * A setter name start with "set", takes 1 parameter and not be parametrized. 
 
 Also object should not contain cyclic references.
 
+= Architecture and implementation =
+
+The architecture of Icegem consists of the four main components:
+
+  * GemFireBeanRegistry
+  * HierarchyRegistry
+  * DataSerializerGenerator
+  * Introspector
+
+=== GemFireBeanRegistry ===
+
+It resides in icegem-spring module, apart from core functionality. And it is just convenient utility for spring-based projects which helps to find all classes for which serialization is required. In short GemFireBeanRegistry scans model packages for classes annotated with @AutoSerialized annotation, creates DataSerializers for them and registeres them with GemFire, so no additional job is required. Usage details you can find below in [Documentation#Spring Integration] section. There is also section, describes how to use Icegem without icegem-spring - [Documentation#Lib_without_Spring_integration]
 
 = Spring Integration =
 
-spring-icegem.jar has usefull class to register all files with annotation @AutoSerializable. to use it, you need register it in spring like:
+spring-icegem.jar has useful class to register all files with annotation @AutoSerializable. to use it, you need register it in spring like:
 
 1. define bean with class  com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry
         e.g. 
