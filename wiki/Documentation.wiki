@@ -40,6 +40,34 @@ The architecture of Icegem consists of the four main components:
 
 It resides in icegem-spring module, apart from core functionality. And it is just convenient utility for spring-based projects which helps to find all classes for which serialization is required. In short GemFireBeanRegistry scans model packages for classes annotated with @AutoSerialized annotation, creates DataSerializers for them and registeres them with GemFire, so no additional job is required. Usage details you can find below in [Documentation#Spring_Integration Spring Integration] section. There is also section, describes how to use Icegem without icegem-spring - [Documentation#Lib_without_Spring_integration Lib without Spring integration]
 
+=== HierarchyRegistry ===
+
+Takes as parameter list of classes to be serialized and sends them to DataSerializerGenerator which generates corresponding DataSerializers. HierarchyRegistry then registers these DataSerializers with GemFire.
+
+=== DataSerializerGenerator ===
+
+The main component of the system. It performs main operations of the framework -  generation of DataSerializers for model classes. The algorithm is simple. First class is checked for validity, i.e. it should conform with requirements described in [Document#Model_objects_constraints Model objects constraints] section. Then if class is valid DataSerializerGenerator creates <Class name>DataSerializer class which extends [http://www.gemstone.com/docs/6.0.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html com.gemstone.gemfire.DataSerializer] class. There are four public method to be implemented within those DataSerializers:
+{{{
+public Class[] getSupportedClasses();
+
+public int getId();
+
+public boolean toData(Object o, DataOutput out) throws IOException;
+
+public Object fromData(DataInput in) throws IOException, ClassNotFoundException;
+}}}
+
+  * `getSupportedClasses()` - this method will return sole class for which serializer is created
+  * `getId()` - will return unique identifier of DataSerializer
+  * `toData(...)` - will serialize an object to a `DataOutput`
+  * `fromData(...)` -will read an object from a `DataInput`
+
+Class generation is performed with the help of [http://www.csg.is.titech.ac.jp/~chiba/javassist/ javassist library]. 
+
+=== Introspector ===   
+
+Introspector performs tasks of checking class validity. 
+
 = Spring Integration =
 
 spring-icegem.jar has useful class to register all files with annotation @AutoSerializable. to use it, you need register it in spring like:
