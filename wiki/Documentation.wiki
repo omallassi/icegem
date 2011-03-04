@@ -64,6 +64,20 @@ Introspector performs tasks of checking class validity.
 
 There are two ways of integrating Icegem into progect - via spring and manually. Both cases are described below:
 
+== Versioning ==
+
+Icegem supports data model versioning. 
+
+Each class with @AutoSerializable annotation should also be annotated with @BeanVersion
+
+In accordance to serialization/deserialization process we impose some restrictions:
+
+1. you cann't delete field in elder version
+
+2. a field that doesn't exist in first version should be annotated with @NewField and version from which field appeared
+
+These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object)
+
 == Spring Integration ==
 
 spring-icegem.jar has useful class to register all files with annotation @AutoSerializable. to use it, you need register it in spring like:
