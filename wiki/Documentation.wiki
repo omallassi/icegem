@@ -70,6 +70,14 @@ Icegem supports data model versioning.
 
 Each class with @AutoSerializable annotation should also be annotated with @BeanVersion
 
+{{{
+@AutoSerializable(dataSerializerID = 1234234)
+@BeanVersion(getVersion = 1)
+class Client {
+    ...
+}
+}}}
+
 In accordance to serialization/deserialization process we impose some restrictions:
 
 1. you cann't delete field in elder version
