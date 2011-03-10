@@ -207,52 +207,75 @@ record MediaContent = {
 
 === Results ===
 
-<img src='https://chart.googleapis.com/chart?chtt=create&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:116,129,129,129,129,129,129,129,129,130,130,130,130,130,130,131,131,162,164,165,166,170,171,172,172,173,175,179,247,250,252,258,261,411,583,1722,2245&chds=0,2470.282529&chxt=y&chxl=0:|avro-generic|avro|scala%2Fsbinary|scala%2Fjava-built-in|thrift|thrift-compact|protobuf|json%2Fprotobuf|protobuf%2Factivemq%2Balt|bson%2Fjackson-manual|java-manual|xml%2Fjavolution|bson%2Fjackson-databind|xml%2Fxstream%2Bc-woodstox|protobuf%2Fprotostuff|protostuff|xml%2Fxstream%2Bc-fastinfo|icegem|smile%2Fprotostuff-manual|java-built-in|json%2Fprotostuff-runtime|json%2Fgoogle-gson|json%2Fprotostuff-manual|json%2Fjackson-databind|protostuff-runtime|xml%2Fxstream%2Bc|json%2Fjackson-manual|protostuff-manual|smile%2Fprotostuff-runtime|xml%2Fmanual-fastinfo|bson%2Fmongodb|smile%2Fjackson-databind|xml%2Fmanual-aalto|xml%2Fmanual-woodstox|smile%2Fjackson-manual|hessian|xml%2Fxstream%2Bc-aalto&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=ser&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:1039,1057,1169,1415,1530,1791,2186,2642,2766,3093,3236,3402,3478,3488,3683,3732,3772,3810,3841,4002,4186,5088,6341,7741,7783,8194,10251,10671,10921,12471,12688,14764,15257,18738,19108,24837,84155&chds=0,92570.61770000002&chxt=y&chxl=0:|json%2Fgoogle-gson|xml%2Fxstream%2Bc-fastinfo|json%2Fprotobuf|scala%2Fjava-built-in|java-built-in|xml%2Fmanual-fastinfo|xml%2Fxstream%2Bc|xml%2Fxstream%2Bc-woodstox|xml%2Fxstream%2Bc-aalto|bson%2Fjackson-databind|xml%2Fjavolution|bson%2Fjackson-manual|bson%2Fmongodb|hessian|xml%2Fmanual-woodstox|scala%2Fsbinary|xml%2Fmanual-aalto|thrift|protobuf%2Factivemq%2Balt|avro-generic|icegem|thrift-compact|protobuf|smile%2Fjackson-databind|json%2Fprotostuff-runtime|avro|json%2Fjackson-databind|smile%2Fprotostuff-manual|smile%2Fprotostuff-runtime|json%2Fprotostuff-manual|json%2Fjackson-manual|smile%2Fjackson-manual|protostuff-runtime|java-manual|protobuf%2Fprotostuff|protostuff|protostuff-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=ser%2Bsame&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:13,929,938,1051,1329,1446,1467,1576,1698,1721,2058,2521,2653,2887,3141,3181,3355,3395,3500,3642,3830,4020,6226,6566,7618,9645,9868,10206,10904,11145,11299,11746,16491,16598,18746,22665,84067&chds=0,92474.31710000001&chxt=y&chxl=0:|json%2Fgoogle-gson|xml%2Fxstream%2Bc-fastinfo|json%2Fprotobuf|xml%2Fmanual-fastinfo|scala%2Fjava-built-in|xml%2Fxstream%2Bc|bson%2Fjackson-manual|xml%2Fxstream%2Bc-woodstox|java-built-in|bson%2Fjackson-databind|xml%2Fjavolution|xml%2Fxstream%2Bc-aalto|bson%2Fmongodb|hessian|xml%2Fmanual-woodstox|xml%2Fmanual-aalto|thrift|icegem|thrift-compact|json%2Fprotostuff-runtime|smile%2Fjackson-databind|scala%2Fsbinary|json%2Fjackson-databind|smile%2Fprotostuff-manual|smile%2Fprotostuff-runtime|json%2Fprotostuff-manual|json%2Fjackson-manual|protobuf|smile%2Fjackson-manual|avro|avro-generic|protostuff-runtime|java-manual|protobuf%2Fprotostuff|protostuff-manual|protostuff|protobuf%2Factivemq%2Balt&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=deser&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:18,1213,1502,1545,1547,1922,1971,2295,2390,2437,2448,2463,2513,2998,3390,3606,3868,3917,4400,5235,5320,6128,9364,10371,11732,12413,13820,16103,18277,18743,21439,24076,44189,54132,59732,79226,113300&chds=0,124630.09240000001&chxt=y&chxl=0:|json%2Fprotobuf|scala%2Fjava-built-in|json%2Fgoogle-gson|java-built-in|xml%2Fxstream%2Bc|bson%2Fmongodb|xml%2Fxstream%2Bc-woodstox|xml%2Fxstream%2Bc-fastinfo|xml%2Fxstream%2Bc-aalto|xml%2Fjavolution|bson%2Fjackson-databind|xml%2Fmanual-fastinfo|bson%2Fjackson-manual|hessian|xml%2Fmanual-woodstox|xml%2Fmanual-aalto|smile%2Fjackson-databind|json%2Fjackson-databind|json%2Fprotostuff-runtime|json%2Fjackson-manual|json%2Fprotostuff-manual|smile%2Fprotostuff-runtime|avro|avro-generic|scala%2Fsbinary|smile%2Fprotostuff-manual|icegem|thrift-compact|smile%2Fjackson-manual|thrift|protostuff-runtime|protobuf|protobuf%2Fprotostuff|protostuff|protostuff-manual|java-manual|protobuf%2Factivemq%2Balt&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=deser%2Bdeep&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:1294,1635,1657,1678,2094,2398,2458,2485,2533,2631,2635,2652,3347,3787,3995,4085,4549,4717,4804,5474,5715,6573,9786,10661,11969,12757,14108,16571,19372,21969,24295,25913,44600,54589,60047,80609,114044&chds=0,125449.17000000001&chxt=y&chxl=0:|json%2Fprotobuf|scala%2Fjava-built-in|json%2Fgoogle-gson|java-built-in|xml%2Fxstream%2Bc|xml%2Fxstream%2Bc-aalto|bson%2Fmongodb|xml%2Fxstream%2Bc-woodstox|xml%2Fxstream%2Bc-fastinfo|xml%2Fjavolution|bson%2Fjackson-databind|xml%2Fmanual-fastinfo|bson%2Fjackson-manual|hessian|xml%2Fmanual-woodstox|xml%2Fmanual-aalto|smile%2Fjackson-databind|json%2Fjackson-databind|avro-generic|avro|json%2Fprotostuff-runtime|json%2Fjackson-manual|json%2Fprotostuff-manual|smile%2Fprotostuff-runtime|scala%2Fsbinary|thrift-compact|icegem|smile%2Fprotostuff-manual|smile%2Fjackson-manual|protobuf%2Factivemq%2Balt|thrift|protobuf|protostuff-runtime|protobuf%2Fprotostuff|protostuff|protostuff-manual|java-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=deser%2Bshal&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:1188,1254,1568,1592,1622,2045,2081,2350,2466,2509,2520,2585,2955,3698,3912,3921,3951,4005,4025,4467,5321,6331,9554,10509,11847,12635,13955,16501,18730,19326,21635,23851,44760,54297,59578,80111,113732&chds=0,125106.29395&chxt=y&chxl=0:|json%2Fprotobuf|scala%2Fjava-built-in|json%2Fgoogle-gson|java-built-in|xml%2Fxstream%2Bc|bson%2Fmongodb|xml%2Fxstream%2Bc-woodstox|xml%2Fxstream%2Bc-fastinfo|xml%2Fxstream%2Bc-aalto|xml%2Fjavolution|bson%2Fjackson-databind|xml%2Fmanual-fastinfo|bson%2Fjackson-manual|hessian|xml%2Fmanual-woodstox|xml%2Fmanual-aalto|json%2Fjackson-databind|json%2Fprotostuff-runtime|avro|json%2Fjackson-manual|avro-generic|smile%2Fjackson-databind|json%2Fprotostuff-manual|smile%2Fprotostuff-runtime|scala%2Fsbinary|smile%2Fprotostuff-manual|icegem|thrift-compact|smile%2Fjackson-manual|thrift|protobuf|protostuff-runtime|protobuf%2Fprotostuff|protostuff|protostuff-manual|java-manual|protobuf%2Factivemq%2Balt&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=total&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:2675,2710,2714,2848,3624,4324,5725,6082,6272,6327,6384,6407,6461,6553,6637,8027,8119,8436,8614,8710,9204,10759,16127,18402,20163,24779,26823,27521,32078,34441,36834,44210,57288,69846,99347,133152,144202&chds=0,158623.17955000003&chxt=y&chxl=0:|json%2Fgoogle-gson|json%2Fprotobuf|scala%2Fjava-built-in|java-built-in|xml%2Fxstream%2Bc|xml%2Fxstream%2Bc-fastinfo|xml%2Fxstream%2Bc-aalto|xml%2Fxstream%2Bc-woodstox|bson%2Fmongodb|xml%2Fmanual-fastinfo|xml%2Fjavolution|bson%2Fjackson-databind|bson%2Fjackson-manual|hessian|xml%2Fmanual-woodstox|xml%2Fmanual-aalto|smile%2Fjackson-databind|json%2Fjackson-databind|avro-generic|scala%2Fsbinary|avro|json%2Fprotostuff-runtime|json%2Fprotostuff-manual|smile%2Fprotostuff-runtime|thrift|icegem|thrift-compact|protobuf%2Factivemq%2Balt|json%2Fjackson-manual|protobuf|smile%2Fprotostuff-manual|smile%2Fjackson-manual|protostuff-runtime|protobuf%2Fprotostuff|protostuff|java-manual|protostuff-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=size&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:221,221,239,239,239,239,239,240,241,255,255,278,325,339,341,345,349,364,377,449,468,469,486,487,488,495,495,501,503,504,519,525,525,653,653,889,1312&chds=0,1443.2&chxt=y&chxl=0:|scala%2Fjava-built-in|java-built-in|xml%2Fmanual-woodstox|xml%2Fmanual-aalto|xml%2Fxstream%2Bc-woodstox|xml%2Fxstream%2Bc-aalto|bson%2Fjackson-databind|xml%2Fjavolution|json%2Fjackson-databind|hessian|bson%2Fjackson-manual|bson%2Fmongodb|json%2Fprotobuf|xml%2Fxstream%2Bc|json%2Fgoogle-gson|json%2Fprotostuff-runtime|json%2Fjackson-manual|json%2Fprotostuff-manual|xml%2Fmanual-fastinfo|smile%2Fjackson-databind|thrift|xml%2Fxstream%2Bc-fastinfo|smile%2Fjackson-manual|smile%2Fprotostuff-runtime|smile%2Fprotostuff-manual|icegem|java-manual|scala%2Fsbinary|protostuff-runtime|thrift-compact|protostuff-manual|protobuf%2Factivemq%2Balt|protostuff|protobuf|protobuf%2Fprotostuff|avro-generic|avro&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
-<img src='https://chart.googleapis.com/chart?chtt=size%2Bdfl&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x400&chd=t:133,133,147,147,148,149,149,149,150,150,151,164,197,233,233,240,243,244,244,253,253,259,259,263,264,268,273,273,278,278,284,295,304,304,313,523,700&chds=0,770.0000000000001&chxt=y&chxl=0:|scala%2Fjava-built-in|java-built-in|hessian|xml%2Fmanual-woodstox|xml%2Fmanual-aalto|bson%2Fjackson-databind|xml%2Fmanual-fastinfo|bson%2Fjackson-manual|bson%2Fmongodb|xml%2Fxstream%2Bc-woodstox|xml%2Fxstream%2Bc-aalto|json%2Fjackson-databind|xml%2Fxstream%2Bc-fastinfo|xml%2Fjavolution|json%2Fgoogle-gson|smile%2Fjackson-databind|json%2Fjackson-manual|json%2Fprotobuf|smile%2Fjackson-manual|xml%2Fxstream%2Bc|json%2Fprotostuff-runtime|smile%2Fprotostuff-runtime|json%2Fprotostuff-manual|smile%2Fprotostuff-manual|thrift|icegem|protostuff-runtime|protostuff-manual|protostuff|protobuf%2Factivemq%2Balt|protobuf|protobuf%2Fprotostuff|thrift-compact|java-manual|scala%2Fsbinary|avro-generic|avro&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=5,0,5&nonsense=aaa.png'/>
 
+<p>
+Create an object, serialize it to a byte array, then deserialize it back to an object and access all fields.
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Total%20Time&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:4880,6318,65642&chds=0,72206.2044&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
 
-|| ||create||ser||+same||deser||+shal||+deep||total||size||+dfl||
-||java-built-in||163||15257||10905||54133||54298||54590||69847||889||523||
-||java-manual||175||1416||1330||1214||1255||1295||2710||255||147||
-||scala/java-built-in||411||18738||16491||79227||80112||80609||99347||1312||700||
-||scala/sbinary||584||5089||3181||2514||2956||3347||8436||255||147||
-||hessian||129||7741||6566||10371||10510||10661||18402||501||313||
-||protobuf||253||3684||1721||1922||2082||2399||6082||239||149||
-||protobuf/activemq+alt||248||3842||13||19||1189||2486||6328||239||149||
-||protostuff||171||1058||929||1545||1593||1657||2715||239||150||
-||protostuff-manual||130||1039||938||1503||1569||1636||2675||239||150||
-||protostuff-runtime||131||1530||1447||1971||2045||2094||3624||241||151||
-||protobuf/protostuff||172||1169||1051||1547||1623||1679||2848||239||149||
-||thrift||261||4003||3831||2295||2351||2459||6462||349||197||
-||thrift-compact||259||3732||3501||2437||2509||2652||6384||240||148||
-||avro||1723||3403||1577||3391||4026||4717||8120||221||133||
-||avro-generic||2246||3811||1467||2999||3951||4804||8615||221||133||
-||json/jackson-manual||131||2186||2059||3917||4006||4086||6272||468||253||
-||json/jackson-databind||131||3237||3142||5236||5322||5474||8711||503||268||
-||json/protostuff-manual||131||2642||2521||3868||3913||3996||6638||449||233||
-||json/protostuff-runtime||132||3478||3396||4400||4467||4550||8028||469||243||
-||json/protobuf||250||19108||18746||113300||113733||114045||133153||488||253||
-||json/google-gson||131||84155||84068||59732||59579||60048||144203||486||259||
-||bson/jackson-manual||180||8194||11299||11733||11847||11969||20164||495||278||
-||bson/jackson-databind||173||10671||10206||13821||13955||14108||24779||519||295||
-||bson/mongodb||130||7783||7618||24077||23851||24295||32079||495||278||
-||smile/jackson-manual||129||1791||1698||2390||2467||2534||4325||341||244||
-||smile/jackson-databind||130||3488||3356||5321||3922||5716||9204||364||259||
-||smile/protostuff-manual||164||3094||2888||2464||2585||2632||5726||325||233||
-||smile/protostuff-runtime||130||2766||2654||3607||3699||3787||6553||339||240||
-||xml/manual-woodstox||129||6341||6226||9364||9554||9787||16128||653||304||
-||xml/manual-aalto||129||4186||4021||6128||6331||6573||10760||653||304||
-||xml/manual-fastinfo||130||14764||16599||12413||12636||12757||27522||377||284||
-||xml/xstream+c||131||12688||11746||44190||44761||44601||57289||487||244||
-||xml/xstream+c-woodstox||172||12472||11146||21439||21635||21970||34442||525||273||
-||xml/xstream+c-aalto||117||10921||9646||18277||18731||25913||36835||525||273||
-||xml/xstream+c-fastinfo||166||24838||22666||18744||19326||19372||44210||345||264||
-||xml/javolution||174||10252||9868||16104||16502||16572||26823||504||263||
-||icegem||166||3772||3642||2448||2521||2635||6407||278||164||
+</p>
+<br>
+<p>
+Create an object, serialize it to a byte array.
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Serialization%20Time&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:3157,3676,11949&chds=0,13144.28995&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+
+</p>
+<br>
+<p>
+Serialize the same object (i.e. doesn’t include creation time)
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Serialization%20Time%2Bsame&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:3066,3581,10974&chds=0,12071.73&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+
+</p>
+<br>
+<p>
+Deserialize an object
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Deserialize%20Time&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:1623,2517,53464&chds=0,58811.464250000005&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+
+</p>
+<br>
+<p>
+Deserialize an object and access the top-level fields
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Deserialize%20Time%2Bshal&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:1671,2583,53553&chds=0,58908.41715000001&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+</p>
+<br>
+<p>
+Often the most expensive operation. To make a fair comparison, all fields of the deserialized instances are accessed – this forces lazy deserializers to really do their work. The raw data below shows additional measurements for deserialization.
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Deserialization%20Time%2Bdeep&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:1722,2641,53692&chds=0,59061.914450000004&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+
+</p>
+<br>
+<p>
+The size of the serialized data. These numbers may vary depending on the exact data value being used.
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Serialized%20Size&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:263,278,889&chds=0,977.9000000000001&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+
+</p>
+<br>
+<p>
+The size of the serialized data compressed with Java’s built-in implementation of DEFLATE (zlib).
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Serialization%20Compressed%20Size&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:156,164,523&chds=0,575.3000000000001&chxt=y&chxl=0:|java-built-in|icegem|dataserializable-manual&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+
+</p>
+<br>
+<p>
+Create an object (using the classes specified by the serialization tool)
+</p>
+<p>
+<img src='https://chart.googleapis.com/chart?chtt=Object%20Creation%20Time&chf=c||lg||0||FFFFFF||1||76A4FB||0|bg||s||EFEFEF&chs=700x90&chd=t:122,122,122&chds=0,177.198956&chxt=y&chxl=0:|java-built-in|dataserializable-manual|icegem&chm=N *f*,000000,0,-1,10&lklk&chdlp=t&chco=660000|660033|660066|660099|6600CC|6600FF|663300|663333|663366|663399|6633CC|6633FF|666600|666633|666666&cht=bhg&chbh=10,0,10&nonsense=aaa.png'/>
+
+</p>
+<br>
