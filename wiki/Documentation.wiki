@@ -83,7 +83,7 @@ Each class with @AutoSerializable annotation should also be annotated with @Bean
 
 {{{
 @AutoSerializable(dataSerializerID = 1234234)
-@BeanVersion(getVersion = 1)
+@BeanVersion(1)
 class Client {
     ...
 }
@@ -93,7 +93,7 @@ In accordance to serialization/deserialization process we impose some restrictio
 
 1. you cann't delete field in elder version
 
-2. a field that doesn't exist in first version should be annotated with @NewField and version from which field appeared
+2. a field that doesn't exist in first version should be annotated with @FieldVersion and version from which field appeared
 
 These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object)
 
