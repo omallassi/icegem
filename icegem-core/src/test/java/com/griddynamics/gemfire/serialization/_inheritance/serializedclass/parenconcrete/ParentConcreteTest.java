@@ -2,7 +2,7 @@ package com.griddynamics.gemfire.serialization._inheritance.serializedclass.pare
 
 import com.gemstone.gemfire.DataSerializer;
 import com.griddynamics.gemfire.serialization.HierarchyRegistry;
-import com.griddynamics.gemfire.serialization.TestParent;
+import com.griddynamics.gemfire.serialization.primitive.TestParent;
 import javassist.CannotCompileException;
 import org.fest.assertions.Assertions;
 import org.testng.annotations.BeforeClass;
@@ -76,7 +76,8 @@ public class ParentConcreteTest extends TestParent {
     @Test(expectedExceptions = NotSerializableException.class, enabled = false) //todo: uncomment
     public void testParentNotMarked_ValueParent() throws IOException {
         final Bean expected = new Bean();
-        expected.setParentNotmarked(new ParentNotMarked());
+        expected.setParentNotMarked(new ParentNotMarked());
+
 
         // Serialize
         final ByteArrayOutputStream buff = new ByteArrayOutputStream();
@@ -90,19 +91,19 @@ public class ParentConcreteTest extends TestParent {
     @Test(enabled = false) //todo: uncomment
     public void testParentNotMarked_ValueMarkedChild() {
         final Bean expected = new Bean();
-        expected.setParentNotmarked(new MarkedChildOfNotMarkedParent());
-        expected.getParentNotmarked().setParentData(123);
-        ((MarkedChildOfNotMarkedParent) expected.getParentNotmarked()).setChildData(654);
+        expected.setParentNotMarked(new MarkedChildOfNotMarkedParent());
+        expected.getParentNotMarked().setParentData(123);
+        ((MarkedChildOfNotMarkedParent) expected.getParentNotMarked()).setChildData(654);
 
         // Serialize / Deserialize
         Bean actual = serializeAndDeserialize(expected);
 
         // assert: type
-        Assertions.assertThat(actual.getParentNotmarked()).isInstanceOf(MarkedChildOfNotMarkedParent.class);
+        Assertions.assertThat(actual.getParentNotMarked()).isInstanceOf(MarkedChildOfNotMarkedParent.class);
         // assert: parent data
-        Assertions.assertThat((actual.getParentNotmarked().getParentData())).isEqualTo(expected.getParentNotmarked().getParentData());
+        Assertions.assertThat((actual.getParentNotMarked().getParentData())).isEqualTo(expected.getParentNotMarked().getParentData());
         // assert: child data
-        Assertions.assertThat(((MarkedChildOfNotMarkedParent) actual.getParentNotmarked()).getChildData()).isEqualTo(((MarkedChildOfNotMarkedParent) expected.getParentNotmarked()).getChildData());
+        Assertions.assertThat(((MarkedChildOfNotMarkedParent) actual.getParentNotMarked()).getChildData()).isEqualTo(((MarkedChildOfNotMarkedParent) expected.getParentNotMarked()).getChildData());
     }
 }
 

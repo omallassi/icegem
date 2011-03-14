@@ -1,7 +1,7 @@
 package com.griddynamics.gemfire.serialization.cyclicobectjref;
 
 import com.griddynamics.gemfire.serialization.HierarchyRegistry;
-import com.griddynamics.gemfire.serialization.TestParent;
+import com.griddynamics.gemfire.serialization.primitive.TestParent;
 import com.griddynamics.gemfire.serialization.codegen.MethodFrameCounter;
 import javassist.CannotCompileException;
 import org.testng.annotations.BeforeClass;

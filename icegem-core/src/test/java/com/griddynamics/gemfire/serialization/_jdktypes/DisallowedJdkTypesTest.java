@@ -1,7 +1,7 @@
 package com.griddynamics.gemfire.serialization._jdktypes;
 
 import com.griddynamics.gemfire.serialization.HierarchyRegistry;
-import com.griddynamics.gemfire.serialization.TestParent;
+import com.griddynamics.gemfire.serialization.primitive.TestParent;
 import javassist.CannotCompileException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

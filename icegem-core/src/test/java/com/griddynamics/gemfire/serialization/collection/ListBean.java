@@ -1,6 +1,7 @@
 package com.griddynamics.gemfire.serialization.collection;
 
 import com.griddynamics.gemfire.serialization.AutoSerializable;
+import com.griddynamics.gemfire.serialization.BeanVersion;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -11,6 +12,7 @@ import java.util.List;
  */
 
 @AutoSerializable(dataSerializerID = 8)
+@BeanVersion(1)
 public class ListBean {
     private ArrayList arrayList;
     private LinkedList linkedList;

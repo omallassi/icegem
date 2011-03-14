@@ -1,6 +1,7 @@
 package com.griddynamics.gemfire.serialization.codegen;
 
 import com.griddynamics.gemfire.serialization.AutoSerializable;
+import com.griddynamics.gemfire.serialization.FieldVersion;
 import com.griddynamics.gemfire.serialization.TransientGetter;
 
 import java.io.InvalidClassException;
@@ -8,10 +9,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -66,9 +64,32 @@ public class Introspector { //todo: move to CodeGenUtils
         final ArrayList<XField> result = new ArrayList<XField>();
         for (Map.Entry<String, Method> entry : gettersMap.entrySet()) {
             final Method method = entry.getValue();
-            result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass()));
+            //result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass()));
+            List annotations = getFieldAnnotation(clazz, entry.getKey());
+            int fieldVersion = 0;
+            for(Object annotation: annotations)
+                if (annotation instanceof FieldVersion) {
+                    fieldVersion = ((FieldVersion) annotation).since();
+                    break;
+                }
+            result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass(), annotations, fieldVersion));
         }
         return result;
+    }
+
+    private static List getFieldAnnotation(Class cc, String fieldName) {
+        do {
+            for(int i = 0; i < cc.getDeclaredFields().length; i++)
+                if (fieldName.equals(cc.getDeclaredFields()[i].getName())) {
+                    try {
+                        return Arrays.asList(cc.getDeclaredField(fieldName).getDeclaredAnnotations());
+                    } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
+                    }
+                }
+            cc = cc.getSuperclass();
+        } while(cc != Object.class);
+        return Collections.emptyList();
     }
 
     // -------------------------- PROTECTED

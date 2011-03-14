@@ -1,9 +1,12 @@
 package com.griddynamics.gemfire.serialization.example.bean;
 
+import com.griddynamics.gemfire.serialization.BeanVersion;
+
 /**
  * @author igolovach
  */
 
+@BeanVersion(1)
 public class ParentParentCompany {
 
     private int parentParentData;
