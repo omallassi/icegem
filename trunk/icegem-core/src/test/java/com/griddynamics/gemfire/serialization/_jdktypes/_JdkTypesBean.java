@@ -1,6 +1,7 @@
 package com.griddynamics.gemfire.serialization._jdktypes;
 
 import com.griddynamics.gemfire.serialization.AutoSerializable;
+import com.griddynamics.gemfire.serialization.BeanVersion;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -22,6 +23,7 @@ import java.util.UUID;
  */
 
 @AutoSerializable(dataSerializerID = 13)
+@BeanVersion(1)
 public class _JdkTypesBean {
     // common
     private String string;

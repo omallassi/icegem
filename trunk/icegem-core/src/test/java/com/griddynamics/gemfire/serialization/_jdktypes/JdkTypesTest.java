@@ -1,13 +1,12 @@
 package com.griddynamics.gemfire.serialization._jdktypes;
 
 import com.griddynamics.gemfire.serialization.HierarchyRegistry;
-import com.griddynamics.gemfire.serialization.TestParent;
+import com.griddynamics.gemfire.serialization.primitive.TestParent;
 import javassist.CannotCompileException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.InvalidClassException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;

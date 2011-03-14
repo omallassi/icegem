@@ -11,8 +11,7 @@ import javassist.CtNewMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 
-import java.io.IOException;
-import java.io.InvalidClassException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

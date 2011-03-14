@@ -1,5 +1,6 @@
 package com.griddynamics.gemfire.serialization.codegen;
 
+import com.griddynamics.gemfire.serialization.BeanVersion;
 import com.griddynamics.gemfire.serialization.codegen.impl.ToDataFieldProcessor;
 
 import java.util.List;
@@ -44,6 +45,14 @@ public class MethodToDataProcessor {
                 .append(tab(className)).append(" concrete = (").append(className).append(") obj;\n");
 
         builder.append("\n");
+
+        //save bean value
+        if (element.getType().getAnnotation(BeanVersion.class) != null) {
+            builder.append(tab("out.writeInt(" + element.getType().getAnnotation(BeanVersion.class).value()+");"));  //todo: value is harcoded in result code
+        } else {
+            throw new RuntimeException("class must be annotated with @BeanVersion: " + element.getType().getCanonicalName());
+        }
+
         for (XField field : fields) {
             builder.append("\n");
             builder.append(tab("// this." + field.getName() + " -> byte[]\n")); //todo: can be name collision between parent/child fields

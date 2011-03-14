@@ -1,11 +1,13 @@
 package com.griddynamics.gemfire.serialization._inheritance.transientgetter;
 
 import com.griddynamics.gemfire.serialization.AutoSerializable;
+import com.griddynamics.gemfire.serialization.BeanVersion;
 
 /**
  * @author igolovach
  */
 @AutoSerializable(dataSerializerID = 909887678)
+@BeanVersion(1)
 public class Bean {
     private MarkedParent markedParent;
     private NotMarkedParent notMarkedParent;

@@ -23,6 +23,7 @@ public class ConsoleClient {
         // Create the cache which causes the cache-xml-file to be parsed
         Cache cache = new CacheFactory()
                 .set("cache-xml-file", "EurexClient.xml")
+                .set("mcast-port", "0")
                 .create();
 
         Thread.sleep(1000000000);
