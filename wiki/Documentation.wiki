@@ -34,7 +34,18 @@ It resides in icegem-spring module, apart from core functionality. And it is jus
 
 === HierarchyRegistry ===
 
-Takes as parameter list of classes to be serialized and sends them to DataSerializerGenerator which generates corresponding DataSerializers. HierarchyRegistry then registers these DataSerializers with GemFire.
+Takes as parameter list of classes (@AutoSerializable) to be serialized and sends them to DataSerializerGenerator which generates corresponding DataSerializers. HierarchyRegistry then registers these DataSerializers with GemFire serialization framework.
+
+{{{
+class RegistryBean {
+
+List<Class<?>> classesList = ...
+
+HierarchyRegistry.registerAll(RegistryBean.class.getClassLoader(), classesList);
+
+...
+}
+}}}
 
 === DataSerializerGenerator ===
 
@@ -119,9 +130,11 @@ To use  library without spring-icegem.jar
 = Build description=
 
   # getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
-
   # building artifacts: mvn install
         p.s. to build a single module: cd module_folder, mvn install
+  # testing: mvn test
+versioning test disabled (different versions of a class cann't be registered at once). If you want to test them, first run SerializeForVersioning, then enable all tests in DeserializeForVersioning and run the last
+
 
 = Special cases (mixing auto and manual serialization) =
 
