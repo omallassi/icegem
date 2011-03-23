@@ -21,7 +21,7 @@ public class HierarchyRegistry {
     }
 
     public static synchronized void registerAll(ClassLoader classLoader, List<Class<?>> classList) throws InvalidClassException, CannotCompileException {
-
+        List<String> list = Arrays.asList("c");
 //        List<Class<?>> filteredClassList = new ArrayList<Class<?>>();
 //        // filter enum
 //        for (Class<?> clazz : classList) {

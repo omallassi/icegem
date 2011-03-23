@@ -14,7 +14,8 @@
 		<module>icegem-examples-server</module>
 		<module>icegem-performance</module>
 		<module>icegem-spring</module>
-	</modules>
+        <module>icegem-cache-utils</module>
+    </modules>
 
 	<properties>
 		<com.gemstone.gemfire.version>6.5</com.gemstone.gemfire.version>
