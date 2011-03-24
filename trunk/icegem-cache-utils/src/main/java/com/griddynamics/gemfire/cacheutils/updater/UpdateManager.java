@@ -1,6 +1,8 @@
 package com.griddynamics.gemfire.cacheutils.updater;
 
 import java.util.Set;
+import java.util.List;
+import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -21,6 +23,7 @@ public class UpdateManager {
 	private static boolean withSubRegionsOption;
 	private static String regionsOption;
 	private static String locatorOption;
+    private static List<String> scanPackagesOption;
 	
 	public static void main(String[] commandLineArguments) {
 		parseCommandLineArguments(commandLineArguments);
@@ -48,8 +51,15 @@ public class UpdateManager {
 		}
 		log.info("Found following system regions: " + regionNames);
 		log.info("Connecting to system regions...");
-		PeerCacheService peerCacheService = new PeerCacheService(locatorOption);
-		Set<Region<?,?>> regions = peerCacheService.createRegions(regionNames);
+		PeerCacheService peerCacheService = null;
+        try {
+            peerCacheService = new PeerCacheService(locatorOption, scanPackagesOption);
+        } catch (Exception e) {
+            log.info("Failed to connect to the system regions. " + e.getMessage());
+            admin.close();
+			System.exit(0);
+        }
+        Set<Region<?,?>> regions = peerCacheService.createRegions(regionNames);
 		Updater updater = new Updater();
 		log.info("Updating regions...");
 		updater.updateRegions(regions);
@@ -72,9 +82,13 @@ public class UpdateManager {
 	        	withSubRegionsOption = line.hasOption("subregions");
 	        	regionsOption = line.getOptionValue("regions");
 	        	locatorOption = line.getOptionValue("locator");
+                if(line.hasOption("packages"))
+                    scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
 	        } else if (line.hasOption("all")) {
 	        	regionsOption = "all";
 	        	locatorOption = line.getOptionValue("locator");
+                if(line.hasOption("packages"))
+                    scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
 	        } else if (line.hasOption("help")) {
 	        	printHelp(options);
 	        	System.exit(0);
@@ -102,6 +116,7 @@ public class UpdateManager {
 				.addOption("s", "subregions", false, "Indicate whether to update all subregions of mentioned regions")
 				.addOption("a", "all", false, "Update all regions in system")
 				.addOption("l", "locator", true, "Locator of GemFire system")
+                .addOption("p", "packages", true, "Enumerate packages to scan for @AutoSerializable model classes. Delimiter is a comma sign.")
 				.addOption("h", "help", false, "Print usage information");
 		return gnuOptions;
 	}
