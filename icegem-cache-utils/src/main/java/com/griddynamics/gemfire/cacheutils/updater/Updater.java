@@ -1,17 +1,11 @@
 package com.griddynamics.gemfire.cacheutils.updater;
 
-import java.io.InvalidClassException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.CountDownLatch;
 
-import javassist.CannotCompileException;
-
 import com.gemstone.gemfire.cache.Region;
-import com.griddynamics.gemfire.serialization.HierarchyRegistry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +18,6 @@ public class Updater {
     private CountDownLatch done;
 
 	public void updateRegions(Set<Region<?, ?>> regions) {
-        registerSerializers();
         done = new CountDownLatch(regions.size());
 		ExecutorService executor = Executors.newFixedThreadPool(regions.size());
 		for (Region<?, ?> region : regions)
@@ -35,23 +28,6 @@ public class Updater {
             log.info("Some error ocurred. Will stop updating." + e.getMessage());
         }
     }
-
-	// TODO: make this automatically for all classes in specified jar file with domain objects
-	private static void registerSerializers() {
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
-		List<Class<?>> classesFromPackages = new ArrayList<Class<?>>();
-		//classesFromPackages.add(Company.class);
-		//classesFromPackages.add(Product.class);
-
-		try {
-			HierarchyRegistry.registerAll(classLoader, classesFromPackages);
-		} catch (InvalidClassException e) {
-			log.error(e.getMessage());
-		} catch (CannotCompileException ex) {
-			log.error(ex.getMessage());
-		}
-	}
 
 	private class UpdateRunner implements Runnable {
 		private Region region;
