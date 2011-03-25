@@ -10,6 +10,7 @@
     <groupId>com.griddynamics.gemfire.serialization</groupId>
     <artifactId>icegem-cache-utils</artifactId>
     <version>0.1-SNAPSHOT</version>
+    <name>Cache-utils</name>
 
     <properties>
         <slf4j.version>1.5.11</slf4j.version>

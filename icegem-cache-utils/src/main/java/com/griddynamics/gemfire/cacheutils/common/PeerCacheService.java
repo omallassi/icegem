@@ -25,28 +25,40 @@ public class PeerCacheService {
     private ClientCache cache;
     private List<String> scanPackages = new ArrayList<String>();
 
-    public PeerCacheService(String locatorOption, List<String> scanPackages) throws Exception {
+    public PeerCacheService(String serverOption, List<String> scanPackages) throws Exception {
         if (scanPackages != null) {
             this.scanPackages = scanPackages;
             registerSerializers();
         }
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory();
-        if (locatorOption != null) {
-            String[] locators = locatorOption.split(",");
-            for (String locator : locators) {
-                String locatorHost = locator.substring(0, locator.indexOf("["));
-                String locatorPort = locator.substring(locator.indexOf("[") + 1, locator.indexOf("]"));
-                clientCacheFactory.addPoolLocator(locatorHost, Integer.parseInt(locatorPort));
-            }
+        if (serverOption != null) {
+            String serverHost = serverOption.substring(0, serverOption.indexOf("["));
+            String serverPort = serverOption.substring(serverOption.indexOf("[") + 1, serverOption.indexOf("]"));
+            clientCacheFactory.addPoolServer(serverHost, Integer.parseInt(serverPort));
         }
         this.cache = clientCacheFactory.create();
     }
 
-    public Set<Region<?, ?>> createRegions(Set<String> regionNames) {
+    /**
+     * Creates regions stucture analogue to server region structure
+     *
+     * @param regionNames names of the regions to reconstruct
+     * @return set of created regions
+     */
+    public Set<Region<?, ?>> createRegions(Map<String, String> regionNames) {
         Set<Region<?, ?>> regions = new HashSet<Region<?, ?>>();
         ClientRegionFactory proxyRegionFactory = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
-        for (String regionName : regionNames) {
-            Region region = proxyRegionFactory.create(regionName);
+        for (String regionPath : regionNames.keySet()) {
+            Region region = null;
+            String regionName = regionNames.get(regionPath);
+            if (regionPath.equals("/" + regionName)) {
+                region = proxyRegionFactory.create(regionName);
+            } else {
+                Region parentRegion = cache.getRegion(regionPath.substring(0, regionPath.lastIndexOf("/" + regionName)));
+                if (parentRegion != null)
+                    region = parentRegion.createSubregion(regionName, parentRegion.getAttributes());
+            }
+
             regions.add(region);
         }
         return regions;

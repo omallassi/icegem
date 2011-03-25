@@ -3,6 +3,7 @@ package com.griddynamics.gemfire.cacheutils.updater;
 import java.util.Set;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -23,6 +24,7 @@ public class UpdateManager {
 	private static boolean withSubRegionsOption;
 	private static String regionsOption;
 	private static String locatorOption;
+    private static String serverOption;
     private static List<String> scanPackagesOption;
 	
 	public static void main(String[] commandLineArguments) {
@@ -36,7 +38,7 @@ public class UpdateManager {
 			System.exit(0);
 		}
 		log.info("Collect system regions...");
-		Set<String> regionNames = null;
+		Map<String, String> regionNames = null;
 		try {
 			regionNames = admin.getRegionNames(regionsOption, withSubRegionsOption);
 		} catch (AdminException e) {
@@ -44,19 +46,17 @@ public class UpdateManager {
             admin.close();
 			System.exit(0);
 		}
-		if (regionNames == null || regionNames.size() == 0) {
-            log.info("There is no regions to update.");
-            admin.close();
-            System.exit(0);
-		}
-		log.info("Found following system regions: " + regionNames);
+        log.info("Found following system regions: " + regionNames.values());
+        log.info("Closing admin member...");
+        admin.close();
+        
+
 		log.info("Connecting to system regions...");
 		PeerCacheService peerCacheService = null;
         try {
-            peerCacheService = new PeerCacheService(locatorOption, scanPackagesOption);
+            peerCacheService = new PeerCacheService(serverOption, scanPackagesOption);
         } catch (Exception e) {
-            log.info("Failed to connect to the system regions. " + e.getMessage());
-            admin.close();
+            log.info("Failed to startup updater cache. " + e.getMessage());
 			System.exit(0);
         }
         Set<Region<?,?>> regions = peerCacheService.createRegions(regionNames);
@@ -64,8 +64,6 @@ public class UpdateManager {
 		log.info("Updating regions...");
 		updater.updateRegions(regions);
         log.info("Regions update finished successfuly");
-        log.info("Closing admin member...");
-        admin.close();
         log.info("Closing client cache...");
 		peerCacheService.close();
 	}
@@ -82,11 +80,13 @@ public class UpdateManager {
 	        	withSubRegionsOption = line.hasOption("subregions");
 	        	regionsOption = line.getOptionValue("regions");
 	        	locatorOption = line.getOptionValue("locator");
+                serverOption = line.getOptionValue("server");
                 if(line.hasOption("packages"))
                     scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
 	        } else if (line.hasOption("all")) {
 	        	regionsOption = "all";
 	        	locatorOption = line.getOptionValue("locator");
+                serverOption = line.getOptionValue("server");
                 if(line.hasOption("packages"))
                     scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
 	        } else if (line.hasOption("help")) {
@@ -113,9 +113,10 @@ public class UpdateManager {
 		final Options gnuOptions = new Options();
 
 		gnuOptions.addOption("r", "regions", true, "Enumerate regions to be updated here. Delimiter is a comma sign. Example: region1,region2,region3...")
-				.addOption("s", "subregions", false, "Indicate whether to update all subregions of mentioned regions")
+				.addOption("c", "subregions", false, "Indicate whether to update all subregions of mentioned regions")
 				.addOption("a", "all", false, "Update all regions in system")
-				.addOption("l", "locator", true, "Locator of GemFire system")
+				.addOption("l", "locator", true, "Locator of GemFire system. Example: host[port]")
+                .addOption("s", "server", true, "Server of GemFire system. Example: host[port]")
                 .addOption("p", "packages", true, "Enumerate packages to scan for @AutoSerializable model classes. Delimiter is a comma sign.")
 				.addOption("h", "help", false, "Print usage information");
 		return gnuOptions;

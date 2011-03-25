@@ -26,6 +26,8 @@ public class Updater {
             done.await();
         } catch (InterruptedException e) {
             log.info("Some error ocurred. Will stop updating." + e.getMessage());
+        } finally {
+            executor.shutdown();
         }
     }
 
@@ -41,12 +43,12 @@ public class Updater {
 				for (Object key : region.keySetOnServer()) {
 					Object value = region.get(key);
 					region.put(key, value);
-                    log.info("-----------------------key-value " + key + "-" + value);
+                    //log.info("-----------------------key-value " + key + "-" + value);
 				}
-				log.info("Update of region " + region + " successful");
+				log.info("Update of region " + region.getName() + " successful");
 			} catch (Throwable t) {
-				log.info("Update of region " + region + " failed");
-				log.error("Exception occured in region " + region + "\n"
+				log.info("Update of region " + region.getName() + " failed");
+				log.error("Exception occured in region " + region.getName() + "\n"
 						+ t.getMessage());
 			} finally {
 			    done.countDown();
