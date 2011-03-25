@@ -22,48 +22,50 @@ import org.slf4j.LoggerFactory;
  */
 public class PeerCacheService {
     private static final Logger log = LoggerFactory.getLogger(PeerCacheService.class);
-	private ClientCache cache;
+    private ClientCache cache;
     private List<String> scanPackages = new ArrayList<String>();
-	
-	public PeerCacheService(String locatorOption, List<String> scanPackages) throws Exception {
+
+    public PeerCacheService(String locatorOption, List<String> scanPackages) throws Exception {
         if (scanPackages != null) {
             this.scanPackages = scanPackages;
             registerSerializers();
         }
-        ClientCacheFactory clientCacheFactory =  new ClientCacheFactory();
-        String[] locators = locatorOption.split(",");
-        for (String locator : locators) {
-            String locatorHost = locator.substring(0, locator.indexOf("["));
-		    String locatorPort = locator.substring(locator.indexOf("[") + 1, locator.indexOf("]"));
-            clientCacheFactory.addPoolLocator(locatorHost, Integer.parseInt(locatorPort));
+        ClientCacheFactory clientCacheFactory = new ClientCacheFactory();
+        if (locatorOption != null) {
+            String[] locators = locatorOption.split(",");
+            for (String locator : locators) {
+                String locatorHost = locator.substring(0, locator.indexOf("["));
+                String locatorPort = locator.substring(locator.indexOf("[") + 1, locator.indexOf("]"));
+                clientCacheFactory.addPoolLocator(locatorHost, Integer.parseInt(locatorPort));
+            }
         }
-		this.cache = clientCacheFactory.create();
-	}
+        this.cache = clientCacheFactory.create();
+    }
 
-	public Set<Region<?, ?>> createRegions(Set<String> regionNames) {
-		Set<Region<?, ?>> regions = new HashSet<Region<?, ?>>();   
-		ClientRegionFactory proxyRegionFactory = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
-		for (String regionName : regionNames) {
-			Region region = proxyRegionFactory.create(regionName);
-			regions.add(region);
-		}
-		return regions;
-	}
-	
-	public Region<?, ?> createRegion(String regionName) {
-		ClientRegionFactory proxyRegionFactory = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
-		Region region = proxyRegionFactory.create(regionName);
-		return region;
-	}
+    public Set<Region<?, ?>> createRegions(Set<String> regionNames) {
+        Set<Region<?, ?>> regions = new HashSet<Region<?, ?>>();
+        ClientRegionFactory proxyRegionFactory = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
+        for (String regionName : regionNames) {
+            Region region = proxyRegionFactory.create(regionName);
+            regions.add(region);
+        }
+        return regions;
+    }
 
-	public void close() {
-		cache.close();
-	}
+    public Region<?, ?> createRegion(String regionName) {
+        ClientRegionFactory proxyRegionFactory = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
+        Region region = proxyRegionFactory.create(regionName);
+        return region;
+    }
+
+    public void close() {
+        cache.close();
+    }
 
     private void registerSerializers() throws Exception {
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader(); 
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         registerClasses(classLoader);
-	}
+    }
 
     private void registerClasses(ClassLoader classLoader) throws Exception {
 
