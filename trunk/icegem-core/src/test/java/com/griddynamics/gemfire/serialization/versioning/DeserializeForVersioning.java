@@ -24,7 +24,7 @@ public class DeserializeForVersioning {
         HierarchyRegistry.registerAll(DeserializeForVersioning.class.getClassLoader(),
                 Company.class, IllegalVersion.class, Son.class, Car.class);
     }
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void deserializePreviousVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("simpleCompany.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("simpleCompany.versionTest"));
@@ -37,7 +37,7 @@ public class DeserializeForVersioning {
         assertThat(c2.getName()).isNull();
     }
 
-    @Test(expectedExceptions = ClassCastException.class, enabled = true)
+    @Test(expectedExceptions = ClassCastException.class, enabled = false)
     public void deserializeNewVersionWithOldCLass() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("restoreNewClassVersion.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("restoreNewClassVersion.versionTest"));
@@ -47,7 +47,7 @@ public class DeserializeForVersioning {
         IllegalVersion illegalVersion = DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void deserializeWithInheritance() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("restoreNewClassVersion.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("restoreNewClassVersion.versionTest"));
@@ -63,7 +63,7 @@ public class DeserializeForVersioning {
         assertThat(son.getBrothers()).isEqualTo(Arrays.asList(4L, 3L, 5L, 1L));
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void deserializeCarVersionThree() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("cars.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("cars.versionTest"));
