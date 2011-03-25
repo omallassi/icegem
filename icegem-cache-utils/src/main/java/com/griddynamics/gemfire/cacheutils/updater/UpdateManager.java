@@ -72,6 +72,7 @@ public class UpdateManager {
 		Options options = constructGnuOptions();
 		if (commandLineArguments.length < 1) {
 			printHelp(options);
+            System.exit(0);
 		}
 		CommandLineParser parser = new GnuParser();
 	    try {
