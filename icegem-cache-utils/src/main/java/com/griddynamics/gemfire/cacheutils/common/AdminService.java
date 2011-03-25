@@ -11,7 +11,6 @@ import com.gemstone.gemfire.admin.AdminDistributedSystem;
 import com.gemstone.gemfire.admin.AdminDistributedSystemFactory;
 import com.gemstone.gemfire.admin.AdminException;
 import com.gemstone.gemfire.admin.DistributedSystemConfig;
-import com.gemstone.gemfire.admin.Statistic;
 import com.gemstone.gemfire.admin.SystemMember;
 import com.gemstone.gemfire.admin.SystemMemberCache;
 import com.gemstone.gemfire.admin.SystemMemberRegion;
@@ -22,7 +21,7 @@ import com.gemstone.gemfire.distributed.DistributedSystem;
  */
 public class AdminService {
 	private AdminDistributedSystem admin;
-	private Set<String> regionNames = new HashSet<String>();
+	private Set<String> regionNames;
 	private Set<SystemMember> systemMembers = new HashSet<SystemMember>();
 
 	public AdminService(String locator) throws Exception {
@@ -32,7 +31,8 @@ public class AdminService {
 	}
 
 	public Set<String> getRegionNames(String regionNamesOption,	boolean withSubRegionsOption) throws AdminException {
-		if (regionNamesOption.equals("all"))
+		regionNames = new HashSet<String>();
+        if (regionNamesOption.equals("all"))
 			return getSystemRegionNames(null);
 		String[] regionNamesArray = regionNamesOption.split(",");
 		if (!withSubRegionsOption)
@@ -47,7 +47,6 @@ public class AdminService {
 			if (!member.hasCache())
 				continue;
 			SystemMemberCache cache = member.getCache();
-			Statistic[] st = cache.getStatistics();
 			SystemMemberRegion region = cache.getRegion(name);
 			if (region != null) {
 				result.put(member.getId(), region);
@@ -69,22 +68,31 @@ public class AdminService {
 			if (regionNamesArray == null)
 				regionNamesArray = cache.getRootRegionNames().toArray();
 			for (Object name : regionNamesArray) {
-				SystemMemberRegion region = cache.getRegion(name.toString());
-				if (region != null) {
-					regionNames.add(name.toString());
-					regionNames.addAll(region.getSubregionNames());
-				}
+                getSubregionsNameRequrcively(cache, name);
 			}
 		}
 		return regionNames;
 	}
 
-	private AdminDistributedSystem adminCreateAndConnect(String locator)
+    private void getSubregionsNameRequrcively(SystemMemberCache cache, Object name) throws AdminException {
+        SystemMemberRegion region = cache.getRegion(name.toString());
+        if (region != null) {
+            regionNames.add(name.toString());
+            Set<String> subregionsNames = region.getSubregionFullPaths();
+            //regionNames.addAll(subregionsNames);
+            for (String subregionName: subregionsNames) {
+                getSubregionsNameRequrcively(cache, subregionName);
+            }
+        }
+    }
+
+    private AdminDistributedSystem adminCreateAndConnect(String locator)
 			throws Exception {
 		Properties props = new Properties();
 		props.setProperty("mcast-port", "0");
 		props.setProperty("locators", locator);
-		AdminDistributedSystemFactory.setEnableAdministrationOnly(true);
+        props.setProperty("start-locator", locator);
+        AdminDistributedSystemFactory.setEnableAdministrationOnly(false);
 		DistributedSystem connection = DistributedSystem.connect(props);
 		DistributedSystemConfig config = AdminDistributedSystemFactory
 				.defineDistributedSystem(connection, null);
@@ -104,4 +112,11 @@ public class AdminService {
 		return admin;
 	}
 
+    public AdminDistributedSystem getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(AdminDistributedSystem admin) {
+        this.admin = admin;
+    }
 }

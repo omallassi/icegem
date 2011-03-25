@@ -41,6 +41,7 @@ public class Updater {
 				for (Object key : region.keySetOnServer()) {
 					Object value = region.get(key);
 					region.put(key, value);
+                    log.info("-----------------------key-value " + key + "-" + value);
 				}
 				log.info("Update of region " + region + " successful");
 			} catch (Throwable t) {
