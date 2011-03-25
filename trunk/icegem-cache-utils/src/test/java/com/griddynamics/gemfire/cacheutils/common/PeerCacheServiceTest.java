@@ -6,69 +6,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.fest.assertions.Assertions;
 
-import java.io.File;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.admin.AdminException;
 import com.griddynamics.gemfire.cacheutils.updater.Updater;
 
+//TODO upgrade this test
 public class PeerCacheServiceTest {
     private static final Logger log = LoggerFactory.getLogger(PeerCacheServiceTest.class);
     private static final int LOCATOR_PORT = 10356;
     private Cache cache;
     private AdminService admin;
-    private Set<Region> regions = new HashSet<Region>();
+    private Set<Region<?,?>> regions = new HashSet<Region<?,?>>();
     private PeerCacheService peerCacheService;
+
 
     //@BeforeClass
     public void before() throws Exception {
 
-        admin = new AdminService("localhost[" + LOCATOR_PORT + "]");
-        peerCacheService = new PeerCacheService(null, null);
         startPeerCache();
         createRegions();
         fillRegionsWithData();
-
-        //peerCacheService = new PeerCacheService(null, null);
+        peerCacheService = new PeerCacheService(null, null);
     }
 
     //@Test
     public void testUpdateRegions() throws AdminException {
-        Set<String> regionNames = admin.getRegionNames("all", true);
-        Set<Region<?, ?>> regions = peerCacheService.createRegions(regionNames);
         Updater updater = new Updater();
         log.info("Updating regions...");
         updater.updateRegions(regions);
         Assertions.assertThat(true);
-
-        /* ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(new Runnable() {
-
-            public void run() {
-                try {
-                    Set<String> regionNames = admin.getRegionNames("all", true);
-                    Set<Region<?,?>> regions = peerCacheService.createRegions(regionNames);
-                    Updater updater = new Updater();
-                    log.info("Updating regions...");
-                    updater.updateRegions(regions);
-                    Assertions.assertThat(true);
-                } catch (Exception e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
-            }
-        });*/
-
-
         //Assertions.assertThat(new TreeSet<String>(regionNames)).isEqualTo(new TreeSet<String>(expectedRegionNames));
     }
 
     private void startPeerCache() {
-        cache = new CacheFactory().create();
+        cache = new CacheFactory().set("mcast-port", "0").set("locators", "localhost[" + LOCATOR_PORT + "]").create();
         log.info("Cache started successfully ");
     }
 

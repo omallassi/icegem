@@ -1,19 +1,8 @@
 package com.griddynamics.gemfire.cacheutils.common;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
-import com.gemstone.gemfire.admin.AdminDistributedSystem;
-import com.gemstone.gemfire.admin.AdminDistributedSystemFactory;
-import com.gemstone.gemfire.admin.AdminException;
-import com.gemstone.gemfire.admin.DistributedSystemConfig;
-import com.gemstone.gemfire.admin.SystemMember;
-import com.gemstone.gemfire.admin.SystemMemberCache;
-import com.gemstone.gemfire.admin.SystemMemberRegion;
+import com.gemstone.gemfire.admin.*;
 import com.gemstone.gemfire.distributed.DistributedSystem;
 
 /**
@@ -21,8 +10,9 @@ import com.gemstone.gemfire.distributed.DistributedSystem;
  */
 public class AdminService {
 	private AdminDistributedSystem admin;
-	private Set<String> regionNames;
+	private Map<String, String> regionNames;
 	private Set<SystemMember> systemMembers = new HashSet<SystemMember>();
+    private DistributedSystem connection;
 
 	public AdminService(String locator) throws Exception {
 		this.admin = adminCreateAndConnect(locator);
@@ -30,14 +20,12 @@ public class AdminService {
 		systemMembers.addAll(new HashSet<SystemMember>(Arrays.asList(admin.getSystemMemberApplications())));
 	}
 
-	public Set<String> getRegionNames(String regionNamesOption,	boolean withSubRegionsOption) throws AdminException {
-		regionNames = new HashSet<String>();
+	public Map<String, String> getRegionNames(String regionNamesOption,	boolean withSubRegionsOption) throws AdminException {
+		regionNames = new TreeMap<String, String>();
         if (regionNamesOption.equals("all"))
-			return getSystemRegionNames(null);
+			return getSystemRegionNames(null, true);
 		String[] regionNamesArray = regionNamesOption.split(",");
-		if (!withSubRegionsOption)
-			return new HashSet<String>(Arrays.asList(regionNamesArray));
-		return getSystemRegionNames(regionNamesArray);
+        return getSystemRegionNames(Arrays.asList(regionNamesArray), withSubRegionsOption);
 	}
 
 	public Map<String, SystemMemberRegion> getMemberRegionMap(String name)
@@ -57,31 +45,30 @@ public class AdminService {
 
     public void close() {
 		admin.disconnect();
+        connection.disconnect();
 	}
 
-	private Set<String> getSystemRegionNames(Object[] regionNamesArray)
+	private Map<String, String> getSystemRegionNames(List<String> regionNamesToFind, boolean withSubRegionsOption)
 			throws AdminException {
 		for (SystemMember member : systemMembers) {
 			if (!member.hasCache())
 				continue;
 			SystemMemberCache cache = member.getCache();
-			if (regionNamesArray == null)
-				regionNamesArray = cache.getRootRegionNames().toArray();
-			for (Object name : regionNamesArray) {
-                getSubregionsNameRequrcively(cache, name);
+			for (Object name : cache.getRootRegionNames()) {
+                getSubregionsNameRequrcively(cache, "/" + name, regionNamesToFind, withSubRegionsOption);
 			}
 		}
 		return regionNames;
 	}
 
-    private void getSubregionsNameRequrcively(SystemMemberCache cache, Object name) throws AdminException {
-        SystemMemberRegion region = cache.getRegion(name.toString());
+    private void getSubregionsNameRequrcively(SystemMemberCache cache, String path, List<String> regionNamesToFind, boolean withSubRegionsOption) throws AdminException {
+        SystemMemberRegion region = cache.getRegion(path);
         if (region != null) {
-            regionNames.add(name.toString());
-            Set<String> subregionsNames = region.getSubregionFullPaths();
-            //regionNames.addAll(subregionsNames);
-            for (String subregionName: subregionsNames) {
-                getSubregionsNameRequrcively(cache, subregionName);
+            if (regionNamesToFind == null || regionNamesToFind.contains(region.getName()) || (withSubRegionsOption && new ArrayList<String>(Arrays.asList(path.split("/"))).removeAll(regionNamesToFind)))
+                regionNames.put(path, region.getName());
+            Set<String> subregionsPaths = region.getSubregionFullPaths();
+            for (String subregionsPath: subregionsPaths) {
+                getSubregionsNameRequrcively(cache, subregionsPath, regionNamesToFind, withSubRegionsOption);
             }
         }
     }
@@ -90,10 +77,10 @@ public class AdminService {
 			throws Exception {
 		Properties props = new Properties();
 		props.setProperty("mcast-port", "0");
-		props.setProperty("locators", locator);
-        props.setProperty("start-locator", locator);
+        if (locator != null)
+		    props.setProperty("locators", locator);
         AdminDistributedSystemFactory.setEnableAdministrationOnly(false);
-		DistributedSystem connection = DistributedSystem.connect(props);
+		connection = DistributedSystem.connect(props);
 		DistributedSystemConfig config = AdminDistributedSystemFactory
 				.defineDistributedSystem(connection, null);
 		AdminDistributedSystem admin = AdminDistributedSystemFactory
