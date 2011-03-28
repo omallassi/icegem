@@ -16,6 +16,6 @@ CLASSPATH1=$CLASSPATH1:./lib/spring-core-3.0.3.RELEASE.jar
 
 
 $JAVA -version || { echo  'java binary exits bad'; exit 2 ; }
-$JAVA -cp $CLASSPATH1 com.griddynamics.gemfire.cacheutils.updater.UpdateManager  $*
+$JAVA -cp $CLASSPATH1 com.griddynamics.icegem.cacheutils.updater.UpdateManager  $*
 exit $?
 

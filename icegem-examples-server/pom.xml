@@ -129,7 +129,7 @@
 				<classesDirectory>${project.build.directory}</classesDirectory>
 				<finalName>gemfire-serialization-examples-console-client-0.1</finalName>
 				<archive> <manifest>
-				<mainClass>com.griddynamics.gemfire.serialization.example.console.ConsoleClient
+				<mainClass>com.griddynamics.icegem.serialization.example.console.ConsoleClient
 				</mainClass> </manifest> </archive> </configuration> </execution>
 				<execution> <id>console-server</id> <goals> <goal>jar</goal>
 				</goals> <configuration> <includes>
@@ -139,7 +139,7 @@
 				<classesDirectory>${project.build.directory}/classes</classesDirectory>
 				<finalName>gemfire-serialization-examples-console-server-0.1</finalName>
 				<archive> <manifest>
-				<mainClass>com.griddynamics.gemfire.serialization.example.console.ConsoleServer
+				<mainClass>com.griddynamics.icegem.serialization.example.console.ConsoleServer
 				</mainClass> </manifest> </archive> </configuration> </execution>
 				</executions> </plugin>
 			-->

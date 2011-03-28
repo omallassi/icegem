@@ -11,6 +11,7 @@ import java.util.*;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.admin.AdminException;
+import com.griddynamics.icegem.cacheutils.common.AdminService;
 
 public class AdminServiceTest {
     private static final Logger log = LoggerFactory.getLogger(AdminServiceTest.class);

@@ -11,7 +11,9 @@ import java.util.HashSet;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.admin.AdminException;
-import com.griddynamics.gemfire.cacheutils.updater.Updater;
+import com.griddynamics.icegem.cacheutils.common.AdminService;
+import com.griddynamics.icegem.cacheutils.common.PeerCacheService;
+import com.griddynamics.icegem.cacheutils.updater.Updater;
 
 //TODO upgrade this test
 public class PeerCacheServiceTest {
