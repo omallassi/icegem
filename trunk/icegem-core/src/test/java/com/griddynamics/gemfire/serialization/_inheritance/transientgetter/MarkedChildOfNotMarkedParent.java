@@ -2,7 +2,7 @@ package com.griddynamics.gemfire.serialization._inheritance.transientgetter;
 
 import com.griddynamics.gemfire.serialization.AutoSerializable;
 import com.griddynamics.gemfire.serialization.BeanVersion;
-import com.griddynamics.gemfire.serialization.TransientGetter;
+import com.griddynamics.gemfire.serialization.Transient;
 
 /**
  * @author igolovach
@@ -12,7 +12,7 @@ import com.griddynamics.gemfire.serialization.TransientGetter;
 public class MarkedChildOfNotMarkedParent extends NotMarkedParent {
 
     @Override
-    @TransientGetter
+    @Transient
     public int getData() {
         return super.getData();
     }

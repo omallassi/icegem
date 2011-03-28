@@ -2,7 +2,7 @@ package com.griddynamics.gemfire.serialization.example.bean;
 
 import com.griddynamics.gemfire.serialization.AutoSerializable;
 import com.griddynamics.gemfire.serialization.BeanVersion;
-import com.griddynamics.gemfire.serialization.TransientGetter;
+import com.griddynamics.gemfire.serialization.Transient;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
@@ -69,7 +69,7 @@ public class Company extends ParentCompany {
         this.mainOfficeAddress = mainOfficeAddress;
     }
 
-    @TransientGetter
+    @Transient
     public String[] getTransientCache() {
         return transientCache;
     }

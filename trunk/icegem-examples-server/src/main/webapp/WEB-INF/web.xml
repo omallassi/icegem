@@ -9,11 +9,11 @@
         <description>SERVER</description>
         <servlet-name>serverServlet</servlet-name>
         <servlet-class>com.griddynamics.gemfire.serialization.example.web.EurexServerServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
         <init-param>
             <param-name>put-interval</param-name>
             <param-value>2000</param-value>
         </init-param>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <listener>
