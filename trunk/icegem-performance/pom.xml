@@ -96,7 +96,7 @@
 					<finalName>icegem-performance-0.1</finalName>
 					<archive>
 						<manifest>
-							<mainClass>com.griddynamics.gemfire.serialization.perf.Main</mainClass>
+							<mainClass>com.griddynamics.icegem.serialization.perf.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

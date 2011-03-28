@@ -7,7 +7,7 @@
 	<region name="Eurex-Region">
 		<region-attributes refid="REPLICATE">
 			<cache-listener>
-				<class-name>com.griddynamics.gemfire.serialization.example.web.ClientCacheListener</class-name>
+				<class-name>com.griddynamics.icegem.serialization.example.web.ClientCacheListener</class-name>
 			</cache-listener>
 		</region-attributes>
 	</region>

@@ -1,40 +1,11 @@
-1. SVN
-    + idea:idea
-    - goals:
-        + install
-        - test
-        + verify
-        + package
-    - all artifacts builded
-        + core
-        + perf
-        ? spring
-        ? examples
-    - all artifacts builded in the best way
-        + core
-        - perf
-        - spring
-        - examples    
-    - all dependencies can be downloaded
-    - minimize dependencies
-        + core
-        + perf
-        - spring
-        - examples
-
-2. Doc
-
 3. Integration with Spring
 
 //todo: NotMarkedParent[] = new NotMarkedParent[] {new MarkedChild()}
 //todo: bit matrix for null field flag
-//todo: how we save String - нет ограничений на длину строки и тип символов? (dataoutput/dataserializer/modified UTF-8) ?
 
 //todo: pack String: "" -> 1byte, "!" -> 2byte
 //todo: @PackString(dict = {"0","1","2","3","4","5","6","7","8","9","(",")","-"})
 //todo: @PackShort/@PackChar/@PackInt/@PackLong
-//todo: pack enum: 1) private Enum, private Object - used DS.writeObject 2) write not name but ordinal 3) pack MyEnum[] 4) what with List<MyEnum>?
-
 //todo: pack java.util.Date
 //todo: pack EnumSet
 //todo: pack Boolean/boolean -> 1 bit
@@ -42,8 +13,6 @@
 ??? how get logs / how to monitor
 ??? how to customize process
 ??? in what packages created XXXDataSerializers?
-
-??? Integer[], Number[]
 
 ???- com.gemstone.gemfire.cache.util.ObjectSizer
 
@@ -55,54 +24,6 @@
 
 
 
-
-----------------------
-----------------------
-      OLD plans
-----------------------
-----------------------
-- what if getter marked as @NotSerializable in parent?
-+ cyclic obj references
-+ Object field
-- ASM Initiator (from Spring-GemFire)
-
-- reflection cache (what with ClassLoaders in reflection) ?
-- cache of ser/deser objects (for cyclic references)
-- serialization of hierarhy (data in all parents)
-- primitive array
-- wrapper array
-- List
-- Set
-- Map
-- circular class definition
-- circular objects refs
-- имя поля + сеттер + геттер (или без имени поля?)
-
-The methods implemented by ObjectOutputStream  can be grouped into three categories:
-- methods that write information to the stream,
-- methods used to control the stream's behavior,
-- and methods used to customize the serialization algorithm.
-
-ObjectOutputStream and ObjectInputStream are simply encoding and transformation layers
-
-Write the nonstatic and nontransient fields of the current class to this stream.
-
-The data serialization framework does not require that a DataSerializer be Serializable, but it does require that it provide a zero-argument constructor.
-
-ObjectOutputStream
-ObjectInputStream
-ObjectStreamClass
-ObjectStreamField
-
-spring-gemfire:
-    - AsmInstantiatorGenerator
-            - Only public classes are supported
-            - clazz.getConstructor() [not newInstance()]
-
---
-setter/getter/field: equal names + types
---
-
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
@@ -113,58 +34,6 @@ setter/getter/field: equal names + types
 - DOS.writeUTF(...) - perheps not optimal on size(DS:"1"->4byte, DOS:"1"->3)? use custom scheme?
 - any changes to serialize field with type: "ArrayList list = new ArrayList() {};"
 
-
-
-Architecture:
-- we do not need src of serialized classes!
-- fields without ID
-- generate code for javassist
-- circular class references
-- circular obj references detection
-- new XXXDataSer for every root+XXX, not every XXX
-- how ser parent fields
-- how registrate package with beans
-- how registrate DS in GemFire (+by Spring)
-
-User view:
-- @NotSerialized
-- code conv: getter/setter/field-name  +  field modifiers(non static/final/transient + ?)
-- when + how register Serializer in DataSerializer
-- how get src of generated serializers
-- how get logs / how to monitor
-- how to customize process
-- in what packages created XXXDataSerializers?
-- what if serialize classes from different packages?
-- what with class/getter visibility?
-
-
----
-Bean implements List?
-Short form of int: array length
-Short form of long: 1)id not use biggest values 2) Date dont use all bits: currentTimeMillis
-Short form of Date: +- from 2000year
-
----
-* Allow a pluggable scheme for writing abbreviated class headers (for example, using a short magic number for commonly-used classes)
-* Allow custom Externalizers for specific object types
-* what about enums?
-
----
-OOS
-Hessian
-JBoss
-Javolution
-
----
-BigDecimal
-Calendar
-Locale
-
----------------------------
----------------------------
----------------------------
----------------------------
----------------------------
 
 Ideal bean:
 
