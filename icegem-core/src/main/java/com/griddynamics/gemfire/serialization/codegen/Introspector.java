@@ -2,7 +2,7 @@ package com.griddynamics.gemfire.serialization.codegen;
 
 import com.griddynamics.gemfire.serialization.AutoSerializable;
 import com.griddynamics.gemfire.serialization.FieldVersion;
-import com.griddynamics.gemfire.serialization.TransientGetter;
+import com.griddynamics.gemfire.serialization.Transient;
 
 import java.io.InvalidClassException;
 import java.lang.annotation.Annotation;
@@ -171,7 +171,7 @@ public class Introspector { //todo: move to CodeGenUtils
                         final Annotation[] annArr = method.getDeclaredAnnotations();
                         boolean find = false;
                         for (Annotation ann : annArr) {
-                            if (ann.annotationType() == TransientGetter.class) { //todo: ann.annotationType() or getClass()?
+                            if (ann.annotationType() == Transient.class) { //todo: ann.annotationType() or getClass()?
                                 find = true;
                                 break;
                             }

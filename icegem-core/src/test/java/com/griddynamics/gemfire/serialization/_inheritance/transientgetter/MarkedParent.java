@@ -1,6 +1,6 @@
 package com.griddynamics.gemfire.serialization._inheritance.transientgetter;
 
-import com.griddynamics.gemfire.serialization.TransientGetter;
+import com.griddynamics.gemfire.serialization.Transient;
 
 /**
  * @author igolovach
@@ -9,7 +9,7 @@ import com.griddynamics.gemfire.serialization.TransientGetter;
 public class MarkedParent {
     private int data;
 
-    @TransientGetter
+    @Transient
     public int getData() {
         return data;
     }
