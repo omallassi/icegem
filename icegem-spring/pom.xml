@@ -18,7 +18,7 @@
 
 		<!-- COMPILE -->
 		<dependency>
-			<groupId>com.griddynamics.icegem</groupId>
+			<groupId>icegem</groupId>
 			<artifactId>icegem-core</artifactId>
 			<version>0.1-SNAPSHOT</version>
 			<scope>compile</scope>
