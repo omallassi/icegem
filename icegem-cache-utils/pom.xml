@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>icegem-root</artifactId>
-        <groupId>com.griddynamics.icegem</groupId>
+        <groupId>icegem</groupId>
         <version>0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.griddynamics.icegem</groupId>
+    <groupId>icegem</groupId>
     <artifactId>icegem-cache-utils</artifactId>
     <name>Cache Utilities</name>
 	<version>0.1-SNAPSHOT</version>
