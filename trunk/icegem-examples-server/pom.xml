@@ -2,14 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.griddynamics.icegem</groupId>
+	<groupId>icegem</groupId>
 	<artifactId>icegem-examples-server</artifactId>
 	<name>Examples server</name>
     <packaging>war</packaging>
 	<version>0.1-SNAPSHOT</version>
 
 	<parent>
-		<groupId>com.griddynamics.icegem</groupId>
+		<groupId>icegem</groupId>
 		<artifactId>icegem-root</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
