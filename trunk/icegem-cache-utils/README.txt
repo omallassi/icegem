@@ -14,3 +14,7 @@ Examples:
                                                           region1 and region2 with all its' subregions
                                                           in distributed system with locator "localhost[10355]" 
                                                           and cache server "localhost[40404]"
+
+./comparator.sh -p /data -s localhost[40402],localhost[40403],localhost[40405] - this command will start comparator
+                                                          utility. Replicated region with path "/data" will be compared
+                                                          on the cache servers localhost[40402],localhost[40403] and localhost[40405]

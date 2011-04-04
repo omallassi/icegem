@@ -79,6 +79,7 @@ public class AdminService {
 		props.setProperty("mcast-port", "0");
         if (locator != null)
 		    props.setProperty("locators", locator);
+        props.setProperty("log-file", "admin.log");
         AdminDistributedSystemFactory.setEnableAdministrationOnly(false);
 		connection = DistributedSystem.connect(props);
 		DistributedSystemConfig config = AdminDistributedSystemFactory
