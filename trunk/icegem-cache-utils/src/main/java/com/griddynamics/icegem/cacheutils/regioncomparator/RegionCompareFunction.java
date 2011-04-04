@@ -13,12 +13,13 @@ public class RegionCompareFunction extends FunctionAdapter {
     private static final long serialVersionUID = 4569716549835836666L;
 
     public void execute(FunctionContext fc) {
+        Region region = null;
         try {
             Object[] argsArray = (Object[]) fc.getArguments();
             String regionPath = (String) argsArray[0];
             Object[] keySetOnServer = (Object[]) argsArray[1];
             Cache cache = CacheFactory.getAnyInstance();
-            Region region = cache.getRegion(regionPath);
+            region = cache.getRegion(regionPath);
             if (region != null) {
                 Map distributedEntriesMap = new HashMap(region.getAll(Arrays.asList(keySetOnServer)));
                 Object[] localEntries = region.entrySet().toArray();
@@ -43,7 +44,7 @@ public class RegionCompareFunction extends FunctionAdapter {
             result[0][0] = null;
             result[1][0] = null;
             result[2][0] = null;
-            result[3][0] = ex.getMessage() + ex.getCause().getMessage();
+            result[3][0] = "Exception " + ex.getMessage() + ex.getCause().getMessage() + " was thrown on node " + region.getCache().getDistributedSystem().getDistributedMember().getId();
             fc.getResultSender().lastResult((Serializable) result);
         }
 
@@ -55,7 +56,7 @@ public class RegionCompareFunction extends FunctionAdapter {
             result[0][0] = null;
             result[1][0] = null;
             result[2][0] = null;
-            result[3][0] = "equals";//region.getCache().getDistributedSystem().getDistributedMember().getId();
+            result[3][0] = region.getCache().getDistributedSystem().getDistributedMember().getId();
             return result;
         }
         Set missing = new HashSet(distributedEntries.keySet());
