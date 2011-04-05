@@ -167,7 +167,7 @@ public class Introspector { //todo: move to CodeGenUtils
             Method[] methodArr = clazz.getMethods();
             for (Method method : methodArr) {
                 if (isNameSuitableForGetter(method)) {
-                    if (method.getDeclaringClass() != Object.class) { //remove Object.getClass()
+                    if (method.getDeclaringClass() != Object.class && !method.isBridge()) { //remove Object.getClass()
                         final Annotation[] annArr = method.getDeclaredAnnotations();
                         boolean find = false;
                         for (Annotation ann : annArr) {
