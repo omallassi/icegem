@@ -1,5 +1,6 @@
 package com.griddynamics.icegem.serialization._inheritance.transientgetter;
 
+import antlr.preprocessor.Hierarchy;
 import com.griddynamics.icegem.serialization.HierarchyRegistry;
 import com.griddynamics.icegem.serialization.primitive.TestParent;
 
@@ -44,7 +45,7 @@ public class TransientGetterTest extends TestParent {
         Assertions.assertThat((actual.getMarkedParent().getData())).isEqualTo(0);
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test
     public void testMarkedParentNotMarkedChild() {
         final Bean expected = new Bean();
         expected.setMarkedParent(new NotMarkedChildOfMarkedParent());
@@ -59,7 +60,7 @@ public class TransientGetterTest extends TestParent {
         Assertions.assertThat((actual.getMarkedParent().getData())).isEqualTo(expected.getMarkedParent().getData());
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test
     public void testNotMarkedParentMarkedChild() {
         final Bean expected = new Bean();
         expected.setNotMarkedParent(new MarkedChildOfNotMarkedParent());
@@ -87,6 +88,15 @@ public class TransientGetterTest extends TestParent {
         Assertions.assertThat(actual.getNotMarkedParent()).isInstanceOf(NotMarkedChildOfNotMarkedParent.class);
         // assert: data
         Assertions.assertThat((actual.getNotMarkedParent().getData())).isEqualTo(expected.getNotMarkedParent().getData());
+    }
+
+
+    @Test
+    public void testTransient() throws Exception{
+        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), ImplForInterfaceForTransient.class);
+
+        Object obj = new ImplForInterfaceForTransient();
+        serializeAndDeserialize(obj);
     }
 }
 
