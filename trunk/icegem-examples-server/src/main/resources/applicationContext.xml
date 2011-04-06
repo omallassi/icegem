@@ -10,17 +10,17 @@
 
     <bean id="gemFireBeanRegistry"
           scope="singleton"
-          class="com.griddynamics.icegem.serialization.spring.GemFireBeanRegistry">
+          class="com.googlecode.icegem.serialization.spring.GemFireBeanRegistry">
         <!--<property name="registeredClasses">-->
             <!--<list>-->
-                <!--<value>com.griddynamics.icegem.serialization.example.bean.Company</value>-->
-                <!--<value>com.griddynamics.icegem.serialization.example.bean.Address</value>-->
-                <!--<value>com.griddynamics.icegem.serialization.example.bean.Person</value>-->
+                <!--<value>com.googlecodecegem.serialization.example.bean.Company</value>-->
+                <!--<value>com.googlecodecegem.serialization.example.bean.Address</value>-->
+                <!--<value>com.googlecodecegem.serialization.example.bean.Person</value>-->
             <!--</list>-->
         <!--</property>-->
         <property name="scanPackages">
             <list>
-                <value>com.griddynamics.icegem.serialization.example.bean</value>
+                <value>com.googlecode.icegem.serialization.example.bean</value>
             </list>
         </property>
     </bean>

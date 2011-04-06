@@ -7,7 +7,7 @@
 	<region name="Eurex-Region">
 		<region-attributes refid="REPLICATE">
 			<!--<transientCache-listener>-->
-				<!--<class-name>com.griddynamics.gemfirere.web.SimpleCacheListener</class-name>-->
+				<!--<class-name>com.googlecodeemfirere.web.SimpleCacheListener</class-name>-->
 			<!--</transientCache-listener>-->
 		</region-attributes>
 	</region>
