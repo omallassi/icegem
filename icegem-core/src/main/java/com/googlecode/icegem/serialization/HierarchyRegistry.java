@@ -6,8 +6,7 @@ import com.googlecode.icegem.serialization.codegen.DataSerializerGenerator;
 import javassist.CannotCompileException;
 
 import java.io.InvalidClassException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Responsibility:
@@ -33,6 +32,12 @@ public class HierarchyRegistry {
 //            }
 //        }
 
+        //solve problem when one class is registered two or more times
+        Set<Class<?>> uniqueClass = new HashSet<Class<?>>();
+        for(Class clazz: classList)
+                uniqueClass.add(clazz);
+        classList = new LinkedList<Class<?>>();
+        classList.addAll(uniqueClass);
         // generate classes of DataSerializers
         List<Class<?>> serializerClassList = DataSerializerGenerator.generateDataSerializerClasses(classLoader, /*filteredClassList*/classList);
 
