@@ -1,19 +1,19 @@
 *) PUBLIC API
     CORE:
-    - com.griddynamics.gemfire.serialization:
+    - com.googlecode.gemfire.serialization:
         - HierarchyRegistry
-    - com.griddynamics.gemfire.serialization.codegen:
+    - com.googlecode.gemfire.serialization.codegen:
         - DataSerializerGenerator
         - CodeGenerationListener
         - SOUTCodeGenerationListener
     SPRING:
-    - com.griddynamics.gemfire.serialization.spring
+    - com.googlecode.gemfire.serialization.spring
         - GemFireBeanRegistry
             USING:
                 - Example (bean from applicationContext.xml):
                 <bean id="gemFireBeanRegistry"
                       scope="singleton"
-                      class="com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry">
+                      class="com.googlecode.gemfire.serialization.spring.GemFireBeanRegistry">
                     <property name="scanPackages">
                         <list>
                             <value>com.my.company.beans</value>

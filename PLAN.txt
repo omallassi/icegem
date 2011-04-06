@@ -16,11 +16,11 @@
 
 ???- com.gemstone.gemfire.cache.util.ObjectSizer
 
-???- сбросится ли счетчик фреймов если будет исключение при сериализации?
+???- пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ?
 
-???- инлайн кода сериализации если нет циклов? а не new XXXDataSerializer().process()
+???- пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ? пїЅ пїЅпїЅ new XXXDataSerializer().process()
 
-???- если нет циклов вызова - отсутствие счетчика фреймов (+ оптимизированный счетчик фреймов - не везде а только в узлах)
+???- пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (+ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ)
 
 
 
@@ -117,7 +117,7 @@ Architecture:
     - GemFireBeanRegistry.setRegisteredClasses(List<Class>)
         -> HierarchyRegistry.registerAll(List<Class>)
             -> DataSerializerGenerator.generateDataSerializerClasses(List<Class>) + foreach:DataSerializer.register(clazz)
-    - data-ser name: a.b.c.Company -> com.griddynamics.gemfire.serialization.$$$.a.b.c.CompanyDataSerializer
+    - data-ser name: a.b.c.Company -> com.googlecode.gemfire.serialization.$$$.a.b.c.CompanyDataSerializer
     - two classes with the same name but diff class loaders: bahavior undefined but GemFire don't like it
     - ref cycles (how deep frame counter(???conf))
     - @Transient - there is no event of restoring (analog of ???readResolve())

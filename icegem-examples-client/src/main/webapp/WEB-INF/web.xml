@@ -8,7 +8,7 @@
 	<servlet>
         <description>CLIENT</description>
 		<servlet-name>clientServlet</servlet-name>
-		<servlet-class>com.griddynamics.icegem.serialization.example.web.EurexClientServlet</servlet-class>
+		<servlet-class>com.googlecode.icegem.serialization.example.web.EurexClientServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
