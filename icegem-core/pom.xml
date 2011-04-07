@@ -26,6 +26,27 @@
             <artifactId>gemfire</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!--<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>-->
+
+        <dependency>
+            <groupId>org.apache.logging</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+
+
         <!-- TEST -->
         <dependency>
             <groupId>org.testng</groupId>
