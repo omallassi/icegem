@@ -7,11 +7,7 @@ import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.firstLett
 import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 
 /**
- * Created by IntelliJ IDEA.
- * User: volcano
- * Date: 4/7/11
- * Time: 11:42 AM
- * To change this template use File | Settings | File Templates.
+ * User: akondratyev
  */
 public class FromDataFieldJodaDateTimeProcessor implements FromDataProcessor{
     public String process(XField field) {

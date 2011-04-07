@@ -6,11 +6,7 @@ import com.googlecode.icegem.serialization.codegen.impl.ToDataProcessor;
 import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.firstLetterToUpperCase;
 
 /**
- * Created by IntelliJ IDEA.
- * User: volcano
- * Date: 4/7/11
- * Time: 11:43 AM
- * To change this template use File | Settings | File Templates.
+ * User: akondratyev
  */
 public class ToDataFieldJodaDateTimeProcessor implements ToDataProcessor{
     public String process(XField field) {
