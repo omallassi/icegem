@@ -1,6 +1,7 @@
 package com.googlecode.icegem.serialization.codegen;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
 import com.googlecode.icegem.serialization.Configuration;
 
 import javassist.CannotCompileException;
@@ -11,6 +12,8 @@ import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ import java.util.Map;
  */
 
 public class DataSerializerGenerator {
+
+    private static Logger logger = LoggerFactory.getLogger(DataSerializerGenerator.class);
 
     /**
      * All DataSerializer-s will extend this class.
@@ -103,6 +108,9 @@ public class DataSerializerGenerator {
             final Class resultClass;
             try {
                 resultClass = cc.toClass(classLoader, null); // ProtectionDomain == null
+                logger.info("compiled data serializer for class: {}; id: {}; version: {}",
+                    new Object[]{clazz, clazz.getAnnotation(AutoSerializable.class).dataSerializerID()
+                    , clazz.getAnnotation(BeanVersion.class).value()});
             } catch (CannotCompileException e) {
                 throw new CannotCompileException("Error during end of compilation phase #2 (call CtClass.toClass()) for " + cc.getName() + ". Probably you second time try generate and load DataSerializer class " + cc.getName() + " for class " + clazz.getName(), e);
             }

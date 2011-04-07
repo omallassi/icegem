@@ -11,11 +11,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.io.InvalidClassException;
 
 /**
- * Created by IntelliJ IDEA.
- * User: volcano
- * Date: 4/7/11
- * Time: 12:03 PM
- * To change this template use File | Settings | File Templates.
+ * User: akondratyev
  */
 public class Check3dPartyClasses extends TestParent{
 
@@ -28,10 +24,8 @@ public class Check3dPartyClasses extends TestParent{
     public void jodaTime() {
         JodaTime o = new JodaTime();
         o.setDateTime(new DateTime());
-        System.out.println(o.getDateTime());
 
         JodaTime expected = serializeAndDeserialize(o);
-        System.out.println("date: " + expected.getDateTime());
         assertThat(expected.getDateTime().equals(o.getDateTime()));
     }
 }
