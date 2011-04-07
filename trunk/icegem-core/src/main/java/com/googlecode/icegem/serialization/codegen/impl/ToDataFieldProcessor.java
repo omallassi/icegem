@@ -7,7 +7,9 @@ import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldCalend
 import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldConcreteEnumProcessor;
 import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldDateProcessor;
 import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldStringProcessor;
+import com.googlecode.icegem.serialization.codegen.impl.thirdparty.ToDataFieldJodaDateTimeProcessor;
 import com.googlecode.icegem.serialization.codegen.impl.wrapper.*;
+import org.joda.time.DateTime;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -58,6 +60,7 @@ public class ToDataFieldProcessor {
         map.put(String.class, new ToDataFieldStringProcessor());
         map.put(Date.class, new ToDataFieldDateProcessor());
         map.put(Calendar.class, new ToDataFieldCalendarProcessor());
+        map.put(DateTime.class, new ToDataFieldJodaDateTimeProcessor());
         //todo: Locale: StringToLocaleConverter
     }
 
