@@ -4,6 +4,8 @@ import com.gemstone.gemfire.DataSerializer;
 import com.googlecode.icegem.serialization.codegen.DataSerializerGenerator;
 
 import javassist.CannotCompileException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InvalidClassException;
 import java.util.*;
@@ -15,6 +17,8 @@ import java.util.*;
  * <p> 3) filter enums
  */
 public class HierarchyRegistry {
+
+    private static Logger logger = LoggerFactory.getLogger(HierarchyRegistry.class);
 
     public static synchronized void registerAll(ClassLoader classLoader, Class<?> ... classArray) throws InvalidClassException, CannotCompileException {
         registerAll(classLoader, Arrays.asList(classArray));
@@ -38,6 +42,8 @@ public class HierarchyRegistry {
             if (!uniqueClass.contains(clazz)) {
                 classListToGenerate.add(clazz);
                 uniqueClass.add(clazz);
+            } else {
+                logger.warn("try to register class \'{}\' once more", clazz);
             }
         // generate classes of DataSerializers
         List<Class<?>> serializerClassList = DataSerializerGenerator.generateDataSerializerClasses(classLoader, /*filteredClassList*/classListToGenerate);
