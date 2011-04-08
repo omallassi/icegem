@@ -48,7 +48,6 @@ public class DataSerializerGenerator {
         ClassPool result = new ClassPool(null); // arg - parent ClassPool
         result.appendClassPath(new ClassClassPath(java.lang.Object.class)); // its equivalent of appendSystemPath();
         result.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader())); //todo: ok?
-//        result.appendClassPath(new ClassClassPath(this.getClass()));
 
         return result;
     }

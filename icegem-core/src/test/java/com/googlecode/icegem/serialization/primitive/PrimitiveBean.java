@@ -21,6 +21,10 @@ public class PrimitiveBean {
     private long l;
     private float f;
     private double d;
+    private Boolean b1 = Boolean.FALSE;
+    private Boolean b3 = Boolean.TRUE;
+    private boolean b2 = true;
+
 
     public boolean getBool() {
         return bool;
@@ -85,6 +89,30 @@ public class PrimitiveBean {
     public void setD(double d) {
         this.d = d;
     }
+
+	public Boolean getB1() {
+		return b1;
+	}
+
+	public void setB1(Boolean b1) {
+		this.b1 = b1;
+	}
+
+	public boolean isB2() {
+		return b2;
+	}
+
+	public void setB2(boolean b2) {
+		this.b2 = b2;
+	}
+
+	public Boolean isB3() {
+		return b3;
+	}
+
+	public void setB3(Boolean b3) {
+		this.b3 = b3;
+	}
 
     /*    public boolean getBoolean() {
         return bool;

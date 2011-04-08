@@ -57,8 +57,7 @@ public class _JdkTypesBean {
     private Enumeration enumeration;
     private Iterator iterator;
     private ResourceBundle resourceBundle;
-    private UUID uuid;  
-
+    private UUID uuid;
 
     public String getString() {
         return string;
