@@ -134,7 +134,7 @@ public class Introspector { //todo: move to CodeGenUtils
         try {
             return clazz.getMethod(setterName, param);
         } catch (NoSuchMethodException e) {
-            throw new InvalidClassException("There is do not exists public setter with param type " + param.getName() + " for getter " + getter.getName() + " in class " + clazz.getName());
+            throw new InvalidClassException("There is no public setter with param type " + param.getName() + " for getter " + getter.getName() + " in class " + clazz.getName());
         }
     }
 

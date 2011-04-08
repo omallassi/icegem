@@ -62,20 +62,21 @@
 
             <dependency>
                 <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
+                <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.impl.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.logging</groupId>
+                <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
+            
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${joda-time}</version>
-                <scope>compile</scope>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
