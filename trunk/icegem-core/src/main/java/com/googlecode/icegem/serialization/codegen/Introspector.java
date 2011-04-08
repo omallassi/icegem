@@ -128,13 +128,19 @@ public class Introspector { //todo: move to CodeGenUtils
     }
 
     private static Method getSetterForGetter(Class<?> clazz, Method getter) throws InvalidClassException {
-        String fieldName = getter.getName().substring(3, 4).toUpperCase() + getter.getName().substring(4);
+    	String fieldName = "";
+    	String name = getter.getName();
+		if(name.startsWith("get")){
+    		fieldName = name.substring(3, 4).toUpperCase() + name.substring(4);
+//    	} else {
+//    		fieldName = name.substring(2, 3).toUpperCase() + name.substring(3);
+    	}
         final String setterName = "set" + fieldName;
         Class<?> param = getter.getReturnType();
         try {
             return clazz.getMethod(setterName, param);
         } catch (NoSuchMethodException e) {
-            throw new InvalidClassException("There is no public setter with param type " + param.getName() + " for getter " + getter.getName() + " in class " + clazz.getName());
+            throw new InvalidClassException("There is no public setter with param type " + param.getName() + " for getter " + name + " in class " + clazz.getName());
         }
     }
 
@@ -186,36 +192,20 @@ public class Introspector { //todo: move to CodeGenUtils
             clazz = clazz.getSuperclass();
         }
 
-        //todo: remove
-//        while (clazz != Object.class) {
-//            Method[] methodArr = clazz.getDeclaredMethods();
-//            for (Method method : methodArr) {
-//                if (method.getName().startsWith("get") && method.getName().length() > 3) {
-//                    final Annotation[] annArr = method.getDeclaredAnnotations();
-//                    boolean find = false;
-//                    for (Annotation ann : annArr) {
-//                        if (ann.annotationType() == TransientGetter.class) { //todo: ann.annotationType() or getClass()?
-//                            find = true;
-//                            break;
-//                        }
-//                    }
-//                    if (!find) {
-//                        String fieldName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
-//                        result.put(fieldName, method);
-//                    }
-//                }
-//            }
-//            clazz = clazz.getSuperclass();
-//        }
-
         return result;
     }
 
     private static boolean isNameSuitableForGetter(Method method) {
-        final String forthChar = method.getName().substring(3, 4);
-        return method.getName().startsWith("get")
-                && method.getName().length() > 3
-                && forthChar.toUpperCase().equals(forthChar);
+    	String propFirstChar = "";
+        if(method.getName().startsWith("get")
+                && method.getName().length() > 3){
+            propFirstChar = method.getName().substring(3, 4);
+//        } else if(method.getReturnType() == Boolean.TYPE &&
+//        		method.getName().startsWith("is") &&
+//        		method.getName().length() > 2){
+//            propFirstChar = method.getName().substring(2, 3);
+        }
+        return !propFirstChar.isEmpty() && propFirstChar.toUpperCase().equals(propFirstChar);
     }
 
     protected static void checkSetterPublic(Method setter) throws InvalidClassException {
@@ -226,7 +216,6 @@ public class Introspector { //todo: move to CodeGenUtils
 
     protected static void checkSetterOneArg(Method setter) throws InvalidClassException {
         Class[] types = setter.getParameterTypes();
-//        todo: or getter.getTypeParameters() ?
         if (types.length != 1) {
             throw new InvalidClassException("Setter " + setter.getName() + " in class " + setter.getDeclaringClass() + " do not have 1 arg but" + types.length + ": " + asList(types));
         }

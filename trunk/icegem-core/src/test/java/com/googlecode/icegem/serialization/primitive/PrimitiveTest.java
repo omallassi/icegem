@@ -32,14 +32,6 @@ public class PrimitiveTest extends TestParent {
         PrimitiveBean actual = serializeAndDeserialize(expected);
 
         // assert
-        /*assertThat(actual.getBoolean()).isEqualTo(expected.getBoolean());
-        assertThat(actual.getByte()).isEqualTo(expected.getByte());
-        assertThat(actual.getShort()).isEqualTo(expected.getShort());
-        assertThat(actual.getChar()).isEqualTo(expected.getChar());
-        assertThat(actual.getInt()).isEqualTo(expected.getInt());
-        assertThat(actual.getLong()).isEqualTo(expected.getLong());
-        assertThat(actual.getFloat()).isEqualTo(expected.getFloat());
-        assertThat(actual.getDouble()).isEqualTo(expected.getDouble());*/
         assertThat(actual.getBool()).isEqualTo(expected.getBool());
         assertThat(actual.getByt()).isEqualTo(expected.getByt());
         assertThat(actual.getSh()).isEqualTo(expected.getSh());
@@ -48,19 +40,14 @@ public class PrimitiveTest extends TestParent {
         assertThat(actual.getL()).isEqualTo(expected.getL());
         assertThat(actual.getF()).isEqualTo(expected.getF());
         assertThat(actual.getD()).isEqualTo(expected.getD());
+        assertThat(actual.getB1()).isEqualTo(expected.getB1());
+        assertThat(actual.isB2()).isEqualTo(expected.isB2());
+        assertThat(actual.isB3()).isEqualTo(expected.isB3());
     }
 
     private PrimitiveBean producePrimitiveBean() {
         PrimitiveBean result = new PrimitiveBean();
 
-        /*result.setBoolean(true);
-        result.setByte((byte) 1);
-        result.setShort((short) 2);
-        result.setChar((char) 3);
-        result.setInt(4);
-        result.setLong(5);
-        result.setFloat(666.666f);
-        result.setDouble(777.777d);*/
         result.setBool(true);
         result.setByt((byte) 1);
         result.setSh((short) 2);

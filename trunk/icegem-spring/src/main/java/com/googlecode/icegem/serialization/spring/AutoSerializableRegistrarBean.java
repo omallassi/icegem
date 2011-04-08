@@ -18,9 +18,8 @@ import java.util.logging.Logger;
 /**
  * @author igolovach
  */
-// todo: add property - "dump generated classes to file/stdout"
-public class GemFireBeanRegistry implements InitializingBean {
-    private final static Logger logger = Logger.getLogger(GemFireBeanRegistry.class.getName()); //todo: java.util.logging or other?
+public class AutoSerializableRegistrarBean implements InitializingBean {
+    private final static Logger logger = Logger.getLogger(AutoSerializableRegistrarBean.class.getName()); //todo: java.util.logging or other?
 
     private List<Class<?>> registeredClasses = new ArrayList<Class<?>>();
     private List<String> scanPackages = new ArrayList<String>();
