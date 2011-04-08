@@ -26,7 +26,7 @@ public class PrimitiveBean {
     private boolean b2 = true;
 
 
-    public boolean getBool() {
+    public boolean isBool() {
         return bool;
     }
 
@@ -90,7 +90,7 @@ public class PrimitiveBean {
         this.d = d;
     }
 
-	public Boolean getB1() {
+	public Boolean isB1() {
 		return b1;
 	}
 

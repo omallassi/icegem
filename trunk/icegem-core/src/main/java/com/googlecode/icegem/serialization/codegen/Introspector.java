@@ -132,8 +132,8 @@ public class Introspector { //todo: move to CodeGenUtils
     	String name = getter.getName();
 		if(name.startsWith("get")){
     		fieldName = name.substring(3, 4).toUpperCase() + name.substring(4);
-//    	} else {
-//    		fieldName = name.substring(2, 3).toUpperCase() + name.substring(3);
+    	} else if (name.startsWith("is")){
+    		fieldName = name.substring(2, 3).toUpperCase() + name.substring(3);
     	}
         final String setterName = "set" + fieldName;
         Class<?> param = getter.getReturnType();
@@ -183,7 +183,11 @@ public class Introspector { //todo: move to CodeGenUtils
                             }
                         }
                         if (!find) {
-                            String fieldName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+                            String fieldName;
+                            if (method.getReturnType() == Boolean.TYPE)
+                                fieldName = method.getName().substring(2, 3).toLowerCase() + method.getName().substring(3);
+                            else
+                                fieldName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
                             result.put(fieldName, method);
                         }
                     }
@@ -200,10 +204,10 @@ public class Introspector { //todo: move to CodeGenUtils
         if(method.getName().startsWith("get")
                 && method.getName().length() > 3){
             propFirstChar = method.getName().substring(3, 4);
-//        } else if(method.getReturnType() == Boolean.TYPE &&
-//        		method.getName().startsWith("is") &&
-//        		method.getName().length() > 2){
-//            propFirstChar = method.getName().substring(2, 3);
+        } else if(method.getReturnType() == Boolean.TYPE &&
+        		method.getName().startsWith("is") &&
+        		method.getName().length() > 2){
+                propFirstChar = method.getName().substring(2, 3);
         }
         return !propFirstChar.isEmpty() && propFirstChar.toUpperCase().equals(propFirstChar);
     }
