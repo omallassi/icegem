@@ -32,7 +32,7 @@ public class PrimitiveTest extends TestParent {
         PrimitiveBean actual = serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getBool()).isEqualTo(expected.getBool());
+        assertThat(actual.isBool()).isEqualTo(expected.isBool());
         assertThat(actual.getByt()).isEqualTo(expected.getByt());
         assertThat(actual.getSh()).isEqualTo(expected.getSh());
         assertThat(actual.getCh()).isEqualTo(expected.getCh());
@@ -40,7 +40,7 @@ public class PrimitiveTest extends TestParent {
         assertThat(actual.getL()).isEqualTo(expected.getL());
         assertThat(actual.getF()).isEqualTo(expected.getF());
         assertThat(actual.getD()).isEqualTo(expected.getD());
-        assertThat(actual.getB1()).isEqualTo(expected.getB1());
+        assertThat(actual.isB1()).isEqualTo(expected.isB1());
         assertThat(actual.isB2()).isEqualTo(expected.isB2());
         assertThat(actual.isB3()).isEqualTo(expected.isB3());
     }

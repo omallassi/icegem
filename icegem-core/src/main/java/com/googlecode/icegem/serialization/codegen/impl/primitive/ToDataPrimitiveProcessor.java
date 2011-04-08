@@ -18,6 +18,9 @@ public class ToDataPrimitiveProcessor implements ToDataProcessor {
 
     public String process(XField field) {
         String fieldName = field.getName();
+        if (field.getType() == Boolean.TYPE) {
+            return "out." + dataOutputMethod + "(concrete.is" + firstLetterToUpperCase(fieldName) + "());\n";
+        }
         return "out." + dataOutputMethod + "(concrete.get" + firstLetterToUpperCase(fieldName) + "());\n";
     }
 }
