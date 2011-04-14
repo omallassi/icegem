@@ -11,17 +11,23 @@ import java.util.List;
 public class XField { //todo: check field is serialized? (like in XClass constructor)
 
     private final String name;
+    private final boolean isBoolean;
     private final Class<?> type;
     private final Class<?> declaringClass;
     private final List annotations;
     private final int fieldVersion;
 
-    public XField(String name, Class<?> type, Class<?> declaringClass, List annotations, int fieldVersion) {
+    public XField(String name, Class<?> type, Class<?> declaringClass, List annotations, int fieldVersion, boolean aBoolean) {
         this.name = name;
         this.type = type;
         this.declaringClass = declaringClass;
         this.annotations = annotations;
         this.fieldVersion = fieldVersion;
+        isBoolean = aBoolean;
+    }
+
+    public boolean isBoolean() {
+        return isBoolean;
     }
 
     public List getAnnotations() {

@@ -72,7 +72,10 @@ public class Introspector { //todo: move to CodeGenUtils
                     fieldVersion = ((FieldVersion) annotation).since();
                     break;
                 }
-            result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass(), annotations, fieldVersion));
+            boolean isBoolean = false;
+            if (method.getName().startsWith("is"))
+                isBoolean = true;
+            result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass(), annotations, fieldVersion, isBoolean));
         }
         return result;
     }
@@ -184,7 +187,7 @@ public class Introspector { //todo: move to CodeGenUtils
                         }
                         if (!find) {
                             String fieldName;
-                            if (method.getReturnType() == Boolean.TYPE)
+                            if (method.getReturnType() == Boolean.TYPE && method.getName().startsWith("is"))
                                 fieldName = method.getName().substring(2, 3).toLowerCase() + method.getName().substring(3);
                             else
                                 fieldName = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);

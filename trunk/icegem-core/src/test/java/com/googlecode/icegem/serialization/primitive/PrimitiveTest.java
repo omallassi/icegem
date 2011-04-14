@@ -33,6 +33,7 @@ public class PrimitiveTest extends TestParent {
 
         // assert
         assertThat(actual.isBool()).isEqualTo(expected.isBool());
+        assertThat(actual.getBool()).isEqualTo(expected.getBool());
         assertThat(actual.getByt()).isEqualTo(expected.getByt());
         assertThat(actual.getSh()).isEqualTo(expected.getSh());
         assertThat(actual.getCh()).isEqualTo(expected.getCh());
