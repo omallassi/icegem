@@ -212,7 +212,7 @@ public class Introspector { //todo: move to CodeGenUtils
         		method.getName().length() > 2){
                 propFirstChar = method.getName().substring(2, 3);
         }
-        return !propFirstChar.isEmpty() && propFirstChar.toUpperCase().equals(propFirstChar);
+        return propFirstChar.length()!=0 && propFirstChar.toUpperCase().equals(propFirstChar);
     }
 
     protected static void checkSetterPublic(Method setter) throws InvalidClassException {
