@@ -30,6 +30,10 @@ public class PrimitiveBean {
         return bool;
     }
 
+    public boolean getBool() {
+        return bool;
+    }
+
     public void setBool(boolean bool) {
         this.bool = bool;
     }
