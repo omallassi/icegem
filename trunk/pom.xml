@@ -5,12 +5,53 @@
     <artifactId>icegem-root</artifactId>
     <version>0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>ROOT</name>
+
+    <parent>
+    	<groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+	<version>7</version>
+    </parent>
+
+    <name>Icegem</name>
+    <description>A collection of utilities for GemFire (serialization, management)</description>
+    <url>http://code.google.com/p/icegem/</url>
+    
+    <licenses>
+    	<license>
+          <name>GNU LESSER GENERAL PUBLIC LICENSE, Version 3</name>
+	  <url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
+	  <distribution>repo</distribution>
+	</license>
+    </licenses>
 
     <scm>
         <connection>scm:svn:http://icegem.googlecode.com/svn/trunk/</connection>
         <developerConnection>scm:svn:https://icegem.googlecode.com/svn/trunk/</developerConnection>
+	<url>http://code.google.com/p/icegem/source/browse/</url>
     </scm>
+
+    <developers>
+    	<developer>
+		<id>aih1013</id>
+		<name>Alexey Kharlamov</name>
+		<email>alexey@kharlamov.biz</email>
+	</developer>
+	<developer>
+		<id>akondratyev</id>
+		<name>Artem Kondratyev</name>
+		<email>KondratevAE@gmail.com</email>
+	</developer>
+	<developer>
+		<id>YuliyaAidarova</id>
+		<name>Yuliya Aidarova</name>
+		<email>YuliyaAidarova@gmail.com</email>
+	</developer>
+	<developer>
+		<id>igolovach</id>
+		<name>Ivan Golovach</name>
+		<email>Golovach.Ivan</email>
+	</developer>
+   </developers>
 
     <modules>
         <module>icegem-core</module>
