@@ -7,6 +7,7 @@ import java.io.File;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class JdkTypesBean {
     private Class clazz;
     private String string;
     private Date date;
+    private Timestamp timestamp;
     private File file;
     private InetAddress inetAddress;
     private Inet4Address inet4Address;
@@ -122,6 +124,13 @@ public class JdkTypesBean {
 
     public Inet6Address getInet6Address() {
         return inet6Address;
+    }
+     public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
     }
 
     public void setInet6Address(Inet6Address inet6Address) {
