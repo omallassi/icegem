@@ -13,6 +13,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,6 +70,7 @@ public class JdkTypesTest extends TestParent {
     private JdkTypesBean produceCommon() throws UnknownHostException {
         final JdkTypesBean result = new JdkTypesBean();
 
+        result.setTimestamp(new Timestamp(new Date().getTime()));
         result.setObject(123);
         result.setClazz(Integer.class);
         result.setString("Hello");
