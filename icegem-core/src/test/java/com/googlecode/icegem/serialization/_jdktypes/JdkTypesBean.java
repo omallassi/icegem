@@ -8,22 +8,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * @author igolovach
@@ -44,6 +29,7 @@ public class JdkTypesBean {
     private Inet4Address inet4Address;
     private Inet6Address inet6Address;
     private Properties properties;
+    private UUID uuid;
     // old collections
     private Hashtable hashtable;
     private Vector vector;
@@ -143,6 +129,14 @@ public class JdkTypesBean {
 
     public void setProperties(Properties properties) {
         this.properties = properties;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public Hashtable getHashtable() {

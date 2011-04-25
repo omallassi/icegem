@@ -14,22 +14,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * @author igolovach
@@ -83,6 +68,9 @@ public class JdkTypesTest extends TestParent {
         final Properties properties = new Properties();
         properties.setProperty("abc", "def");
         result.setProperties(properties);
+
+        UUID uuid = new UUID(293847234L, 239728374L);
+        result.setUuid(uuid);
 
         return result;
     }
