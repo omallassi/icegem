@@ -9,10 +9,7 @@ import com.googlecode.icegem.serialization.codegen.impl.wrapper.*;
 import org.joda.time.DateTime;
 
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Generate code that dispatched by 'SOME TYPE' and
@@ -60,6 +57,7 @@ public class ToDataFieldProcessor {
         map.put(Calendar.class, new ToDataFieldCalendarProcessor());
         map.put(Timestamp.class, new ToDataFieldTimeStampProcessor());
         map.put(DateTime.class, new ToDataFieldJodaDateTimeProcessor());
+        map.put(UUID.class, new ToDataFieldUUIDProcessor());
         //todo: Locale: StringToLocaleConverter
     }
 
