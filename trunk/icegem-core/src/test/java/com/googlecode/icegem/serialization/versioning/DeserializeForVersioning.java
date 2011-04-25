@@ -20,7 +20,8 @@ import java.util.Arrays;
  * User: akondratyev
  */
 public class DeserializeForVersioning {
-    @BeforeTest
+
+    @BeforeTest (enabled = false)
     public void before() throws InvalidClassException, CannotCompileException {
         HierarchyRegistry.registerAll(DeserializeForVersioning.class.getClassLoader(),
                 Company.class, IllegalVersion.class, Son.class, Car.class);
