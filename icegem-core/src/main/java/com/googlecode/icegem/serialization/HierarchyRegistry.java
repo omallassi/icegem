@@ -3,6 +3,7 @@ package com.googlecode.icegem.serialization;
 import com.gemstone.gemfire.DataSerializer;
 import com.googlecode.icegem.serialization.codegen.DataSerializerGenerator;
 
+import com.googlecode.icegem.serialization.serializers.RegisteredDataSerializers;
 import javassist.CannotCompileException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,15 @@ public class HierarchyRegistry {
         for (Class<?> clazz : serializerClassList) {
             DataSerializer.register(clazz);
         }
+
+         registerDataSerializers();
     }
+
+    public static void registerDataSerializers() {
+        for (Class<?> clazz: RegisteredDataSerializers.getDataSerializers()) {
+            DataSerializer.register(clazz);
+        }
+    }
+
     private static final Set<Class<?>> uniqueClass = new HashSet<Class<?>>();
 }

@@ -4,11 +4,7 @@ import com.googlecode.icegem.serialization.codegen.XField;
 import com.googlecode.icegem.serialization.codegen.impl.primitive.*;
 import com.googlecode.icegem.serialization.codegen.impl.primitivearray.*;
 import com.googlecode.icegem.serialization.codegen.impl.system.*;
-import com.googlecode.icegem.serialization.codegen.impl.thirdparty.FromDataFieldJodaDateTimeProcessor;
 import com.googlecode.icegem.serialization.codegen.impl.wrapper.*;
-import org.joda.time.DateTime;
-
-import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -55,10 +51,6 @@ public class FromDataFieldProcessor {
         map.put(String.class, new FromDataFieldStringProcessor());
         map.put(Date.class, new FromDataFieldDateProcessor());
         map.put(Calendar.class, new FromDataFieldCalendarProcessor());
-        map.put(Timestamp.class, new FromDataFieldTimeStampProcessor());
-        map.put(UUID.class, new FromDataFieldUUIDProcessor());
-        //third party
-        map.put(DateTime.class, new FromDataFieldJodaDateTimeProcessor());
     }
 
     public String process(XField field) {
