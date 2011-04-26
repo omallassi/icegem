@@ -14,6 +14,8 @@ import java.util.Set;
  */
 
 public class Configuration {
+	private static boolean JAVA_SERIALIZATION_ENABLED = !Boolean.getBoolean("icegem.java.serialization.disabled");
+	
     private Set<Class<?>> gemFireResolvedClasses = new HashSet<Class<?>>();
 
     public Configuration() {
@@ -34,7 +36,11 @@ public class Configuration {
     }
 
     public boolean isJavaSerializationEnabled() {
-        return false;
+        return JAVA_SERIALIZATION_ENABLED;
+    }
+    
+    public void setJavaSerializationEnabled(boolean value) {
+    	JAVA_SERIALIZATION_ENABLED = value;
     }
 
     public boolean isCustomRegisteredClass(Class<?> clazz) {
