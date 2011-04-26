@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.googlecode.icegem</groupId>
     <artifactId>icegem-root</artifactId>
-    <version>0.4</version>
+    <version>0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -25,9 +25,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:http://icegem.googlecode.com/svn/tags/icegem-root-0.4</connection>
-        <developerConnection>scm:svn:https://icegem.googlecode.com/svn/tags/icegem-root-0.4</developerConnection>
-	<url>http://code.google.com/p/icegem/source/browse/tags/icegem-root-0.4</url>
+        <connection>scm:svn:http://icegem.googlecode.com/svn/trunk/</connection>
+        <developerConnection>scm:svn:https://icegem.googlecode.com/svn/trunk/</developerConnection>
+	<url>http://code.google.com/p/icegem/source/browse/</url>
     </scm>
 
     <developers>
