@@ -22,10 +22,15 @@ public class HierarchyRegistry {
     private static Logger logger = LoggerFactory.getLogger(HierarchyRegistry.class);
 
     public static synchronized void registerAll(ClassLoader classLoader, Class<?> ... classArray) throws InvalidClassException, CannotCompileException {
-        registerAll(classLoader, Arrays.asList(classArray));
+        registerAll(classLoader, Arrays.asList(classArray), null);
     }
 
     public static synchronized void registerAll(ClassLoader classLoader, List<Class<?>> classList) throws InvalidClassException, CannotCompileException {
+        registerAll(classLoader, classList, null);
+    }
+
+
+    public static synchronized void registerAll(ClassLoader classLoader, List<Class<?>> classList, String outputDir) throws InvalidClassException, CannotCompileException {
         List<String> list = Arrays.asList("c");
 //        List<Class<?>> filteredClassList = new ArrayList<Class<?>>();
 //        // filter enum
@@ -47,7 +52,7 @@ public class HierarchyRegistry {
                 logger.warn("try to register class \'{}\' once more", clazz);
             }
         // generate classes of DataSerializers
-        List<Class<?>> serializerClassList = DataSerializerGenerator.generateDataSerializerClasses(classLoader, /*filteredClassList*/classListToGenerate);
+        List<Class<?>> serializerClassList = DataSerializerGenerator.generateDataSerializerClasses(classLoader, /*filteredClassList*/classListToGenerate, outputDir);
 
         // register classes of DataSerializers in GemFire
         for (Class<?> clazz : serializerClassList) {

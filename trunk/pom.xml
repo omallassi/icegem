@@ -59,7 +59,8 @@
         <module>icegem-examples-server</module>
         <module>icegem-performance</module>
         <module>icegem-spring</module>
-        <module>icegem-cache-utils</module>
+	<module>icegem-cache-utils</module>
+	<module>icegem-example-mojo</module>
     </modules>
 
     <properties>
@@ -116,7 +117,7 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${joda-time}</version>
-                <scope>provided</scope>
+                <!--<scope>provided</scope>-->
             </dependency>
 
             <dependency>
