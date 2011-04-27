@@ -3,11 +3,12 @@
     <parent>
         <artifactId>icegem-root</artifactId>
         <groupId>com.googlecode.icegem</groupId>
-        <version>0.3-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>modelgenerator</artifactId>
     <packaging>maven-plugin</packaging>
+    <version>0.3-SNAPSHOT</version>
     <name>modelgeneratorMojo</name>
     <url>http://maven.apache.org</url>
     <dependencies>
@@ -25,7 +26,7 @@
         <dependency>
             <groupId>com.googlecode.icegem</groupId>
             <artifactId>icegem-core</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
          <!--<dependency>
             <groupId>org.slf4j</groupId>
