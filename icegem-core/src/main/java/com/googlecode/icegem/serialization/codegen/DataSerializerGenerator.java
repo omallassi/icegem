@@ -4,14 +4,7 @@ import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
 import com.googlecode.icegem.serialization.Configuration;
 
-import javassist.CannotCompileException;
-import javassist.ClassClassPath;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
-import javassist.CtNewMethod;
-import javassist.LoaderClassPath;
-import javassist.NotFoundException;
+import javassist.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +82,8 @@ public class DataSerializerGenerator {
             // create class
             CtClass cc = createClass(classPool, clazz);
             dataSerializerClassList.add(cc);
+            //add statis Register
+            addStaticRegister(clazz, cc);
             // add methods
             addMethodGetId(clazz, cc);
             addMethodGetSupportedClasses(clazz, cc);
@@ -191,6 +186,17 @@ public class DataSerializerGenerator {
             return classPool.makeClass(newSerializerClassName, parentClass);
         } catch (RuntimeException e) { // javadoc:makeClass(): if the existing class is frozen.
             throw new CannotCompileException("There is some internal error in our code (probably class " + newSerializerClassName + " exists and frozen) for " + baseClass.getName(), e);
+        }
+    }
+
+     private static void addStaticRegister(Class<?> baseClass, CtClass cc) throws CannotCompileException{
+        final String src = "com.gemstone.gemfire.DataSerializer.register(" + cc.getName() +".class);";
+        CtConstructor staticConstructor;
+        try {
+            staticConstructor = cc.makeClassInitializer();
+            staticConstructor.insertBefore(src);
+        } catch (CannotCompileException e) {
+            throw new CannotCompileException(formatMsg("Cann't add static block for class ", src, baseClass, cc), e);
         }
     }
 
