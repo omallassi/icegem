@@ -52,8 +52,20 @@ public class DataSerializerGenerator {
         return result;
     }
 
+      private static ClassPool newClassPool(ClassLoader loader) {
+        ClassPool result = new ClassPool(null); // arg - parent ClassPool
+        result.appendClassPath(new ClassClassPath(java.lang.Object.class)); // its equivalent of appendSystemPath();
+        result.appendClassPath(new LoaderClassPath(loader)); //todo: ok?
+
+        return result;
+    }
+
     public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader, Class<?>... classArray) throws CannotCompileException, InvalidClassException {
-        return generateDataSerializerClasses(classLoader, Arrays.asList(classArray));
+        return generateDataSerializerClasses(classLoader, Arrays.asList(classArray), null);
+    }
+
+    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader, List<Class<?>> classList) throws CannotCompileException, InvalidClassException {
+        return generateDataSerializerClasses(classLoader, classList, null);
     }
 
     /**
@@ -61,7 +73,7 @@ public class DataSerializerGenerator {
      * <p> hack from http://www.csg.is.titech.ac.jp/~chiba/javassist/tutorial/tutorial2.html#add
      * <p> order of return of serializer-classes in response corresponds to order of arg-classes
      */
-    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader, List<Class<?>> classList) throws CannotCompileException, InvalidClassException {
+    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader, List<Class<?>> classList, String outputDir) throws CannotCompileException, InvalidClassException {
         checkClassesValid(classList);
 
         List<CtClass> dataSerializerClassList = new ArrayList<CtClass>();
@@ -70,7 +82,7 @@ public class DataSerializerGenerator {
         // 1) low memory consumption - any caches with internal data structures of created classes
         // 2) any collision between methods called serially - all crated classes are forgotten
         // 3) any references on created classes from this lib
-        ClassPool classPool = newClassPool();
+        ClassPool classPool = newClassPool(classLoader);
 
         // #1: create dataSerializers with stubs toData/fromData
         for (Class<?> clazz : classList) {
@@ -110,6 +122,13 @@ public class DataSerializerGenerator {
                 logger.info("compiled data serializer for class: {}; id: {}; version: {}",
                     new Object[]{clazz, clazz.getAnnotation(AutoSerializable.class).dataSerializerID()
                     , clazz.getAnnotation(BeanVersion.class).value()});
+                if (outputDir != null && outputDir.length() > 0) {
+                    try {
+                        cc.writeFile(outputDir);
+                    } catch (IOException e) {
+                        throw new RuntimeException("couldn't save DataSerializer for class " + clazz.getName(), e);
+                    }
+                }
             } catch (CannotCompileException e) {
                 throw new CannotCompileException("Error during end of compilation phase #2 (call CtClass.toClass()) for " + cc.getName() + ". Probably you second time try generate and load DataSerializer class " + cc.getName() + " for class " + clazz.getName(), e);
             }
