@@ -1,4 +1,4 @@
-package com.googlecode.icegem.core.functions.bucketoriented.common.finctions;
+package com.googlecode.icegem.core.functions.bucketoriented.common.functions;
 
 import com.gemstone.gemfire.cache.Cache;
 import com.gemstone.gemfire.cache.CacheFactory;
@@ -91,6 +91,9 @@ public class BucketOrientedFunction extends FunctionAdapter {
      * In some cases it can reduce number of members that will execute this function.
      * But if you want to send this function only to those members that store primary copy of bucket,
      * you must enable a function option "optimizeForWrite".
+     *
+     * See forum link http://forums.gemstone.com/viewtopic.php?f=3&t=496&hilit=bucket+Id&sid=f3b823b748bb253e5019e489c8480fbd for details
+     *
      * @return boolean
      */
     @Override
