@@ -4,7 +4,7 @@ import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.execute.FunctionService;
-import com.googlecode.icegem.core.functions.bucketoriented.common.finctions.BucketOrientedFunction;
+import com.googlecode.icegem.core.functions.bucketoriented.common.functions.BucketOrientedFunction;
 import com.googlecode.icegem.core.functions.bucketoriented.common.utils.ConsoleUtils;
 
 import java.util.*;
