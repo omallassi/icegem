@@ -7,51 +7,56 @@
     <packaging>pom</packaging>
 
     <parent>
-    	<groupId>org.sonatype.oss</groupId>
+        <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-	<version>7</version>
+        <version>7</version>
     </parent>
 
     <name>Icegem</name>
     <description>A collection of utilities for GemFire (serialization, management)</description>
     <url>http://code.google.com/p/icegem/</url>
-    
+
     <licenses>
-    	<license>
-          <name>GNU LESSER GENERAL PUBLIC LICENSE, Version 3</name>
-	  <url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
-	  <distribution>repo</distribution>
-	</license>
+        <license>
+            <name>GNU LESSER GENERAL PUBLIC LICENSE, Version 3</name>
+            <url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
 
     <scm>
         <connection>scm:svn:http://icegem.googlecode.com/svn/trunk/</connection>
         <developerConnection>scm:svn:https://icegem.googlecode.com/svn/trunk/</developerConnection>
-	<url>http://code.google.com/p/icegem/source/browse/</url>
+        <url>http://code.google.com/p/icegem/source/browse/</url>
     </scm>
 
     <developers>
-    	<developer>
-		<id>aih1013</id>
-		<name>Alexey Kharlamov</name>
-		<email>alexey@kharlamov.biz</email>
-	</developer>
-	<developer>
-		<id>akondratyev</id>
-		<name>Artem Kondratyev</name>
-		<email>KondratevAE@gmail.com</email>
-	</developer>
-	<developer>
-		<id>YuliyaAidarova</id>
-		<name>Yuliya Aidarova</name>
-		<email>YuliyaAidarova@gmail.com</email>
-	</developer>
-	<developer>
-		<id>igolovach</id>
-		<name>Ivan Golovach</name>
-		<email>Golovach.Ivan</email>
-	</developer>
-   </developers>
+        <developer>
+            <id>aih1013</id>
+            <name>Alexey Kharlamov</name>
+            <email>alexey@kharlamov.biz</email>
+        </developer>
+        <developer>
+            <id>akondratyev</id>
+            <name>Artem Kondratyev</name>
+            <email>KondratevAE@gmail.com</email>
+        </developer>
+        <developer>
+            <id>YuliyaAidarova</id>
+            <name>Yuliya Aidarova</name>
+            <email>YuliyaAidarova@gmail.com</email>
+        </developer>
+        <developer>
+            <id>astepanov</id>
+            <name>Andrey Stepanov</name>
+            <email>stepanov.standy@gmail.com</email>
+        </developer>
+        <developer>
+            <id>igolovach</id>
+            <name>Ivan Golovach</name>
+            <email>Golovach.Ivan</email>
+        </developer>
+    </developers>
 
     <modules>
         <module>icegem-core</module>
@@ -59,8 +64,9 @@
         <module>icegem-examples-server</module>
         <module>icegem-performance</module>
         <module>icegem-spring</module>
-	<module>icegem-cache-utils</module>
-	<module>icegem-example-mojo</module>
+        <module>icegem-cache-utils</module>
+        <module>icegem-example-mojo</module>
+        <module>icegem-bucket-oriented-function</module>
     </modules>
 
     <properties>
@@ -112,7 +118,7 @@
                 <artifactId>log4j</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
