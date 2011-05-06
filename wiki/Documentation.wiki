@@ -2,7 +2,6 @@
 
 <wiki:toc max_depth="1" />
 
-
 = Introduction =
 
 Icegem is an extension for GemFire^tm^ which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the model classes and cases where part of the objects are already implementing serialization. 
@@ -292,3 +291,39 @@ Create an object (using the classes specified by the serialization tool)
 
 </p>
 <br>
+
+= Bucket oriented query service =
+
+This service allows to execute OQL queries on a specified set of buckets. The set of buckets is determined by keys of entries that are stored in such buckets: 
+ * real and fake keys can be used (such key should have the same routing object as bucket's keys have);
+ * it will be enough to specify one key for each bucket.
+
+Bucket oriented query service can be used both on client and server/peer sides.
+
+{{{
+public class BucketOrientedQueryService {
+    ...
+
+    public static SelectResults<Object> executeOnBuckets(String queryString, Region region, Set<Object> keys) throws QueryException {
+        ...
+    }
+
+    public static SelectResults<Object> executeOnBuckets(String queryString, Object[] queryParameters, Region region, Set<Object> keys) throws QueryException {
+        ...
+    }
+}
+}}}
+
+Where:
+ * `queryString` - OQL query string for execute;
+ * `queryParameters` - query parameters;
+ * `region` - partitioned region on which query will be executed;
+ * `keys` - set of keys that specify buckets;
+
+*Usage example:*
+
+{{{
+...
+SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data WHERE property = $1", new Object[]{1}, data, new HashSet<Object>(Arrays.asList("key1")));
+...
+}}}
