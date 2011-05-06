@@ -34,19 +34,18 @@ public class BucketOrientedQueryServiceTest {
     private static Region<Object, Object> data;
 
 
-    @BeforeClass
+//    @BeforeClass
     public void setUp() throws IOException {
-//        startCacheServer();
         startClient();
         populateRegionByPersons(data);
     }
 
-    @AfterClass
+//    @AfterClass
     public void tearDown() {
         cache.close();
     }
 
-    @Test
+//    @Test
     public void testBucketDataRetrieveForExistedAndFakeKeys() throws QueryException {
         SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)){});
         Assertions.assertThat(resultsBasedOnExistedKey.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
@@ -62,7 +61,7 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(resultsBasedOnFakeKey.equals(resultsBasedOnExistedKey)).as("Results based on fake key and existed key for one bucket are not the same").isFalse();
     }
 
-    @Test
+//    @Test
     public void testBucketsDataRetrieve() throws QueryException {
         SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)){});
         Assertions.assertThat(resultsFromOneBucket.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
@@ -81,7 +80,7 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 2)).as("Entry with key = 2 doesn't exist in results").isTrue();
     }
 
-    @Test
+//    @Test
     public void testBucketDataRetrieveUsingQueryLimit() throws QueryException {
         SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1)){});
         Assertions.assertThat(resultsFromOneBucket.size()).as("Wrong number of entries from the same bucket was found for key = 1 and limit = 3").isEqualTo(3);
@@ -93,7 +92,7 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(resultsFromTwoBuckets.size()).as("Wrong number of entries from the buckets was found for keys: [1, 2] and LIMIT = 3").isEqualTo(3);
     }
 
-    @Test
+//    @Test
     public void testComplexQuering() throws QueryException {
         SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data WHERE socialNumber = $1",
                 new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)){});
@@ -125,22 +124,22 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(results.getCollectionType().getElementType().resolveClass()).as("Wrong element type").isEqualTo(Struct.class);
     }
 
-    @Test(expectedExceptions = QueryException.class)
+//    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithEmptyQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets("", data, new HashSet<Object>(Arrays.asList(1)){});
     }
 
-    @Test(expectedExceptions = QueryException.class)
+//    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithWrongQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets("SELECT *", data, new HashSet<Object>(Arrays.asList(1)){});
     }
 
-    @Test(expectedExceptions = QueryException.class)
+//    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithNullQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets(null, data, new HashSet<Object>(Arrays.asList(1)){});
     }
 
-    @Test(expectedExceptions = QueryException.class)
+//    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithNotExistedRegionQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data1", data, new HashSet<Object>(Arrays.asList(1)){});
     }

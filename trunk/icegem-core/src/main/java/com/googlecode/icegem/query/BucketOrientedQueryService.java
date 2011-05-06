@@ -5,13 +5,11 @@ import com.gemstone.gemfire.cache.execute.FunctionException;
 import com.gemstone.gemfire.cache.execute.FunctionService;
 import com.gemstone.gemfire.cache.query.QueryException;
 import com.gemstone.gemfire.cache.query.SelectResults;
-import com.gemstone.gemfire.cache.query.internal.ResultsBag;
 import com.gemstone.gemfire.cache.query.internal.ResultsCollectionWrapper;
 import com.gemstone.gemfire.cache.query.types.ObjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.util.*;
 
 /**
