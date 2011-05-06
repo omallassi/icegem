@@ -327,3 +327,4 @@ Where:
 SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data WHERE property = $1", new Object[]{1}, data, new HashSet<Object>(Arrays.asList("key1")));
 ...
 }}}
+*Note:* `icegem-core.jar` should be added to a ClassPath of all members in a distributed system where OQL query will be executed.
