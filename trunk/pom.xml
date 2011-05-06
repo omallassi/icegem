@@ -66,7 +66,6 @@
         <module>icegem-spring</module>
         <module>icegem-cache-utils</module>
         <module>icegem-example-mojo</module>
-        <module>icegem-bucket-oriented-function</module>
     </modules>
 
     <properties>
