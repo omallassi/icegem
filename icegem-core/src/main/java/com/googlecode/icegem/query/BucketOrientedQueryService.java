@@ -13,11 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
- * Query service that allows execute OQL queries on a specified set of buckets.
- * This set of buckets is determined by keys of entries that are stored in such buckets.
- * Enough to specify one key that represents bucket.
- * You can use real or fake keys.
- *
+ * Query service that allows to execute OQL queries on a specified set of buckets.
  * This service can be used both on client and server/peer sides.
  *
  * Note: this service works only on partition regions.
@@ -31,15 +27,17 @@ public class BucketOrientedQueryService {
 
     /**
      * Executes a particular query on specified region using set of keys that represents buckets.
-     * Enough to specify one key that represents bucket.
-     * You can use real or fake keys.
      *
-     * Work of this method is based on function execution.
+     * The set of buckets is determined by keys of entries that are stored in such buckets:
+     * - real and fake keys can be used (such key should have the same routing object as bucket's keys have);
+     * - it will be enough to specify one key for each bucket.
+     *
+     * Work of this method is based on execution of function.
      * @see QueryFunction
      *
-     * @param queryString query string for execute
-     * @param region of type Region
-     * @param keys set of keys for determine buckets
+     * @param queryString OQL query string for execute
+     * @param region partitioned region on which query will be executed
+     * @param keys set of keys that specify buckets
      * @return SelectResults<Object>
      * @throws com.gemstone.gemfire.cache.query.QueryException when exception with execution occurs
      */
@@ -49,14 +47,20 @@ public class BucketOrientedQueryService {
     }
 
     /**
-     * Executes a particular query with parameters on specified region using set of keys that represents buckets.
-     * Enough to specify one key that represents bucket.
-     * You can use real or fake keys.
+     * Executes a particular query with parameters on specified region using a set of keys that represents buckets.
      *
-     * @param queryString query string for execute
+     * The set of buckets is determined by keys of entries that are stored in such buckets:
+     * - real and fake keys can be used (such key should have the same routing object as bucket's keys have);
+     * - it will be enough to specify one key for each bucket.
+     *
+     * Work of this method is based on execution of function.
+     * @see QueryFunction
+     *
+     *
+     * @param queryString OQL query string for execute
      * @param queryParameters of type Object[]
-     * @param region of type Region
-     * @param keys of type Set<Object>
+     * @param region partitioned region on which query will be executed
+     * @param keys set of keys that specify buckets
      * @return SelectResults<Object>
      * @throws com.gemstone.gemfire.cache.query.QueryException when exception with execution occurs
      */
