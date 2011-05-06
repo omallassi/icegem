@@ -1,10 +1,12 @@
-package com.googlecode.icegem.core.functions.bucketoriented.common.utils;
+package com.googlecode.icegem.query;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
+ * TODO: Will be removed later.
+ *
  * Console utils.
  *
  * @author Andrey Stepanov aka standy
