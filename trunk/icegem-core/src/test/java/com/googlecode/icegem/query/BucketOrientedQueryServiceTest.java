@@ -47,13 +47,13 @@ public class BucketOrientedQueryServiceTest {
 
 //    @Test
     public void testBucketDataRetrieveForExistedAndFakeKeys() throws QueryException {
-        SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)){});
+        SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsBasedOnExistedKey.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
         Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnExistedKey, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
         Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnExistedKey, 11)).as("Entry with key = 11 doesn't exist in results").isTrue();
         Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnExistedKey, 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
 
-        SelectResults<Object> resultsBasedOnFakeKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(101)){});
+        SelectResults<Object> resultsBasedOnFakeKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(101)));
         Assertions.assertThat(resultsBasedOnFakeKey.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
         Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnFakeKey, 101)).as("Entry with fake key = 101 exists in results").isFalse();
         Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnFakeKey, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
@@ -63,17 +63,17 @@ public class BucketOrientedQueryServiceTest {
 
 //    @Test
     public void testBucketsDataRetrieve() throws QueryException {
-        SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)){});
+        SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsFromOneBucket.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromOneBucket, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromOneBucket, 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
 
-        SelectResults<Object> resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1, 2)){});
+        SelectResults<Object> resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1, 2)));
         Assertions.assertThat(resultsFromTwoBuckets.size()).as("Wrong number of entries from the buckets was found for keys: [1, 2]").isEqualTo(20);
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 2)).as("Entry with key = 2 doesn't exist in results").isTrue();
 
-        resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1, 11, 2)){});
+        resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1, 11, 2)));
         Assertions.assertThat(resultsFromTwoBuckets.size()).as("Wrong number of entries from the buckets was found for keys: [1, 11, 2]").isEqualTo(20);
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 11)).as("Entry with key = 11 doesn't exist in results").isTrue();
@@ -82,10 +82,10 @@ public class BucketOrientedQueryServiceTest {
 
 //    @Test
     public void testBucketDataRetrieveUsingQueryLimit() throws QueryException {
-        SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1)){});
+        SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsFromOneBucket.size()).as("Wrong number of entries from the same bucket was found for key = 1 and limit = 3").isEqualTo(3);
 
-        SelectResults<Object> resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1, 2)){});
+        SelectResults<Object> resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1, 2)));
         Assertions.assertThat(resultsFromTwoBuckets.size()).as("Wrong number of entries from the buckets was found for keys: [1, 2] and limit = 3").isEqualTo(3);
 
         resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data LIMIT 3", data, new HashSet<Object>(Arrays.asList(1, 2)){});
@@ -95,53 +95,53 @@ public class BucketOrientedQueryServiceTest {
 //    @Test
     public void testComplexQuering() throws QueryException {
         SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data WHERE socialNumber = $1",
-                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)){});
+                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(results.size()).as("Query parameters doesn't work correct").isEqualTo(1);
         Person person = (Person) data.get(1);
         Assertions.assertThat(results.asList().get(0).equals(person)).as("Wrong query result").isTrue();
         Assertions.assertThat(results.getCollectionType().getElementType().resolveClass()).as("Wrong element type").isEqualTo(Object.class);
 
         results = BucketOrientedQueryService.executeOnBuckets("SELECT children FROM /data WHERE socialNumber = $1",
-                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)){});
+                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(results.size()).as("Wrong query result for object's nested collection").isEqualTo(1);
         Assertions.assertThat(results.asList().get(0).equals(person.getChildren())).as("Wrong query result for object's nested collection").isTrue();
         Assertions.assertThat(results.getCollectionType().getElementType().resolveClass()).as("Wrong element type").isEqualTo(Object.class);
 
         results = BucketOrientedQueryService.executeOnBuckets("SELECT socialNumber FROM /data WHERE socialNumber = $1",
-                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)){});
+                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(results.size()).as("Wrong query result for object's field").isEqualTo(1);
         Assertions.assertThat(results.asList().get(0).equals(1)).as("Wrong query result for object's field").isTrue();
         Assertions.assertThat(results.getCollectionType().getElementType().resolveClass()).as("Wrong element type").isEqualTo(Object.class);
 
         results = BucketOrientedQueryService.executeOnBuckets("SELECT socialNumber, children FROM /data WHERE socialNumber = $1",
-                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)){});
+                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(results.size()).as("Wrong query result for structures").isEqualTo(1);
         Assertions.assertThat(results.getCollectionType().getElementType().resolveClass()).as("Wrong element type").isEqualTo(Struct.class);
 
         results = BucketOrientedQueryService.executeOnBuckets("SELECT socialNumber, children FROM /data WHERE socialNumber = $1",
-                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(2)){});
+                new Object[]{1}, data, new HashSet<Object>(Arrays.asList(2)));
         Assertions.assertThat(results.size()).as("Wrong query result for structures").isEqualTo(0);
         Assertions.assertThat(results.getCollectionType().getElementType().resolveClass()).as("Wrong element type").isEqualTo(Struct.class);
     }
 
 //    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithEmptyQueryString() throws QueryException {
-        BucketOrientedQueryService.executeOnBuckets("", data, new HashSet<Object>(Arrays.asList(1)){});
+        BucketOrientedQueryService.executeOnBuckets("", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
 //    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithWrongQueryString() throws QueryException {
-        BucketOrientedQueryService.executeOnBuckets("SELECT *", data, new HashSet<Object>(Arrays.asList(1)){});
+        BucketOrientedQueryService.executeOnBuckets("SELECT *", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
 //    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithNullQueryString() throws QueryException {
-        BucketOrientedQueryService.executeOnBuckets(null, data, new HashSet<Object>(Arrays.asList(1)){});
+        BucketOrientedQueryService.executeOnBuckets(null, data, new HashSet<Object>(Arrays.asList(1)));
     }
 
 //    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithNotExistedRegionQueryString() throws QueryException {
-        BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data1", data, new HashSet<Object>(Arrays.asList(1)){});
+        BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data1", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
     private void startClient() {
