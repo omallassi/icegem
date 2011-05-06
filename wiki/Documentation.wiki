@@ -324,6 +324,6 @@ Where:
 
 {{{
 ...
-SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data WHERE property = $1", new Object[]{1}, data, new HashSet<Object>(Arrays.asList("key1")));
+SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data WHERE property = $1", new Object[]{1}, data, new HashSet<Object>(Arrays.asList("key1")));
 ...
 }}}
