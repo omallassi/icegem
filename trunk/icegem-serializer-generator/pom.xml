@@ -9,7 +9,7 @@
     <groupId>com.googlecode.icegem</groupId>
     <artifactId>icegem-serializer-generator</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>Icegem serializer generation mojo</name>
+    <name>Serializer generation mojo</name>
     <version>0.5-SNAPSHOT</version>
     <url>http://maven.apache.org</url>
     <dependencies>
