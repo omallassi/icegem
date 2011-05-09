@@ -1,27 +1,34 @@
 package com.googlecode.icegem.serialization.codegen;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.Configuration;
-
-import javassist.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javassist.CannotCompileException;
+import javassist.ClassClassPath;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.CtMethod;
+import javassist.CtNewMethod;
+import javassist.LoaderClassPath;
+import javassist.NotFoundException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
+import com.googlecode.icegem.serialization.Configuration;
+
 /**
- * <pre>
- * Class that generate for class XYZ.class special serializer:
- * class XYZDataSerializer extends DataSerializer {...}
- * by Javassist lib.
- * </pre>
- *
+ * <pre> Class that generate for class XYZ.class special serializer: class XYZDataSerializer extends DataSerializer
+ * {...} by Javassist lib. </pre>
+ * 
  * @author igolovach
  */
 
@@ -40,33 +47,36 @@ public class DataSerializerGenerator {
     private static ClassPool newClassPool() {
         ClassPool result = new ClassPool(null); // arg - parent ClassPool
         result.appendClassPath(new ClassClassPath(java.lang.Object.class)); // its equivalent of appendSystemPath();
-        result.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader())); //todo: ok?
+        result.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader())); // todo: ok?
 
         return result;
     }
 
-      private static ClassPool newClassPool(ClassLoader loader) {
+    private static ClassPool newClassPool(ClassLoader loader) {
         ClassPool result = new ClassPool(null); // arg - parent ClassPool
         result.appendClassPath(new ClassClassPath(java.lang.Object.class)); // its equivalent of appendSystemPath();
-        result.appendClassPath(new LoaderClassPath(loader)); //todo: ok?
+        result.appendClassPath(new LoaderClassPath(loader)); // todo: ok?
 
         return result;
     }
 
-    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader, Class<?>... classArray) throws CannotCompileException, InvalidClassException {
+    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader,
+            Class<?>... classArray) throws CannotCompileException, InvalidClassException {
         return generateDataSerializerClasses(classLoader, Arrays.asList(classArray), null);
     }
 
-    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader, List<Class<?>> classList) throws CannotCompileException, InvalidClassException {
+    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader,
+            List<Class<?>> classList) throws CannotCompileException, InvalidClassException {
         return generateDataSerializerClasses(classLoader, classList, null);
     }
 
     /**
-     * 2-stage compilation scheme of group of classes:
-     * <p> hack from http://www.csg.is.titech.ac.jp/~chiba/javassist/tutorial/tutorial2.html#add
-     * <p> order of return of serializer-classes in response corresponds to order of arg-classes
+     * 2-stage compilation scheme of group of classes: <p> hack from
+     * http://www.csg.is.titech.ac.jp/~chiba/javassist/tutorial/tutorial2.html#add <p> order of return of
+     * serializer-classes in response corresponds to order of arg-classes
      */
-    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader, List<Class<?>> classList, String outputDir) throws CannotCompileException, InvalidClassException {
+    public static synchronized List<Class<?>> generateDataSerializerClasses(ClassLoader classLoader,
+            List<Class<?>> classList, String outputDir) throws CannotCompileException, InvalidClassException {
         checkClassesValid(classList);
 
         List<CtClass> dataSerializerClassList = new ArrayList<CtClass>();
@@ -79,10 +89,18 @@ public class DataSerializerGenerator {
 
         // #1: create dataSerializers with stubs toData/fromData
         for (Class<?> clazz : classList) {
+            String serializerClsName = createDataSerializerClassNameForClass(clazz);
+
+            if (existsClass(serializerClsName, classLoader)) {
+                logger.warn("Serializer for class {} exists. Skipping generation", clazz.getName());
+                break;
+            }
+
             // create class
-            CtClass cc = createClass(classPool, clazz);
+            CtClass cc = createClass(classPool, clazz, serializerClsName);
+
             dataSerializerClassList.add(cc);
-            //add statis Register
+            // add static Register
             addStaticRegister(clazz, cc);
             // add methods
             addMethodGetId(clazz, cc);
@@ -94,9 +112,13 @@ public class DataSerializerGenerator {
             try {
                 cc.toBytecode();
             } catch (IOException e) {
-                throw new CannotCompileException("Error during end of compilation phase #1 (call CtClass.toBytecode() for some Javassist-magic with CtClass) for " + cc.getName(), e);
+                throw new CannotCompileException(
+                        "Error during end of compilation phase #1 (call CtClass.toBytecode() for some Javassist-magic with CtClass) for "
+                                + cc.getName(), e);
             } catch (CannotCompileException e) {
-                throw new CannotCompileException("Error during end of compilation phase #1 (call CtClass.toBytecode() for some Javassist-magic with CtClass) for " + cc.getName(), e);
+                throw new CannotCompileException(
+                        "Error during end of compilation phase #1 (call CtClass.toBytecode() for some Javassist-magic with CtClass) for "
+                                + cc.getName(), e);
             }
         }
 
@@ -115,9 +137,9 @@ public class DataSerializerGenerator {
             try {
                 resultClass = cc.toClass(classLoader, null); // ProtectionDomain == null
                 logger.info("compiled data serializer for class: {}; id: {}; version: {}",
-                    new Object[]{clazz, clazz.getAnnotation(AutoSerializable.class).dataSerializerID()
-                    , clazz.getAnnotation(BeanVersion.class).value()});
-                if (outputDir != null && outputDir.length() > 0) {
+                        new Object[] { clazz, clazz.getAnnotation(AutoSerializable.class).dataSerializerID()
+                                , clazz.getAnnotation(BeanVersion.class).value() });
+                if ((outputDir != null) && (outputDir.length() > 0)) {
                     try {
                         cc.writeFile(outputDir);
                     } catch (IOException e) {
@@ -125,7 +147,10 @@ public class DataSerializerGenerator {
                     }
                 }
             } catch (CannotCompileException e) {
-                throw new CannotCompileException("Error during end of compilation phase #2 (call CtClass.toClass()) for " + cc.getName() + ". Probably you second time try generate and load DataSerializer class " + cc.getName() + " for class " + clazz.getName(), e);
+                throw new CannotCompileException(
+                        "Error during end of compilation phase #2 (call CtClass.toClass()) for " + cc.getName()
+                                + ". Probably you second time try generate and load DataSerializer class "
+                                + cc.getName() + " for class " + clazz.getName(), e);
             }
 
             // dump code to listener
@@ -139,7 +164,18 @@ public class DataSerializerGenerator {
         return result;
     }
 
-    //todo: what with thread-safeting?
+    // todo: what with thread-safeting?
+
+    /**
+     * TODO.
+     * 
+     * @param serializerClsName
+     * @return
+     */
+    private static boolean existsClass(String clsName, ClassLoader clsLoader) {
+        String resource = clsName.replace('.', '/');
+        return clsLoader.getResource(resource) != null;
+    }
 
     public static synchronized void registerCodeGenerationListener(CodeGenerationListener l) {
         listener = l;
@@ -148,7 +184,8 @@ public class DataSerializerGenerator {
     // ------------------------ PRIVATE
 
     private static void checkClassesValid(List<Class<?>> classList) throws InvalidClassException {
-        // check classes is valid for generating DataSerializer, if not - throw NotSerializableException with detailed reason
+        // check classes is valid for generating DataSerializer, if not - throw NotSerializableException with detailed
+        // reason
         for (Class<?> clazz : classList) {
             Introspector.checkClassIsSerialized(clazz);
         }
@@ -162,7 +199,12 @@ public class DataSerializerGenerator {
             AutoSerializable annotation = clazz.getAnnotation(AutoSerializable.class);
             int dataSerializerID = annotation.dataSerializerID();
             if (dataSerializerID2ClassNameMap.containsKey(dataSerializerID)) {
-                throw new InvalidClassException("Classes " + dataSerializerID2ClassNameMap.get(dataSerializerID) + " and " + clazz.getName() + " contain duplicated value of @AutoSerializable.dataSerializerID: " + dataSerializerID); // todo: right ex type?
+                throw new InvalidClassException("Classes " + dataSerializerID2ClassNameMap.get(dataSerializerID)
+                        + " and " + clazz.getName()
+                        + " contain duplicated value of @AutoSerializable.dataSerializerID: " + dataSerializerID); // todo:
+                                                                                                                   // right
+                                                                                                                   // ex
+                                                                                                                   // type?
             }
             dataSerializerID2ClassNameMap.put(dataSerializerID, clazz.getName());
         }
@@ -173,24 +215,29 @@ public class DataSerializerGenerator {
         return dataSerializerPackage + "." + clazz.getName() + "DataSerializer";
     }
 
-    private static CtClass createClass(ClassPool classPool, Class<?> baseClass) throws CannotCompileException {
-        final String newSerializerClassName = createDataSerializerClassNameForClass(baseClass);
+    private static CtClass createClass(ClassPool classPool, Class<?> baseClass, final String newSerializerClassName)
+            throws CannotCompileException {
         final CtClass parentClass;
         try {
             parentClass = classPool.get(PARENT_CLASS);
         } catch (NotFoundException e) {
-            throw new CannotCompileException("There is no " + DataSerializerGenerator.PARENT_CLASS + " in classpath of context ClassLoader for " + baseClass.getName(), e); //todo: correlation with line: classPool.insertClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+            throw new CannotCompileException("There is no " + DataSerializerGenerator.PARENT_CLASS
+                    + " in classpath of context ClassLoader for " + baseClass.getName(), e); // todo: correlation with
+                                                                                             // line:
+                                                                                             // classPool.insertClassPath(new
+                                                                                             // LoaderClassPath(Thread.currentThread().getContextClassLoader()));
         }
 
         try {
             return classPool.makeClass(newSerializerClassName, parentClass);
         } catch (RuntimeException e) { // javadoc:makeClass(): if the existing class is frozen.
-            throw new CannotCompileException("There is some internal error in our code (probably class " + newSerializerClassName + " exists and frozen) for " + baseClass.getName(), e);
+            throw new CannotCompileException("There is some internal error in our code (probably class "
+                    + newSerializerClassName + " exists and frozen) for " + baseClass.getName(), e);
         }
     }
 
-     private static void addStaticRegister(Class<?> baseClass, CtClass cc) throws CannotCompileException{
-        final String src = "com.gemstone.gemfire.DataSerializer.register(" + cc.getName() +".class);";
+    private static void addStaticRegister(Class<?> baseClass, CtClass cc) throws CannotCompileException {
+        final String src = "com.gemstone.gemfire.DataSerializer.register(" + cc.getName() + ".class);";
         CtConstructor staticConstructor;
         try {
             staticConstructor = cc.makeClassInitializer();
@@ -212,7 +259,8 @@ public class DataSerializerGenerator {
         try {
             cc.addMethod(methodGetId);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can compile but can't add compiled method '.getId()'\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg("Can compile but can't add compiled method '.getId()'\n", src,
+                    baseClass, cc), e);
         }
     }
 
@@ -223,12 +271,14 @@ public class DataSerializerGenerator {
         try {
             methodGetSupportedClasses = CtNewMethod.make(src, cc, null, null);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can't compile method '.getSupportedClasses()'\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg("Can't compile method '.getSupportedClasses()'\n", src,
+                    baseClass, cc), e);
         }
         try {
             cc.addMethod(methodGetSupportedClasses);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can compile but can't add compiled method '.getSupportedClasses()'\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can compile but can't add compiled method '.getSupportedClasses()'\n", src, baseClass, cc), e);
         }
     }
 
@@ -239,12 +289,15 @@ public class DataSerializerGenerator {
         try {
             methodToData = CtNewMethod.make(src, cc, null, null);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can't compile stub method '.toData()' (compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can't compile stub method '.toData()' (compilation phase #1)\n", src, baseClass, cc), e);
         }
         try {
             cc.addMethod(methodToData);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can compile stub but can't add compiled method '.toData()' (compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can compile stub but can't add compiled method '.toData()' (compilation phase #1)\n", src,
+                    baseClass, cc), e);
         }
     }
 
@@ -255,12 +308,15 @@ public class DataSerializerGenerator {
         try {
             methodFromData = CtNewMethod.make(src, cc, null, null);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can't compile stub method '.fromData(...)' (compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can't compile stub method '.fromData(...)' (compilation phase #1)\n", src, baseClass, cc), e);
         }
         try {
             cc.addMethod(methodFromData);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can compile stub but can't add compiled method '.fromData(...)' (compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can compile stub but can't add compiled method '.fromData(...)' (compilation phase #1)\n", src,
+                    baseClass, cc), e);
         }
     }
 
@@ -272,26 +328,33 @@ public class DataSerializerGenerator {
         try {
             methodToData = CtNewMethod.make(src, cc, null, null);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can't compile method '.toData()' (compilation phase #2)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg("Can't compile method '.toData()' (compilation phase #2)\n",
+                    src, baseClass, cc), e);
         }
         // find version #1
         CtMethod removedStubMethod;
         try {
             removedStubMethod = cc.getDeclaredMethod("toData");
         } catch (NotFoundException e) {
-            throw new CannotCompileException(formatMsg("Can't find stub method '.toData()' (from compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can't find stub method '.toData()' (from compilation phase #1)\n", src, baseClass, cc), e);
         }
         // remove version #1
         try {
             cc.removeMethod(removedStubMethod);
         } catch (NotFoundException e) {
-            throw new CannotCompileException(formatMsg("Can find but can't remove stub method '.toData()' (from compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can find but can't remove stub method '.toData()' (from compilation phase #1)\n", src, baseClass,
+                    cc), e);
         }
         // add version #2
         try {
             cc.addMethod(methodToData);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can compile new, find old, remove old but can't add new compiled method '.toData()' (compilation phase #2)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(
+                    formatMsg(
+                            "Can compile new, find old, remove old but can't add new compiled method '.toData()' (compilation phase #2)\n",
+                            src, baseClass, cc), e);
         }
     }
 
@@ -303,26 +366,33 @@ public class DataSerializerGenerator {
         try {
             methodFromData = CtNewMethod.make(src, cc, null, null);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can't compile method '.fromData(...)' (compilation phase #2)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can't compile method '.fromData(...)' (compilation phase #2)\n", src, baseClass, cc), e);
         }
         // find version #1
         CtMethod removedStubMethod;
         try {
             removedStubMethod = cc.getDeclaredMethod("fromData");
         } catch (NotFoundException e) {
-            throw new CannotCompileException(formatMsg("Can't find stub method '.fromData(...)' (from compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can't find stub method '.fromData(...)' (from compilation phase #1)\n", src, baseClass, cc), e);
         }
         // remove version #1
         try {
             cc.removeMethod(removedStubMethod);
         } catch (NotFoundException e) {
-            throw new CannotCompileException(formatMsg("Can find but can't remove stub method '.fromData(...)' (from compilation phase #1)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(formatMsg(
+                    "Can find but can't remove stub method '.fromData(...)' (from compilation phase #1)\n", src,
+                    baseClass, cc), e);
         }
         // add version #2
         try {
             cc.addMethod(methodFromData);
         } catch (CannotCompileException e) {
-            throw new CannotCompileException(formatMsg("Can compile new, find old, remove old but can't add new compiled method '.fromData(...)' (compilation phase #2)\n", src, baseClass, cc), e);
+            throw new CannotCompileException(
+                    formatMsg(
+                            "Can compile new, find old, remove old but can't add new compiled method '.fromData(...)' (compilation phase #2)\n",
+                            src, baseClass, cc), e);
         }
     }
 
