@@ -4,13 +4,13 @@
 	<groupId>com.googlecode.icegem</groupId>
 	<artifactId>icegem-spring</artifactId>
 	<name>Spring</name>
-	<version>0.5</version>
+	<version>0.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>com.googlecode.icegem</groupId>
 		<artifactId>icegem-root</artifactId>
-		<version>0.5</version>
+		<version>0.6-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>com.googlecode.icegem</groupId>
 			<artifactId>icegem-core</artifactId>
-			<version>0.5</version>
+			<version>0.6-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 
