@@ -1,13 +1,5 @@
 package com.googlecode.icegem.mojo;
 
-
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
@@ -17,19 +9,28 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
+
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+
 /**
  * Goal which gen DataSerializers for @AutoSerializable objects
- *
+ * 
  * @goal generate
  * @phase process-classes
  * @requiresDependencyResolution
  * @requiresProject
  */
 public class DataSerializerGenMojo extends AbstractMojo {
-    private final static Logger logger = Logger.getLogger(DataSerializerGenMojo.class.getName()); //todo: java.util.logging or other?
+    private final static Logger logger = Logger.getLogger(DataSerializerGenMojo.class.getName()); // todo:
+                                                                                                  // java.util.logging
+                                                                                                  // or other?
     /**
      * Location of the output dir for DataSerializer.
-     *
+     * 
      * @parameter default-value="target/classes"
      * @required
      */
@@ -39,11 +40,11 @@ public class DataSerializerGenMojo extends AbstractMojo {
      * @parameter default-value="target/classes"
      * @required
      */
-     private String classLocation;
+    private String classLocation;
 
     /**
      * Project classpath.
-     *
+     * 
      * @parameter default-value="${project.compileClasspathElements}"
      * @required
      * @readonly
@@ -52,7 +53,7 @@ public class DataSerializerGenMojo extends AbstractMojo {
 
     /**
      * The source directories containing the sources .
-     *
+     * 
      * @parameter default-value="${project.compileSourceRoots}"
      * @required
      * @readonly
@@ -61,12 +62,11 @@ public class DataSerializerGenMojo extends AbstractMojo {
 
     /**
      * path to packages where data model exists
-     *
+     * 
      * @parameter
      * @required
      */
     private List<String> scanPackages;
-
 
     /**
      * @parameter expression="${project}"
@@ -78,8 +78,9 @@ public class DataSerializerGenMojo extends AbstractMojo {
         ClassLoader mojoLoader = null;
         try {
             URL[] urls = new URL[project.getCompileClasspathElements().size()];
-            for(int i = 0; i < project.getCompileClasspathElements().size(); i++)
+            for (int i = 0; i < project.getCompileClasspathElements().size(); i++) {
                 urls[i] = new File(projectClasspathElements.get(i)).toURI().toURL();
+            }
             mojoLoader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
         } catch (Exception e) {
             e.printStackTrace();
@@ -96,7 +97,6 @@ public class DataSerializerGenMojo extends AbstractMojo {
                 continue;
             }
             File[] files = currentDir.listFiles(new FilenameFilter() {
-                @Override
                 public boolean accept(File dir, String name) {
                     return name.endsWith(".class");
                 }
@@ -118,9 +118,11 @@ public class DataSerializerGenMojo extends AbstractMojo {
         logger.info("to register: " + classesFromPackages);
 
         try {
-            HierarchyRegistry.registerAll(mojoLoader, classesFromPackages, outputDirectory);             //todo: replaced classLoader with cl
+            HierarchyRegistry.registerAll(mojoLoader, classesFromPackages, outputDirectory); // todo: replaced
+                                                                                             // classLoader with cl
         } catch (Exception e) {
-            final String msg = "Some class from list " + classesFromPackages + " is nor serializable. Cause: " + e.getMessage();
+            final String msg = "Some class from list " + classesFromPackages + " is nor serializable. Cause: "
+                    + e.getMessage();
             throw new RuntimeException(msg, e);
         }
     }
