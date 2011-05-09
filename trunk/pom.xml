@@ -65,7 +65,7 @@
         <module>icegem-performance</module>
         <module>icegem-spring</module>
         <module>icegem-cache-utils</module>
-        <module>icegem-example-mojo</module>
+	<module>icegem-serializer-generator</module>
     </modules>
 
     <properties>

@@ -42,14 +42,14 @@
             </plugin>
             <plugin>
                 <groupId>com.googlecode.icegem</groupId>
-                <artifactId>modelgenerator</artifactId>
-                <version>0.3-SNAPSHOT</version>
+                <artifactId>icegem-serializer-generator</artifactId>
+                <version>0.5-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>gen</goal>
+                            <goal>generate</goal>
                         </goals>
-                        <phase>compile</phase>
+                        <phase>process-classes</phase>
                     </execution>
                 </executions>
                 <configuration>

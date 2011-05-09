@@ -20,8 +20,8 @@ import java.util.logging.Logger;
 /**
  * Goal which gen DataSerializers for @AutoSerializable objects
  *
- * @goal gen
- * @phase compile
+ * @goal generate
+ * @phase process-classes
  * @requiresDependencyResolution
  * @requiresProject
  */
