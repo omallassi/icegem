@@ -90,7 +90,7 @@ public class DataSerializerGenMojo extends AbstractMojo {
         List<Class<?>> registeredClasses = new ArrayList<Class<?>>();
 
         for (String pack : scanPackages) {
-            String packPath = classLocation + "/" + pack.replaceAll("\\.", "/");
+            String packPath = project.getBasedir() + "/" + classLocation + "/" + pack.replaceAll("\\.", "/");
             File currentDir = new File(packPath);
             if (!currentDir.exists()) {
                 logger.log(Level.WARNING, packPath + " doesn't exist");
@@ -118,7 +118,7 @@ public class DataSerializerGenMojo extends AbstractMojo {
         logger.info("to register: " + classesFromPackages);
 
         try {
-            HierarchyRegistry.registerAll(mojoLoader, classesFromPackages, outputDirectory); // todo: replaced
+            HierarchyRegistry.registerAll(mojoLoader, classesFromPackages, project.getBasedir() + "/" + outputDirectory); // todo: replaced
                                                                                              // classLoader with cl
         } catch (Exception e) {
             final String msg = "Some class from list " + classesFromPackages + " is nor serializable. Cause: "
