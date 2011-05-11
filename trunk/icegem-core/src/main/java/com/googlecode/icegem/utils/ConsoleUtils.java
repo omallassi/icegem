@@ -1,4 +1,4 @@
-package com.googlecode.icegem.query;
+package com.googlecode.icegem.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

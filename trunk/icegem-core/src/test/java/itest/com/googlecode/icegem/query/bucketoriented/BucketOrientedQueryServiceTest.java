@@ -1,4 +1,4 @@
-package com.googlecode.icegem.query;
+package itest.com.googlecode.icegem.query.bucketoriented;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.cache.client.ClientCache;
@@ -8,6 +8,10 @@ import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.gemstone.gemfire.cache.query.QueryException;
 import com.gemstone.gemfire.cache.query.SelectResults;
 import com.gemstone.gemfire.cache.query.Struct;
+import com.googlecode.icegem.query.bucketoriented.BucketOrientedQueryService;
+import com.googlecode.icegem.utils.JavaProcessLauncher;
+import itest.com.googlecode.icegem.query.bucketoriented.Person;
+import itest.com.googlecode.icegem.query.bucketoriented.Server;
 import org.fest.assertions.Assertions;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,11 +20,9 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.TimeoutException;
 
 /**
- * TODO: Starts two servers for tests automatically.
- * TODO: At that time we need to start two servers before start tests.
- *
  * Tests for bucket oriented query service.
  *
  * @author Andrey Stepanov aka standy
@@ -32,20 +34,27 @@ public class BucketOrientedQueryServiceTest {
     private static ClientCache cache;
     /** Field data  */
     private static Region<Object, Object> data;
+    /** Field cacheServer1  */
+    private static Process cacheServer1;
+    /** Field cacheServer2  */
+    private static Process cacheServer2;
+    /** Field javaProcessLauncher  */
+    private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 
-
-//    @BeforeClass
-    public void setUp() throws IOException {
+    @BeforeClass
+    public void setUp() throws IOException, InterruptedException, TimeoutException {
+        startCacheServers();
         startClient();
         populateRegionByPersons(data);
     }
 
-//    @AfterClass
-    public void tearDown() {
+    @AfterClass
+    public void tearDown() throws IOException {
         cache.close();
+        stopCacheServers();
     }
 
-//    @Test
+    @Test
     public void testBucketDataRetrieveForExistedAndFakeKeys() throws QueryException {
         SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsBasedOnExistedKey.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
@@ -61,7 +70,7 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(resultsBasedOnFakeKey.equals(resultsBasedOnExistedKey)).as("Results based on fake key and existed key for one bucket are not the same").isFalse();
     }
 
-//    @Test
+    @Test
     public void testBucketsDataRetrieve() throws QueryException {
         SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsFromOneBucket.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
@@ -80,7 +89,7 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 2)).as("Entry with key = 2 doesn't exist in results").isTrue();
     }
 
-//    @Test
+    @Test
     public void testBucketDataRetrieveUsingQueryLimit() throws QueryException {
         SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsFromOneBucket.size()).as("Wrong number of entries from the same bucket was found for key = 1 and limit = 3").isEqualTo(3);
@@ -92,7 +101,7 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(resultsFromTwoBuckets.size()).as("Wrong number of entries from the buckets was found for keys: [1, 2] and LIMIT = 3").isEqualTo(3);
     }
 
-//    @Test
+    @Test
     public void testComplexQuering() throws QueryException {
         SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data WHERE socialNumber = $1",
                 new Object[]{1}, data, new HashSet<Object>(Arrays.asList(1)));
@@ -124,26 +133,29 @@ public class BucketOrientedQueryServiceTest {
         Assertions.assertThat(results.getCollectionType().getElementType().resolveClass()).as("Wrong element type").isEqualTo(Struct.class);
     }
 
-//    @Test(expectedExceptions = QueryException.class)
+    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithEmptyQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets("", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
-//    @Test(expectedExceptions = QueryException.class)
+    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithWrongQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets("SELECT *", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
-//    @Test(expectedExceptions = QueryException.class)
+    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithNullQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets(null, data, new HashSet<Object>(Arrays.asList(1)));
     }
 
-//    @Test(expectedExceptions = QueryException.class)
+    @Test(expectedExceptions = QueryException.class)
     public void testExecutionWithNotExistedRegionQueryString() throws QueryException {
         BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data1", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
+    /**
+     * Starts a client.
+     */
     private void startClient() {
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
         cache = clientCacheFactory.set("log-level", "warning").create();
@@ -152,14 +164,25 @@ public class BucketOrientedQueryServiceTest {
         data = regionFactory.create("data");
     }
 
-    private void startCacheServer() throws IOException {
-        AttributesFactory attributesFactory = new AttributesFactory();
-        attributesFactory.setDataPolicy(DataPolicy.PARTITION);
-        RegionAttributes regionAttributes = attributesFactory.create();
+    /**
+     * Starts two cache servers for tests.
+     *
+     * @throws IOException when
+     * @throws InterruptedException when
+     */
+    private void startCacheServers() throws IOException, InterruptedException {
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class);
+        cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
+    }
 
-        CacheFactory cacheFactory = new CacheFactory();
-        Cache cache = cacheFactory.set("mcast-port", "0").set("log-level", "warning").set("start-locator" , "localhost[" + LOCATOR_PORT + "]").create();
-        Region<Object, Object> data = cache.createRegionFactory(regionAttributes).create("data");
+    /**
+     * Stops cache servers.
+     *
+     * @throws IOException when
+     */
+    private void stopCacheServers() throws IOException {
+        javaProcessLauncher.stop(cacheServer1);
+        javaProcessLauncher.stop(cacheServer2);
     }
 
     /**
