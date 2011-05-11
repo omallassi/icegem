@@ -1,4 +1,4 @@
-package com.googlecode.icegem.query;
+package com.googlecode.icegem.query.bucketoriented;
 
 import java.io.Serializable;
 

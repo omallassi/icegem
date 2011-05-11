@@ -1,23 +1,23 @@
-package com.googlecode.icegem.query;
+package com.googlecode.icegem.query.bucketoriented;
 
 import com.gemstone.gemfire.cache.execute.*;
 import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
 import com.gemstone.gemfire.cache.query.*;
 import com.gemstone.gemfire.cache.query.internal.DefaultQuery;
 import com.gemstone.gemfire.internal.cache.LocalDataSet;
+import com.googlecode.icegem.query.bucketoriented.QueryFunctionArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * Function for executing query on a specified set of buckets.
  * Do not call this function directly. Use bucket oriented query service instead.
  *
- * @see BucketOrientedQueryService
+ * @see com.googlecode.icegem.query.bucketoriented.BucketOrientedQueryService
  *
  * @author Andrey Stepanov aka standy
  */
