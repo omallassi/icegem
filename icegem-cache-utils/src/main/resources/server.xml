@@ -3,9 +3,4 @@
 <cache>
 	<cache-server port="0" />
 	<region name="data" refid="PARTITION" />
-	<function-service>
-		<function>
-			<class-name>com.googlecode.icegem.cacheutils.monitor.function.ZeroFunction</class-name>
-		</function>
-	</function-service>
 </cache>
