@@ -14,13 +14,6 @@ import com.gemstone.gemfire.cache.query.QueryException;
 import com.gemstone.gemfire.cache.query.SelectResults;
 import com.gemstone.gemfire.cache.query.internal.ResultsCollectionWrapper;
 import com.gemstone.gemfire.cache.query.types.ObjectType;
-<<<<<<< .working
-import com.googlecode.icegem.query.bucketoriented.QueryFunction;
-import com.googlecode.icegem.query.bucketoriented.QueryFunctionArgument;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-=======
->>>>>>> .merge-right.r128
 
 /**
  * Query service that allows to execute OQL queries on a specified set of buckets. This service can be used both on
