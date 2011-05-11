@@ -1,2 +1,2 @@
-set SERVER_CLASSPATH=.;lib\gemfire-6.5.1.2.jar;lib\mail-1.4.1.jar;lib\activation-1.1.jar
+set SERVER_CLASSPATH=.;lib\gemfire-${com.gemstone.gemfire.version}.jar
 java -DgemfirePropertyFile=gemfire-monitor.properties -classpath %SERVER_CLASSPATH% com.googlecode.icegem.cacheutils.monitor.server.Server

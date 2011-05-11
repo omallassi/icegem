@@ -1,10 +1,8 @@
 package com.googlecode.icegem.cacheutils.monitor.utils;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.mail.Message;
@@ -80,15 +78,6 @@ public class EmailService {
 				});
 	}
 
-	private Properties readMailProperties() throws FileNotFoundException,
-			IOException {
-		Properties properties = new Properties();
-
-		properties.load(new FileInputStream("mail.properties"));
-
-		return properties;
-	}
-
 	private Set<String> csvToSetOfString(String csv) {
 		Set<String> resultSet = new HashSet<String>();
 
@@ -105,7 +94,7 @@ public class EmailService {
 			throws MessagingException {
 		MimeMessage message = new MimeMessage(mailSession);
 		message.setSubject(subject);
-		message.setContent(content, "text/plain");
+		message.setContent(content, "text/html; charset=ISO-8859-1");
 
 		message.setFrom(new InternetAddress(propertiesHelper
 				.getStringProperty("mail.from")));
