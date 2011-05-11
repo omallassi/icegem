@@ -24,7 +24,8 @@ public class Server {
      * Server entry point.
      *
      * @param args of type String[]
-     * @throws Exception when
+     * @throws java.io.IOException
+     * @throws InterruptedException
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         createCacheAndRegion();
