@@ -69,7 +69,7 @@
     </modules>
 
     <properties>
-        <com.gemstone.gemfire.version>6.5.1.4</com.gemstone.gemfire.version>
+        <com.gemstone.gemfire.version>6.5.1.2</com.gemstone.gemfire.version>
         <javassist.version>3.8.0.GA</javassist.version>
         <org.testng.version>5.14.6</org.testng.version>
         <org.ehoffman.version>0.5</org.ehoffman.version>

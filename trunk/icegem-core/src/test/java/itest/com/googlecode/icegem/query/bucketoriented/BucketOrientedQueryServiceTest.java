@@ -158,7 +158,7 @@ public class BucketOrientedQueryServiceTest {
      */
     private void startClient() {
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
-        cache = clientCacheFactory.set("log-level", "warning").create();
+        cache = clientCacheFactory.set("log-level", "config").create();
         ClientRegionFactory<Object, Object> regionFactory =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
         data = regionFactory.create("data");
