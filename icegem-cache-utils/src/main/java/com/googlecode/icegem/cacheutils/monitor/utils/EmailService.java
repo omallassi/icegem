@@ -65,7 +65,7 @@ public class EmailService {
 	}
 
 	private EmailService() throws FileNotFoundException, IOException {
-		propertiesHelper = new PropertiesHelper("mail.properties");
+		propertiesHelper = new PropertiesHelper("/mail.properties");
 		mailSession = Session.getDefaultInstance(
 				propertiesHelper.getProperties(),
 				new javax.mail.Authenticator() {

@@ -36,8 +36,8 @@ public class NodesController {
 		this.propertiesHelper = propertiesHelper;
 		adminDistributedSystem = new AdminService(
 			propertiesHelper
-				.getStringProperty("com.googlecode.icegem.cacheutils.monitor.locators"))
-			.getAdmin();
+				.getStringProperty("com.googlecode.icegem.cacheutils.monitor.locators"),
+			false).getAdmin();
 		poolFactory = PoolManager.createFactory();
 		bufferedNodeEventHandler = new BufferedNodeEventHandler();
 		nodes.addNodeEventHandler(bufferedNodeEventHandler);
@@ -167,22 +167,9 @@ public class NodesController {
 					propertiesHelper
 						.getStringProperty(
 							"com.googlecode.icegem.cacheutils.monitor.email.alert.content",
-							toContentStringHTML(eventsList), Utils.currentDate()));
+							toContentStringHTML(eventsList),
+							Utils.currentDate()));
 		}
-	}
-
-	private String toContentString(List<NodeEvent> eventslist) {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("[Event date, Event type, Node]\n");
-		for (NodeEvent event : eventslist) {
-			sb.append("[").append(Utils.dateToString(event.getCreatedAt()))
-				.append(", ");
-			sb.append(event.getType()).append(", ");
-			sb.append(event.getNode()).append("]\n");
-		}
-
-		return sb.toString();
 	}
 
 	private String toContentStringHTML(List<NodeEvent> eventslist) {
@@ -197,7 +184,8 @@ public class NodesController {
 		sb.append("</tr>");
 		for (NodeEvent event : eventslist) {
 			sb.append("<tr>");
-			sb.append("<td>").append(Utils.dateToString(event.getCreatedAt())).append("</td>");
+			sb.append("<td>").append(Utils.dateToString(event.getCreatedAt()))
+				.append("</td>");
 			sb.append("<td>").append(event.getType()).append("</td>");
 			sb.append("<td>").append(event.getNode()).append("</td>");
 			sb.append("</tr>");

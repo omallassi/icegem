@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<project name="star-stop-gemfire-test-environment">
+    <property name="locator.base.directory" value="${project.build.directory}/locator"/>
+
+    <target name="start-gemfire-test-environment" depends="stop-gemfire-test-environment, start-locator">
+    </target>
+
+    <target name="start-locator" depends="copy-scripts">
+        <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.sh"/>
+        <exec osfamily="unix" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.sh"/>
+    </target>
+
+    <target name="copy-scripts" depends="create-base-directories, copy-resources">
+        <copy todir="${project.build.directory}">
+            <fileset dir="${project.build.testSourceDirectory}/../scripts"/>
+        </copy>
+        <chmod dir="${project.build.directory}" perm="755" includes="*.sh"/>
+    </target>
+
+    <target name="copy-resources" depends="create-base-directories">
+        <copy todir="${project.build.directory}">
+            <fileset dir="${project.build.testSourceDirectory}/../resources"/>
+        </copy>
+    </target>
+
+    <target name="create-base-directories">
+        <mkdir dir="${locator.base.directory}"/>
+    </target>
+
+    <target name="stop-gemfire-test-environment" depends="stop-locator">
+    </target>
+
+    <target name="stop-locator" depends="copy-scripts">
+        <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.sh"/>
+        <exec osfamily="unix" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.sh"/>
+    </target>
+</project>
