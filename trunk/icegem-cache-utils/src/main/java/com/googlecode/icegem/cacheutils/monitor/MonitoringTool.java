@@ -6,10 +6,10 @@ import java.util.TimerTask;
 
 import javax.mail.MessagingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import com.googlecode.icegem.cacheutils.monitor.controller.NodesController;
+import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.cacheutils.monitor.utils.EmailService;
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
@@ -19,9 +19,8 @@ import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
  * failure
  */
 public class MonitoringTool {
-
-	private static final Logger log = LoggerFactory.getLogger(MonitoringTool.class);
-
+	private static final Logger log = Logger.getLogger(MonitoringTool.class);
+	
 	private NodesController nodesController;
 	private PropertiesHelper propertiesHelper;
 	private Timer timer;
@@ -67,9 +66,12 @@ public class MonitoringTool {
 		log.info(Utils.currentDate() + "  --------------------------------------------------");
 		log.info(Utils.currentDate() + "  Monitoring tool started");
 		log.info(Utils.currentDate() + "  --------------------------------------------------");
-		propertiesHelper = new PropertiesHelper("monitoring.properties");
+
+		propertiesHelper = new PropertiesHelper("/monitoring.properties");
+		
 		nodesController = new NodesController(propertiesHelper);
 		nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
+		
 		timer = new Timer();
 	}
 
@@ -86,6 +88,10 @@ public class MonitoringTool {
 					.getLongProperty("com.googlecode.icegem.cacheutils.monitor.timer.period"));
 	}
 
+	public void addNodeEventHandler(NodeEventHandler handler) {
+		nodesController.addNodeEventHandler(handler);
+	}
+	
 	/**
 	 * Starts the monitoring tool
 	 * 

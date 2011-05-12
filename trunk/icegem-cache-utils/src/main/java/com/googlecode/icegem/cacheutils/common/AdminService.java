@@ -15,7 +15,11 @@ public class AdminService {
     private DistributedSystem connection;
 
 	public AdminService(String locator) throws Exception {
-		this.admin = adminCreateAndConnect(locator);
+		this(locator, true);
+	}
+
+	public AdminService(String locator, boolean logToFile) throws Exception {
+		this.admin = adminCreateAndConnect(locator, logToFile);
 		systemMembers.addAll(new HashSet<SystemMember>(Arrays.asList(admin.getCacheVms())));
 		systemMembers.addAll(new HashSet<SystemMember>(Arrays.asList(admin.getSystemMemberApplications())));
 	}
@@ -73,13 +77,18 @@ public class AdminService {
         }
     }
 
-    private AdminDistributedSystem adminCreateAndConnect(String locator)
+    private AdminDistributedSystem adminCreateAndConnect(String locator, boolean logToFile)
 			throws Exception {
 		Properties props = new Properties();
 		props.setProperty("mcast-port", "0");
         if (locator != null)
 		    props.setProperty("locators", locator);
-        props.setProperty("log-file", "admin.log");
+       	if (logToFile) {
+       		props.setProperty("log-file", "admin.log");
+       	} else {
+       		props.setProperty("log-level", "none");
+       	}
+       	
         AdminDistributedSystemFactory.setEnableAdministrationOnly(false);
 		connection = DistributedSystem.connect(props);
 		DistributedSystemConfig config = AdminDistributedSystemFactory

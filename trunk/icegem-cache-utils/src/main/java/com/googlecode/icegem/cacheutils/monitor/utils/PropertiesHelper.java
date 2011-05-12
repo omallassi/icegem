@@ -1,6 +1,5 @@
 package com.googlecode.icegem.cacheutils.monitor.utils;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -17,7 +16,7 @@ public class PropertiesHelper {
 	public PropertiesHelper(String filename) throws FileNotFoundException,
 			IOException {
 		properties = new Properties();
-		properties.load(new FileInputStream(filename));
+		properties.load(getClass().getResourceAsStream(filename));
 	}
 
 	public String getStringProperty(String key) {
