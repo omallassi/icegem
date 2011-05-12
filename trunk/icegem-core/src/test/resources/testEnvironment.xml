@@ -5,7 +5,7 @@
     <property name="agent.base.directory" value="${project.build.directory}/agent"/>
 
     <!--Set of targets for starting GemFire test environment-->
-    <target name="start-gemfire-test-environment" depends="start-locator, start-agent">
+    <target name="start-gemfire-test-environment" depends="stop-gemfire-test-environment, start-locator, start-agent">
     </target>
 
     <target name="start-locator" depends="copy-scripts">
