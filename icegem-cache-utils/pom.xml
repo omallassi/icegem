@@ -155,6 +155,7 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
+            
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
@@ -163,6 +164,7 @@
 					</descriptors>
 				</configuration>
 			</plugin>
+            
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -202,6 +204,7 @@
 					</execution>
 				</executions>
 			</plugin>
+            
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
