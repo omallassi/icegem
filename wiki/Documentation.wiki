@@ -328,3 +328,15 @@ SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SEL
 ...
 }}}
 *Note:* `icegem-core.jar` should be added to a ClassPath of all members in a distributed system where OQL query will be executed.
+
+= Paginated Query =
+
+This component allows to execute paginated queries both from client and peer/server sides. It caches paginated query results in a help region and allows to iterate on them using paginated query API.
+
+*Paginated query API:*
+
+TODO
+
+*Usage example:*
+
+TODO
