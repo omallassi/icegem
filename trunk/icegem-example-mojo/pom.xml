@@ -7,7 +7,7 @@
     <groupId>com.googlecode.icegem</groupId>
     <artifactId>icegem-example-mojo</artifactId>
     <name>example-mojo</name>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -58,6 +58,12 @@
                         <scanPackage>model.transport</scanPackage>
                     </scanPackages>
                 </configuration>
+            </plugin>
+            <plugin>
+            	<artifactId>maven-deploy-plugin</artifactId>
+            	<configuration>
+            		<skip>true</skip>
+            	</configuration>
             </plugin>
         </plugins>
     </build>
