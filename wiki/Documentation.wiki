@@ -409,7 +409,24 @@ public int getTotalNumberOfEntries(){...};
 
 ==Usage example==
 
-Get first 10 persons from the region /person:
+Get first page of persons from the region `/person`:
 {{{
+...
+ClientCache cache = clientCacheFactory.create();
+String queryString = "SELECT * FROM /person.keySet";
+int pageSize = 10;
+PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", queryString, pageSize);
+if (querty.hasNext()) {
+    List<Person> pageEntries = query.next();
+}
+}}}
 
+Get first page of persons from the region `/person` with social number = 534:
+{{{
+...
+Cache cache = cacheFactory.create();
+String queryString = "SELECT e.key FROM /person.entrySet e WHERE e.value.socialNumber = $1";
+int pageSize = 30;
+PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", queryString, new Object[]{534}, pageSize);
+List<Person> pageEntries = query.page(1);
 }}}
