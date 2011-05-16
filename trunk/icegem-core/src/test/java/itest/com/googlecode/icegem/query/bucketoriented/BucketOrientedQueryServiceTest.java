@@ -9,13 +9,13 @@ import com.gemstone.gemfire.cache.query.QueryException;
 import com.gemstone.gemfire.cache.query.SelectResults;
 import com.gemstone.gemfire.cache.query.Struct;
 import com.googlecode.icegem.query.bucketoriented.BucketOrientedQueryService;
+import com.googlecode.icegem.utils.CacheUtils;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
-import itest.com.googlecode.icegem.query.bucketoriented.Person;
+import itest.com.googlecode.icegem.query.common.domain.Person;
 import itest.com.googlecode.icegem.query.bucketoriented.Server;
+import itest.com.googlecode.icegem.query.common.utils.PersonUtils;
 import org.fest.assertions.Assertions;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -45,11 +45,11 @@ public class BucketOrientedQueryServiceTest {
     public void setUp() throws IOException, InterruptedException, TimeoutException {
         startCacheServers();
         startClient();
-        populateRegionByPersons(data);
+        PersonUtils.populateRegionByPersons(data, 100);
     }
 
     @AfterClass
-    public void tearDown() throws IOException {
+    public void tearDown() throws IOException, InterruptedException {
         cache.close();
         stopCacheServers();
     }
@@ -58,15 +58,15 @@ public class BucketOrientedQueryServiceTest {
     public void testBucketDataRetrieveForExistedAndFakeKeys() throws QueryException {
         SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsBasedOnExistedKey.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnExistedKey, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnExistedKey, 11)).as("Entry with key = 11 doesn't exist in results").isTrue();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnExistedKey, 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnExistedKey.asList(), 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnExistedKey.asList(), 11)).as("Entry with key = 11 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnExistedKey.asList(), 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
 
         SelectResults<Object> resultsBasedOnFakeKey = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(101)));
         Assertions.assertThat(resultsBasedOnFakeKey.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnFakeKey, 101)).as("Entry with fake key = 101 exists in results").isFalse();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnFakeKey, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsBasedOnFakeKey, 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnFakeKey.asList(), 101)).as("Entry with fake key = 101 exists in results").isFalse();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnFakeKey.asList(), 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnFakeKey.asList(), 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
         Assertions.assertThat(resultsBasedOnFakeKey.equals(resultsBasedOnExistedKey)).as("Results based on fake key and existed key for one bucket are not the same").isFalse();
     }
 
@@ -74,19 +74,19 @@ public class BucketOrientedQueryServiceTest {
     public void testBucketsDataRetrieve() throws QueryException {
         SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
         Assertions.assertThat(resultsFromOneBucket.size()).as("Wrong number of entries from the same bucket was found for key = 1").isEqualTo(10);
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsFromOneBucket, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsFromOneBucket, 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsFromOneBucket.asList(), 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsFromOneBucket.asList(), 2)).as("Entry with key = 2 exists in results but it should not").isFalse();
 
         SelectResults<Object> resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1, 2)));
         Assertions.assertThat(resultsFromTwoBuckets.size()).as("Wrong number of entries from the buckets was found for keys: [1, 2]").isEqualTo(20);
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 2)).as("Entry with key = 2 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsFromTwoBuckets.asList(), 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsFromTwoBuckets.asList(), 2)).as("Entry with key = 2 doesn't exist in results").isTrue();
 
         resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1, 11, 2)));
         Assertions.assertThat(resultsFromTwoBuckets.size()).as("Wrong number of entries from the buckets was found for keys: [1, 11, 2]").isEqualTo(20);
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 11)).as("Entry with key = 11 doesn't exist in results").isTrue();
-        Assertions.assertThat(containsPersonWithSocialNumber(resultsFromTwoBuckets, 2)).as("Entry with key = 2 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsFromTwoBuckets.asList(), 1)).as("Entry with key = 1 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsFromTwoBuckets.asList(), 11)).as("Entry with key = 11 doesn't exist in results").isTrue();
+        Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(resultsFromTwoBuckets.asList(), 2)).as("Entry with key = 2 doesn't exist in results").isTrue();
     }
 
     @Test
@@ -155,9 +155,16 @@ public class BucketOrientedQueryServiceTest {
 
     /**
      * Starts a client.
+     *
+     * Important:
+     * If you plan to establish a client connection with only one cache server,
+     * use direct connection to this server via client's pool.
+     * If you plan to establish a client connection with more than one cache server,
+     * use client connection to this servers via specified in client's pool locator.
      */
     private void startClient() {
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
+//        ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolServer("SERVER_HOST", "SERVER_PORT");
         cache = clientCacheFactory.set("log-level", "warning").create();
         ClientRegionFactory<Object, Object> regionFactory =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
@@ -171,7 +178,7 @@ public class BucketOrientedQueryServiceTest {
      * @throws InterruptedException when
      */
     private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class);
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class, new String[]{CacheUtils.START_EMBEDDED_LOCATOR_COMMAND});
         cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
     }
 
@@ -181,34 +188,7 @@ public class BucketOrientedQueryServiceTest {
      * @throws IOException when
      */
     private void stopCacheServers() throws IOException {
-        javaProcessLauncher.stop(cacheServer1);
-        javaProcessLauncher.stop(cacheServer2);
-    }
-
-    /**
-     * Checks existence of person with specified social number in results.
-     *
-     * @param results of type SelectResults<Object>
-     * @param socialNumber of type int
-     * @return boolean
-     */
-    private static boolean containsPersonWithSocialNumber(SelectResults<Object> results, int socialNumber) {
-        for (Object result : results) {
-            if (((Person) result).getSocialNumber() == socialNumber) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Populates region by persons.
-     *
-     * @param region of type Region<Object, Object>
-     */
-    private static void populateRegionByPersons(Region<Object, Object> region) {
-        for (int i = 1; i <= 100; i++) {
-            region.put(i, new Person(i, Arrays.asList(Integer.toString(i), Integer.toString(i*2))));
-        }
+        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
+        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }
 }

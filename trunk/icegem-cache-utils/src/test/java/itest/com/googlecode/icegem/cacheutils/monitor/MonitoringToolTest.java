@@ -65,8 +65,8 @@ public class MonitoringToolTest {
     }
 
     private void stopCacheServers() throws IOException {
-        javaProcessLauncher.stop(cacheServer1);
-        javaProcessLauncher.stop(cacheServer2);
+        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
+        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }
 
 }

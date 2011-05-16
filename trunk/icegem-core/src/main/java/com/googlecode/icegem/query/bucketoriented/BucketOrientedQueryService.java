@@ -31,7 +31,7 @@ public class BucketOrientedQueryService {
      * have the same routing object as bucket's keys have); - it will be enough to specify one key for each bucket. Work
      * of this method is based on execution of function.
      * 
-     * @see QueryFunction
+     * @see BucketOrientedQueryFunction
      * @param queryString OQL query string for execute
      * @param region partitioned region on which query will be executed
      * @param keys set of keys that specify buckets
@@ -50,7 +50,7 @@ public class BucketOrientedQueryService {
      * (such key should have the same routing object as bucket's keys have); - it will be enough to specify one key for
      * each bucket. Work of this method is based on execution of function.
      * 
-     * @see QueryFunction
+     * @see BucketOrientedQueryFunction
      * @param queryString OQL query string for execute
      * @param queryParameters of type Object[]
      * @param region partitioned region on which query will be executed
@@ -69,9 +69,9 @@ public class BucketOrientedQueryService {
         if (limitInfo[0] != -1) {
             queryString = queryString.substring(0, limitInfo[1]);
         }
-        QueryFunctionArgument functionArgument = new QueryFunctionArgument(queryString, queryParameters);
+        BucketOrientedQueryFunctionArgument functionArgument = new BucketOrientedQueryFunctionArgument(queryString, queryParameters);
 
-        QueryFunction function = new QueryFunction();
+        BucketOrientedQueryFunction function = new BucketOrientedQueryFunction();
         FunctionService.registerFunction(function);
         List<List<Object>> queryResults;
         try {
@@ -103,6 +103,11 @@ public class BucketOrientedQueryService {
         }
         String limitNumber = queryString.substring(limitIndex + 5);
         return new int[] { Integer.parseInt(limitNumber.trim()), limitIndex };
+    }
+
+    private static String extractRegionName(String queryString) {
+        // TODO
+        return null;
     }
 
     /**

@@ -7,15 +7,19 @@
 
 	<target name="start-locator" depends="copy-scripts">
 		<exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.bat" />
-		<exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.sh" />
-		<exec osfamily="unix" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.sh" />
+		<exec osfamily="mac" dir="${project.build.directory}" executable="bash">
+            <arg file="${project.build.directory}/start-locator.sh"/>
+        </exec>
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+            <arg file="${project.build.directory}/start-locator.sh"/>
+        </exec>
 	</target>
 
 	<target name="copy-scripts" depends="create-base-directories, copy-resources">
 		<copy todir="${project.build.directory}" filtering="true">
 			<fileset dir="${project.build.testSourceDirectory}/../scripts" />
 			<filterset begintoken="${" endtoken="}">
-				<filter token="gemfire.jar" value="${project.build.directory}/lib/gemfire-${com.gemstone.gemfire.version}.jar" />
+				<filter token="gemfire.jar" value="${project.build.directory}\lib\gemfire-${com.gemstone.gemfire.version}.jar" />
 			</filterset>
 		</copy>
 		<chmod dir="${project.build.directory}" perm="755" includes="*.sh" />
@@ -36,7 +40,11 @@
 
 	<target name="stop-locator" depends="copy-scripts">
 		<exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.bat" />
-		<exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.sh" />
-		<exec osfamily="unix" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.sh" />
+		<exec osfamily="mac" dir="${project.build.directory}" executable="bash">
+            <arg file="${project.build.directory}/stop-locator.sh"/>
+        </exec>
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+            <arg file="${project.build.directory}/stop-locator.sh"/>
+        </exec>
 	</target>
 </project>
