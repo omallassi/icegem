@@ -1,7 +1,6 @@
 package itest.com.googlecode.icegem.query.common.utils;
 
 import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.query.SelectResults;
 import itest.com.googlecode.icegem.query.common.domain.Person;
 
 import java.util.Arrays;
@@ -16,13 +15,13 @@ public class PersonUtils {
     /**
      * Checks existence of person with specified social number in results.
      *
-     * @param results of type List<Object>
+     * @param results of type List<?>
      * @param socialNumber of type int
      * @return boolean
      */
-    public static boolean containsPersonWithSocialNumber(List<Object> results, int socialNumber) {
+    public static boolean containsPersonWithSocialNumber(List<?> results, int socialNumber) {
         for (Object result : results) {
-            if (((Person) result).getSocialNumber() == socialNumber) {
+            if (((Person)result).getSocialNumber() == socialNumber) {
                 return true;
             }
         }
