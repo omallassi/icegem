@@ -333,7 +333,31 @@ SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SEL
 
 This component allows to execute paginated queries both from client and peer/server sides. It caches paginated query results in a help region and allows to iterate on them using paginated query API.
 
-*Paginated query API:*
+*Paginated query creation*
+
+A paginated query can be created and configured using following constructors:
+{{{
+PaginatedQuery(GemFireCache cache, String regionName, String queryString);
+PaginatedQuery(GemFireCache cache, String regionName, String queryString, int pageSize);
+PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters);
+PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters, int pageSize);
+}}}
+
+Where:
+
+ * _cache_ - an instance of a peer/server cache (`com.gemstone.gemfire.cache.Cache`) or a client cache (`com.gemstone.gemfire.cache.client.ClientCache`);
+ * _regionName_ - a name of a region for querying;
+ * _queryString_ - a query string^1^;
+ * _queryParameters_ - parameters for query execution;
+ * _pageSize_ - a size of page (default is 20).
+
+^1^ query string has some limitations. See a limitations section below.
+
+*Limitations* 
+
+TODO 
+
+*Paginated query API*
 
 TODO
 
