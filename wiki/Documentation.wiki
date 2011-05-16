@@ -329,11 +329,11 @@ SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SEL
 }}}
 *Note:* `icegem-core.jar` should be added to a ClassPath of all members in a distributed system where OQL query will be executed.
 
-= Paginated Query =
+=Paginated Query=
 
 This component allows to execute paginated queries both from client and peer/server sides. It caches paginated query results in a help region and allows to iterate on them using paginated query API.
 
-*Paginated query creation*
+==Creation==
 
 A paginated query can be created and configured using following constructors:
 {{{
@@ -343,24 +343,63 @@ PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object
 PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters, int pageSize);
 }}}
 
-Where:
+*Where:*
 
- * _cache_ - an instance of a peer/server cache (`com.gemstone.gemfire.cache.Cache`) or a client cache (`com.gemstone.gemfire.cache.client.ClientCache`);
- * _regionName_ - a name of a region for querying;
- * _queryString_ - a query string^1^;
- * _queryParameters_ - parameters for query execution;
- * _pageSize_ - a size of page (default is 20).
+ * `cache` - an instance of a peer/server cache (`com.gemstone.gemfire.cache.Cache`) or a client cache (`com.gemstone.gemfire.cache.client.ClientCache`);
+ * `regionName` - a name of a region for querying;
+ * `queryString` - a query string^1^;
+ * `queryParameters` - parameters for query execution;
+ * `pageSize` - a size of page (default is 20).
 
-^1^ query string has some limitations. See a limitations section below.
+^1^ query string has some limitations. See a restrictions section below.
 
-*Limitations* 
+Query can be parametrized by an entry type. For example, a paginated query for working with a region that contains entries of a type `Person` can be created this way:
 
-TODO 
+{{{
+PaginatedQuery<Person> query = new PaginatedQuery<Person>(...);
+}}} 
 
-*Paginated query API*
+==Restrictions== 
+
+ # A query string for paginated query can be arbitrarily complex but must return keys of entries that obtained during the query;
+ # For partitioned regions a query string must meet the requirements described in a GemFire documentation for querying partitioned regions.  
+
+==API==
+
+Paginated query support the following methods:
+
+{{{
+public class PaginatedQuery<V> {
+...
+public List<V> page(int pageNumber){...};
+public List<V> next(){...};
+public List<V> previous(){...};
+public boolean hasNext(){...};
+public boolean hasPrevious(){...};
+public int getPageSize(){...};
+public int getTotalNumberOfPages(){...};
+public int getTotalNumberOfEntries(){...};
+...
+}
+}}}
+
+*Where method:*
+
+ * `page(int pageNumber)` - returns entries for a specified page number;
+ * `next()` - returns next to the current page. For the first call of this method it will be a first page;
+ * `previous()` - returns previous to the current page;
+ * `hasNext()` - checks that the query has the next page;
+ * 'hasPrevious()` - checks that query has the previous page;
+ * `getPageSize()` - returns size of page (page size is 20 by default);
+ * `getTotalNumberOfPages()` - returns a total number of query pages;
+ * `getTotalNumberOfEntries()` - returns a total number of query entries.
 
 TODO
 
-*Usage example:*
+==Workflow==
+
+TODO
+
+==Usage example==*
 
 TODO
