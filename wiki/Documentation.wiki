@@ -421,7 +421,7 @@ if (querty.hasNext()) {
 }
 }}}
 
-Get first page of persons from the region `/person` with social number = 534:
+Get first page of persons with social number = 534 from the region `/person`:
 {{{
 ...
 Cache cache = cacheFactory.create();
