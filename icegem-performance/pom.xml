@@ -4,20 +4,20 @@
 	<groupId>com.googlecode.icegem</groupId>
 	<artifactId>icegem-performance</artifactId>
 	<name>Performance</name>
-	<version>0.6-SNAPSHOT</version>
+	<version>0.7-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>com.googlecode.icegem</groupId>
 		<artifactId>icegem-root</artifactId>
-		<version>0.6-SNAPSHOT</version>
+		<version>0.7-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.googlecode.icegem</groupId>
 			<artifactId>icegem-core</artifactId>
-			<version>0.6-SNAPSHOT</version>
+			<version>0.7-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -100,6 +100,12 @@
 					</archive>
 				</configuration>
 			</plugin>
+            <plugin>
+            	<artifactId>maven-deploy-plugin</artifactId>
+            	<configuration>
+            		<skip>true</skip>
+            	</configuration>
+            </plugin>
 		</plugins>
 	</build>
 
