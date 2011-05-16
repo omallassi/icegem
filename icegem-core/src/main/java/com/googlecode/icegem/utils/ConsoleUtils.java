@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * TODO: Will be removed later.
- *
  * Console utils.
  *
  * @author Andrey Stepanov aka standy

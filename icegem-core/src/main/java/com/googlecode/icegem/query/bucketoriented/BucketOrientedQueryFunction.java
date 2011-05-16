@@ -5,7 +5,6 @@ import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
 import com.gemstone.gemfire.cache.query.*;
 import com.gemstone.gemfire.cache.query.internal.DefaultQuery;
 import com.gemstone.gemfire.internal.cache.LocalDataSet;
-import com.googlecode.icegem.query.bucketoriented.QueryFunctionArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +20,11 @@ import java.util.List;
  *
  * @author Andrey Stepanov aka standy
  */
-public class QueryFunction extends FunctionAdapter {
+public class BucketOrientedQueryFunction extends FunctionAdapter {
     /** Field FUNCTION_ID  */
-    private final static String FUNCTION_ID = QueryFunction.class.getName();
+    private final static String FUNCTION_ID = BucketOrientedQueryFunction.class.getName();
     /** Field logger  */
-    private static Logger logger = LoggerFactory.getLogger(QueryFunction.class);
+    private static Logger logger = LoggerFactory.getLogger(BucketOrientedQueryFunction.class);
 
     /**
      * Executes specified via arguments query string.
@@ -33,7 +32,7 @@ public class QueryFunction extends FunctionAdapter {
      * @param functionContext of type FunctionContext
      */
     @Override
-    @SuppressWarnings({"ThrowableInstanceNeverThrown", "unchecked"})
+    @SuppressWarnings({ "ThrowableInstanceNeverThrown", "unchecked" })
     public void execute(FunctionContext functionContext) {
         ResultSender<Serializable> resultSender = functionContext.getResultSender();
         RegionFunctionContext regionFunctionContext = (RegionFunctionContext) functionContext;
@@ -42,12 +41,12 @@ public class QueryFunction extends FunctionAdapter {
             handleException(new FunctionException("You must specify function argument for query execution"), resultSender);
             return;
         }
-        if (!(functionContext.getArguments() instanceof QueryFunctionArgument)) {
-            handleException(new FunctionException("Function arguments must be of QueryFunctionArgument.class"), resultSender);
+        if (!(functionContext.getArguments() instanceof BucketOrientedQueryFunctionArgument)) {
+            handleException(new FunctionException("Function arguments must be of BucketOrientedQueryFunctionArgument.class"), resultSender);
             return;
         }
 
-        QueryFunctionArgument argument = (QueryFunctionArgument) functionContext.getArguments();
+        BucketOrientedQueryFunctionArgument argument = (BucketOrientedQueryFunctionArgument) functionContext.getArguments();
         LocalDataSet localData = (LocalDataSet) PartitionRegionHelper.getLocalDataForContext(regionFunctionContext);
         QueryService queryService = localData.getCache().getQueryService();
 
@@ -72,9 +71,9 @@ public class QueryFunction extends FunctionAdapter {
     }
 
     /**
-     * Method getId returns the id of this QueryFunction object.
+     * Method getId returns the id of this BucketOrientedQueryFunction object.
      *
-     * @return the id (type String) of this QueryFunction object.
+     * @return the id (type String) of this BucketOrientedQueryFunction object.
      */
     @Override
     public String getId() {
@@ -105,7 +104,7 @@ public class QueryFunction extends FunctionAdapter {
      * @param e of type Throwable
      * @param resultSender of type ResultSender<Serializable>
      */
-    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
     private void handleException(Throwable e, ResultSender<Serializable> resultSender) {
         e.printStackTrace();
         logger.warn(e.getMessage());
@@ -118,7 +117,7 @@ public class QueryFunction extends FunctionAdapter {
      * @param selectResults of type SelectResults
      * @return List<Object>
      */
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({ "unchecked" })
     private List<Object> formatResults(SelectResults selectResults) {
         List<Object> results = new ArrayList<Object>(selectResults.size() + 1);
         results.addAll(selectResults.asList());

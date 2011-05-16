@@ -1,4 +1,4 @@
-package itest.com.googlecode.icegem.query.bucketoriented;
+package itest.com.googlecode.icegem.query.common.domain;
 
 import java.io.Serializable;
 import java.util.List;

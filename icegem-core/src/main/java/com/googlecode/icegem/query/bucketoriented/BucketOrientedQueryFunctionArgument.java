@@ -8,7 +8,7 @@ import java.io.Serializable;
  *
  * @author Andrey Stepanov aka standy
  */
-public class QueryFunctionArgument implements Serializable {
+public class BucketOrientedQueryFunctionArgument implements Serializable {
     /** Field serialVersionUID  */
     private static final long serialVersionUID = -2428574227320772082L;
     /** Field queryString  */
@@ -17,29 +17,29 @@ public class QueryFunctionArgument implements Serializable {
     private Object[] queryParameters;
 
     /**
-     * Constructor QueryFunctionArgument creates a new QueryFunctionArgument instance.
+     * Constructor BucketOrientedQueryFunctionArgument creates a new BucketOrientedQueryFunctionArgument instance.
      *
      * @param queryString of type String
      * @param queryParameters of type Object[]
      */
-    public QueryFunctionArgument(String queryString, Object[] queryParameters) {
+    public BucketOrientedQueryFunctionArgument(String queryString, Object[] queryParameters) {
         this.queryString = queryString;
         this.queryParameters = queryParameters;
     }
 
     /**
-     * Method getQueryParameters returns the queryParameters of this QueryFunctionArgument object.
+     * Method getQueryParameters returns the queryParameters of this BucketOrientedQueryFunctionArgument object.
      *
-     * @return the queryParameters (type Object[]) of this QueryFunctionArgument object.
+     * @return the queryParameters (type Object[]) of this BucketOrientedQueryFunctionArgument object.
      */
     public Object[] getQueryParameters() {
         return queryParameters;
     }
 
     /**
-     * Method getQueryString returns the queryString of this QueryFunctionArgument object.
+     * Method getQueryString returns the queryString of this BucketOrientedQueryFunctionArgument object.
      *
-     * @return the queryString (type String) of this QueryFunctionArgument object.
+     * @return the queryString (type String) of this BucketOrientedQueryFunctionArgument object.
      */
     public String getQueryString() {
         return queryString;

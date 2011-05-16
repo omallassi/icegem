@@ -1,6 +1,9 @@
 package com.googlecode.icegem.utils;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -15,8 +18,8 @@ public class JavaProcessLauncher {
      */
     public static final String PROCESS_STARTUP_COMPLETED = "JavaProcessLauncher: startup complete";
 
-    /** Field DEFAULT_PROCESS_STARTUP_TIME  */
-    public static final long DEFAULT_PROCESS_STARTUP_TIME = 5000;
+    /** Field DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME  */
+    public static final long DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME = 5000;
 
     /**
      * Constructor JavaProcessLauncher creates a new JavaProcessLauncher instance.
@@ -35,7 +38,22 @@ public class JavaProcessLauncher {
      * @throws InterruptedException when
      */
     public Process runWithConfirmation(Class klass) throws IOException, InterruptedException {
-        Process process = startProcess(klass);
+        return runWithConfirmation(klass, null);
+    }
+
+    /**
+     * Runs process based on a specified class in a separate VM using array of arguments.
+     * To confirm that process completes startup it should write a startup completed string
+     * into it's standard output.
+     *
+     * @param klass of type Class
+     * @param args start arguments
+     * @return Process
+     * @throws IOException when
+     * @throws InterruptedException when
+     */
+    public Process runWithConfirmation(Class klass, String[] args) throws IOException, InterruptedException {
+        Process process = startProcess(klass, args);
         System.out.println("Wait startup complete confirmation for process (" + klass.getCanonicalName() + ")...");
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -44,6 +62,7 @@ public class JavaProcessLauncher {
             if (line.equals(PROCESS_STARTUP_COMPLETED)) {
                 return process;
             }
+            System.err.println(line);
         }
         throw new InterruptedException("Process (" + klass.getCanonicalName() + ") " +
                 "has been already finished without startup complete confirmation");
@@ -78,7 +97,7 @@ public class JavaProcessLauncher {
      * @throws TimeoutException if process startup is not completed in time.
      */
     public Process runWithStartupDelay(Class klass) throws IOException, InterruptedException, TimeoutException {
-        return runWithStartupDelay(klass, DEFAULT_PROCESS_STARTUP_TIME);
+        return runWithStartupDelay(klass, DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME);
     }
 
     /**
@@ -100,8 +119,6 @@ public class JavaProcessLauncher {
         return process;
     }
 
-
-
     /**
      * Stops process by sending new line to it's output stream.
      *
@@ -110,8 +127,20 @@ public class JavaProcessLauncher {
      * @param process of type Process
      * @throws IOException when
      */
+    public void stopBySendingNewLineIntoProcess(Process process) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+        writer.newLine();
+        writer.flush();
+    }
+
+    /**
+     * Stops process by sending new line to it's output stream.
+     *
+     * @param process of type Process
+     * @throws IOException when
+     */
     public void stop(Process process) throws IOException {
-        new BufferedWriter(new OutputStreamWriter(process.getOutputStream())).newLine();
+        process.destroy();
     }
 
     /**
@@ -124,17 +153,29 @@ public class JavaProcessLauncher {
      * @throws InterruptedException when
      */
     private Process startProcess(Class klass) throws IOException, InterruptedException {
+        return startProcess(klass, null);
+    }
+
+    private Process startProcess(Class klass, String[] args) throws IOException, InterruptedException {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome +
                 File.separator + "bin" +
                 File.separator + "java";
         String classpath = System.getProperty("java.class.path");
 
-        ProcessBuilder builder = new ProcessBuilder(
-                javaBin, "-cp", classpath, klass.getCanonicalName());
+        List<String> arguments = new ArrayList<String>();
+        arguments.add(javaBin);
+        arguments.add("-cp");
+        arguments.add(classpath);
+        arguments.add(klass.getCanonicalName());
+        if (args != null && args.length > 0) {
+            arguments.addAll(Arrays.asList(args));
+        }
+
+        ProcessBuilder builder = new ProcessBuilder(arguments);
 
         Process process = builder.start();
-        new StreamRedirector(process.getErrorStream(), "ERROR").start();
+        new StreamRedirector(process.getErrorStream(), klass.getSimpleName()).start();
         return process;
     }
 
