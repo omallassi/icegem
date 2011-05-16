@@ -130,13 +130,13 @@ public class PaginatedQueryTest {
     public void testPageMethodForEmptyResults() throws NameResolutionException, FunctionDomainException, QueryInvocationTargetException, TypeMismatchException {
         String queryString = "SELECT * FROM /data.keySet";
         int pageSize = 20;
-        PaginatedQuery query = new PaginatedQuery(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
 
         int pageNumber = 1;
         pageKey.setPageNumber(pageNumber);
 
-        List<Object> pageEntries = query.page(pageNumber);
+        List<Person> pageEntries = query.page(pageNumber);
 
         List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
         Assertions.assertThat(pageKeys != null).as("Paginated query has not been stored").isTrue();
@@ -151,13 +151,13 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, numberOfEntriesForPopulation);
         String queryString = "SELECT * FROM /data.keySet";
         int pageSize = 20;
-        PaginatedQuery query = new PaginatedQuery(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
 
         int pageNumber = 1;
         pageKey.setPageNumber(pageNumber);
 
-        List<Object> pageEntries = query.page(pageNumber);
+        List<Person> pageEntries = query.page(pageNumber);
 
         List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
         Assertions.assertThat(pageKeys != null).as("Paginated query has not been stored").isTrue();
@@ -171,8 +171,8 @@ public class PaginatedQueryTest {
         Assertions.assertThat(pageEntries.size()).as("Number of paginated entries for the first page was not correct").isEqualTo(numberOfEntriesForPopulation);
         Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1)).as("The first page does not contain entry with key = 1").isTrue();
         Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(pageEntries, 10)).as("The first page does not contain entry with key = 10").isTrue();
-        Assertions.assertThat(((Person) pageEntries.get(0)).getSocialNumber()).as("The first page contains entry with key = 1 on the wrong position").isEqualTo(1);
-        Assertions.assertThat(((Person) pageEntries.get(9)).getSocialNumber()).as("The first page contains entry with key = 10 on the wrong position").isEqualTo(10);
+        Assertions.assertThat(pageEntries.get(0).getSocialNumber()).as("The first page contains entry with key = 1 on the wrong position").isEqualTo(1);
+        Assertions.assertThat(pageEntries.get(9).getSocialNumber()).as("The first page contains entry with key = 10 on the wrong position").isEqualTo(10);
     }
 
     @Test
@@ -180,13 +180,13 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 100);
         String queryString = "SELECT * FROM /data.keySet";
         int pageSize = 20;
-        PaginatedQuery query = new PaginatedQuery(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
 
         int pageNumber = 1;
         pageKey.setPageNumber(pageNumber);
 
-        List<Object> pageEntries = query.page(pageNumber);
+        List<Person> pageEntries = query.page(pageNumber);
 
         List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
         Assertions.assertThat(pageKeys != null).as("Paginated query has not been stored").isTrue();
@@ -200,8 +200,8 @@ public class PaginatedQueryTest {
         Assertions.assertThat(pageEntries.size()).as("Number of paginated entries for the first page was not correct").isEqualTo(pageSize);
         Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1)).as("The first page does not contain entry with key = 1").isTrue();
         Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(pageEntries, 20)).as("The first page does not contain entry with key = 20").isTrue();
-        Assertions.assertThat(((Person) pageEntries.get(0)).getSocialNumber()).as("The first page contains entry with key = 1 on the wrong position").isEqualTo(1);
-        Assertions.assertThat(((Person) pageEntries.get(19)).getSocialNumber()).as("The first page contains entry with key = 20 on the wrong position").isEqualTo(20);
+        Assertions.assertThat(pageEntries.get(0).getSocialNumber()).as("The first page contains entry with key = 1 on the wrong position").isEqualTo(1);
+        Assertions.assertThat(pageEntries.get(19).getSocialNumber()).as("The first page contains entry with key = 20 on the wrong position").isEqualTo(20);
 
         pageNumber = 5;
         pageKey.setPageNumber(pageNumber);
@@ -219,8 +219,8 @@ public class PaginatedQueryTest {
         Assertions.assertThat(pageEntries.size()).as("Number of paginated entries for the fifth page was not correct").isEqualTo(pageSize);
         Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(pageEntries, 81)).as("The fifth page does not contain entry with key = 81").isTrue();
         Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(pageEntries, 100)).as("The fifth page does not contain entry with key = 100").isTrue();
-        Assertions.assertThat(((Person) pageEntries.get(0)).getSocialNumber()).as("The fifth page contains entry with key = 81 on the wrong position").isEqualTo(81);
-        Assertions.assertThat(((Person) pageEntries.get(19)).getSocialNumber()).as("The fifth page contains entry with key = 100 on the wrong position").isEqualTo(100);
+        Assertions.assertThat(pageEntries.get(0).getSocialNumber()).as("The fifth page contains entry with key = 81 on the wrong position").isEqualTo(81);
+        Assertions.assertThat(pageEntries.get(19).getSocialNumber()).as("The fifth page contains entry with key = 100 on the wrong position").isEqualTo(100);
     }
 
     @Test
@@ -228,16 +228,16 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 100);
         String queryString = "SELECT * FROM /data.keySet";
         int pageSize = 20;
-        PaginatedQuery query = new PaginatedQuery(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
 
         int pageNumber = 1;
 
-        List<Object> pageEntries = query.page(pageNumber);
-        List<Object> pageEntriesUsingNext = query.next();
+        List<Person> pageEntries = query.page(pageNumber);
+        List<Person> pageEntriesUsingNext = query.next();
 
         Assertions.assertThat(pageEntriesUsingNext.size()).as("Number of paginated entries for the next page was not correct").isEqualTo(pageSize);
-        Assertions.assertThat(((Person) pageEntriesUsingNext.get(0)).getSocialNumber()).as("The next page contains entry with key = 1 on the wrong position").isEqualTo(1);
-        Assertions.assertThat(((Person) pageEntriesUsingNext.get(19)).getSocialNumber()).as("The next page contains entry with key = 20 on the wrong position").isEqualTo(20);
+        Assertions.assertThat(pageEntriesUsingNext.get(0).getSocialNumber()).as("The next page contains entry with key = 1 on the wrong position").isEqualTo(1);
+        Assertions.assertThat(pageEntriesUsingNext.get(19).getSocialNumber()).as("The next page contains entry with key = 20 on the wrong position").isEqualTo(20);
         Assertions.assertThat(pageEntriesUsingNext).as("Query results from page and next methods were not the same").isEqualTo(pageEntries);
 
         pageNumber = 2;
@@ -245,8 +245,8 @@ public class PaginatedQueryTest {
         pageEntriesUsingNext = query.next();
 
         Assertions.assertThat(pageEntriesUsingNext.size()).as("Number of paginated entries for the next page was not correct").isEqualTo(pageSize);
-        Assertions.assertThat(((Person) pageEntriesUsingNext.get(0)).getSocialNumber()).as("The next page contains entry with key = 21 on the wrong position").isEqualTo(21);
-        Assertions.assertThat(((Person) pageEntriesUsingNext.get(19)).getSocialNumber()).as("The next page contains entry with key = 40 on the wrong position").isEqualTo(40);
+        Assertions.assertThat(pageEntriesUsingNext.get(0).getSocialNumber()).as("The next page contains entry with key = 21 on the wrong position").isEqualTo(21);
+        Assertions.assertThat(pageEntriesUsingNext.get(19).getSocialNumber()).as("The next page contains entry with key = 40 on the wrong position").isEqualTo(40);
         Assertions.assertThat(pageEntriesUsingNext).as("Query results from page and next methods were not the same").isEqualTo(pageEntries);
     }
 
@@ -271,20 +271,20 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 100);
         String queryString = "SELECT * FROM /data.keySet";
         int pageSize = 20;
-        PaginatedQuery query = new PaginatedQuery(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
 
         query.next();
         query.next();
         query.next();
 
         int pageNumber = 2;
-        List<Object> pageEntries = query.page(pageNumber);
+        List<Person> pageEntries = query.page(pageNumber);
 
-        List<Object> pageEntriesUsingPrevious = query.previous();
+        List<Person> pageEntriesUsingPrevious = query.previous();
 
         Assertions.assertThat(pageEntriesUsingPrevious.size()).as("Number of paginated entries for the previous page was not correct").isEqualTo(pageSize);
-        Assertions.assertThat(((Person) pageEntriesUsingPrevious.get(0)).getSocialNumber()).as("The previous page contains entry with key = 21 on the wrong position").isEqualTo(21);
-        Assertions.assertThat(((Person) pageEntriesUsingPrevious.get(19)).getSocialNumber()).as("The previous page contains entry with key = 40 on the wrong position").isEqualTo(40);
+        Assertions.assertThat(pageEntriesUsingPrevious.get(0).getSocialNumber()).as("The previous page contains entry with key = 21 on the wrong position").isEqualTo(21);
+        Assertions.assertThat(pageEntriesUsingPrevious.get(19).getSocialNumber()).as("The previous page contains entry with key = 40 on the wrong position").isEqualTo(40);
         Assertions.assertThat(pageEntriesUsingPrevious).as("Query results from page and previous methods were not the same").isEqualTo(pageEntries);
 
         pageNumber = 1;
@@ -292,8 +292,8 @@ public class PaginatedQueryTest {
         pageEntriesUsingPrevious = query.previous();
 
         Assertions.assertThat(pageEntriesUsingPrevious.size()).as("Number of paginated entries for the previous page was not correct").isEqualTo(pageSize);
-        Assertions.assertThat(((Person) pageEntriesUsingPrevious.get(0)).getSocialNumber()).as("The previous page contains entry with key = 1 on the wrong position").isEqualTo(1);
-        Assertions.assertThat(((Person) pageEntriesUsingPrevious.get(19)).getSocialNumber()).as("The previous page contains entry with key = 20 on the wrong position").isEqualTo(20);
+        Assertions.assertThat(pageEntriesUsingPrevious.get(0).getSocialNumber()).as("The previous page contains entry with key = 1 on the wrong position").isEqualTo(1);
+        Assertions.assertThat(pageEntriesUsingPrevious.get(19).getSocialNumber()).as("The previous page contains entry with key = 20 on the wrong position").isEqualTo(20);
         Assertions.assertThat(pageEntriesUsingPrevious).as("Query results from page and previous methods were not the same").isEqualTo(pageEntries);
     }
 
@@ -332,7 +332,7 @@ public class PaginatedQueryTest {
         String queryString = "SELECT e.key FROM /data.entrySet e WHERE e.value.socialNumber = $1";
         PaginatedQuery query = new PaginatedQuery(cache, "data", queryString, new Object[]{1});
 
-        List<Object> pageEntries = query.page(1);
+        List pageEntries = query.page(1);
 
         Assertions.assertThat(pageEntries.size()).as("Number of paginated entries for the first page was not correct").isEqualTo(1);
         Assertions.assertThat(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1)).as("The first page does not contain entry with key = 1").isTrue();

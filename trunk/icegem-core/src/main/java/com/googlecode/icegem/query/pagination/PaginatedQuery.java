@@ -9,7 +9,12 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
- * Query that support pagination.
+ * This component allows to execute paginated queries both from client and peer/server sides.
+ * It caches paginated query results in a help region and allows to iterate on them using paginated query API.
+ * 
+ * Query results can be sorted by keys, if key object implements Comparable interface.
+ * @see Comparable
+ *
  * This query can be used both on client and server sides.
  *
  * LIMITATIONS:
@@ -17,15 +22,13 @@ import java.util.*;
  *
  * @author Andrey Stepanov aka standy
  */
-public class PaginatedQuery {
+public class PaginatedQuery<V> {
     /** page size by default  */
     public static final int DEFAULT_PAGE_SIZE = 20;
-    /** number of page that will be store general information about paginated query (e.g. total number of entries) */
+    /** number of page that will be store general information about paginated query (e.g. total number of query entries) */
     public static final int PAGE_NUMBER_FOR_GENERAL_INFO = -1;
     /** name of a help region for storing information about paginated queries  */
     public static final String PAGINATED_QUERY_INFO_REGION_NAME = "paginated_query_info";
-    /** Field logger  */
-    private Logger logger = LoggerFactory.getLogger(PaginatedQuery.class);
     /** common key for query pages */
     private PaginatedQueryPageKey pageKey;
     /** Field totalNumberOfEntries  */
@@ -35,12 +38,14 @@ public class PaginatedQuery {
     /** Field queryService  */
     private QueryService queryService;
     /** region for querying  */
-    private Region<Object, Object> queryRegion;
+    private Region<Object, V> queryRegion;
     /** help region for storing information about paginated queries  */
     private Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
+    /** Field logger  */
+    private Logger logger = LoggerFactory.getLogger(PaginatedQuery.class);
 
     /**
-     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     * Creates a new PaginatedQuery instance.
      *
      * @param cache peer/server of client cache
      * @param regionName name of region for querying
@@ -52,7 +57,7 @@ public class PaginatedQuery {
     }
 
     /**
-     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     * Creates a new PaginatedQuery instance.
      *
      * @param cache peer/server of client cache
      * @param regionName name of region for querying
@@ -65,7 +70,7 @@ public class PaginatedQuery {
     }
 
     /**
-     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     * Creates a new PaginatedQuery instance.
      *
      * @param cache peer/server of client cache
      * @param regionName name of region for querying
@@ -78,7 +83,7 @@ public class PaginatedQuery {
     }
 
     /**
-     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     * Creates a new PaginatedQuery instance.
      *
      * @param cache peer/server of client cache
      * @param regionName name of region for querying
@@ -108,17 +113,17 @@ public class PaginatedQuery {
     }
 
     /**
-     * Return entries for specified page number.
+     * Return entries for a specified page number.
      * Use getTotalNumberOfPages() method to know how many pages this query has.
      *
-     * @param pageNumber of type int
-     * @return List<Object> list of entries
+     * @param pageNumber number of page to return
+     * @return List<V> list of entries
      * @throws FunctionDomainException when
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
      * @throws NameResolutionException when
      */
-    public List<Object> page(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
+    public List<V> page(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         storePaginatedQueryInfoIfNeeded();
         if (!pageNumberExists(pageNumber)) {
             IndexOutOfBoundsException exception = new IndexOutOfBoundsException("A page number {" + pageNumber + "} " +
@@ -129,27 +134,27 @@ public class PaginatedQuery {
         pageKey.setPageNumber(pageNumber);
         List<Object> entriesKeysForPage = paginatedQueryInfoRegion.get(pageKey);
 
-        return entriesKeysForPage != null ? getSortedValues(entriesKeysForPage) : new ArrayList<Object>(0);
+        return entriesKeysForPage != null ? getSortedValues(entriesKeysForPage) : new ArrayList<V>(0);
     }
 
     /**
-     * Return next to current page.
+     * Return next to the current page.
      * For the first call of this method it will be a first page.
-     * Use hasNext() method to check that the query has next page.
+     * Use hasNext() method to check that the query has a next page.
      *
-     * @return List<Object> list of entries
+     * @return List<V> list of entries
      * @throws FunctionDomainException when
      * @throws QueryInvocationTargetException when
      * @throws TypeMismatchException when
      * @throws NameResolutionException when
      */
-    public List<Object> next() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+    public List<V> next() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         return page(++currentPageNumber);
     }
 
     /**
-     * Return previous to current page.
-     * Use hasPrevious() method to check that the query has previous page.
+     * Return previous to the current page.
+     * Use hasPrevious() method to check that the query has a previous page.
      *
      * @return List<Object> list of entries
      * @throws FunctionDomainException when
@@ -157,14 +162,14 @@ public class PaginatedQuery {
      * @throws TypeMismatchException when
      * @throws NameResolutionException when
      */
-    public List<Object> previous() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+    public List<V> previous() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         return page(--currentPageNumber);
     }
 
     /**
-     * Returns total number of query entries.
+     * Returns a total number of query entries.
      *
-     * @return the totalNumberOfEntries (type int) of this PaginatedQuery object.
+     * @return total number of entries
      * @throws FunctionDomainException when
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
@@ -178,7 +183,7 @@ public class PaginatedQuery {
     /**
      * Returns total number of query pages.
      *
-     * @return the totalNumberOfPages (type int) of this PaginatedQuery object.
+     * @return total number of pages
      * @throws FunctionDomainException when
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
@@ -199,7 +204,7 @@ public class PaginatedQuery {
     /**
      * Returns size of page.
      *
-     * @return the pageSize (type int) of this PaginatedQuery object.
+     * @return page size
      * @throws FunctionDomainException when
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
@@ -224,7 +229,7 @@ public class PaginatedQuery {
 
     /**
      * Checks that query has previous page.
-     * 
+     *
      * @return boolean
      * @throws FunctionDomainException when
      * @throws QueryInvocationTargetException when
@@ -236,26 +241,30 @@ public class PaginatedQuery {
     }
 
     /**
-     * Returns sorted values for given keys.
+     * Returns sorted by keys values for given keys.
+     * Values will be sorted by keys, if keys implement Comparable interface.
      *
      * @param entriesKeysForPage of type List<Object>
-     * @return List<Object>
+     * @return List<V>
      */
     @SuppressWarnings({ "unchecked" })
-    private List<Object> getSortedValues(List<Object> entriesKeysForPage) {
+    private List<V> getSortedValues(List<Object> entriesKeysForPage) {
         if (entriesKeysForPage.size() == 0) {
-            return new ArrayList<Object>(0);
+            return new ArrayList<V>(0);
         }
-        Map<Object, Object> entries = queryRegion.getAll(entriesKeysForPage);
+        Map<Object, V> entries = queryRegion.getAll(entriesKeysForPage);
         List<Object> keys = new ArrayList<Object>(entries.keySet());
-        if (keys.get(0) instanceof Comparable) {
-            Collections.sort(keys, new Comparator<Object>() {
-                public int compare(Object o1, Object o2) {
-                    return ((Comparable) o1).compareTo(o2);
-                }
-            });
+
+        if (!(keys.get(0) instanceof Comparable)) {
+            return new ArrayList<V> (entries.values());
         }
-        List<Object> values = new ArrayList<Object>(entries.size());
+        
+        Collections.sort(keys, new Comparator<Object>() {
+            public int compare(Object o1, Object o2) {
+                return ((Comparable) o1).compareTo(o2);
+            }
+        });
+        List<V> values = new ArrayList<V>(entries.size());
         for (Object key : keys) {
             values.add(entries.get(key));
         }
@@ -277,7 +286,7 @@ public class PaginatedQuery {
     }
 
     /**
-     * Stores paginated query info if it was not stored.
+     * Stores paginated query info if it has not been stored yet.
      *
      * @throws FunctionDomainException when
      * @throws QueryInvocationTargetException when
@@ -294,12 +303,6 @@ public class PaginatedQuery {
             SelectResults<Object> results = (SelectResults<Object>) query.execute(pageKey.getQueryParameters());
             storePaginatedQueryPagesAndGeneralInfo(results.asList());
         }
-    }
-
-    private void storePaginatedQueryGeneralInfo(int totalNumberOfEntries) {
-        pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
-        paginatedQueryInfoRegion.put(pageKey, Arrays.asList((Object) totalNumberOfEntries));
-        this.totalNumberOfEntries = totalNumberOfEntries;
     }
 
     /**
@@ -335,11 +338,22 @@ public class PaginatedQuery {
         if (pageKeys.size() > 0 || pageNumber == 0) {
             pageKey.setPageNumber(++pageNumber);
             paginatedQueryInfoRegion.put(pageKey, pageKeys);
-        }                    
+        }
     }
 
     /**
-     * Checks that region is empty.
+     * Stores paginated query general info (total number of query entries).
+     *
+     * @param totalNumberOfEntries of type int
+     */
+    private void storePaginatedQueryGeneralInfo(int totalNumberOfEntries) {
+        pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
+        paginatedQueryInfoRegion.put(pageKey, Arrays.asList((Object) totalNumberOfEntries));
+        this.totalNumberOfEntries = totalNumberOfEntries;
+    }
+
+    /**
+     * Checks that query doesn't have results.
      *
      * @return the empty (type boolean) of this PaginatedQuery object.
      */
