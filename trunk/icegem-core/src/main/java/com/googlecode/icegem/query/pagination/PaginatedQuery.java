@@ -15,8 +15,6 @@ import java.util.*;
  * LIMITATIONS:
  * Query string that will be used for this paginated query must return entry keys.
  *
- * TODO: javadocs will be added soon.
- *
  * @author Andrey Stepanov aka standy
  */
 public class PaginatedQuery {
@@ -41,18 +39,54 @@ public class PaginatedQuery {
     /** help region for storing information about paginated queries  */
     private Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
 
+    /**
+     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server of client cache
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
     public PaginatedQuery(GemFireCache cache, String regionName, String queryString) throws RegionNotFoundException {
         this(cache, regionName, queryString, DEFAULT_PAGE_SIZE);
     }
 
+    /**
+     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server of client cache
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @param pageSize size of page
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
     public PaginatedQuery(GemFireCache cache, String regionName, String queryString, int pageSize) throws RegionNotFoundException {
         this(cache, regionName, queryString, new Object[]{}, pageSize);
     }
 
+    /**
+     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server of client cache
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @param queryParameters parameters for query execution
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
     public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters) throws RegionNotFoundException {
         this(cache, regionName, queryString, queryParameters, DEFAULT_PAGE_SIZE);
     }
 
+    /**
+     * Constructor PaginatedQuery creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server of client cache
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @param queryParameters parameters for query execution
+     * @param pageSize size of page
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
     public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters, int pageSize) throws RegionNotFoundException {
         queryService = cache.getQueryService();
 
@@ -73,6 +107,17 @@ public class PaginatedQuery {
         pageKey = new PaginatedQueryPageKey(queryString, queryParameters, pageSize);
     }
 
+    /**
+     * Return entries for specified page number.
+     * Use getTotalNumberOfPages() method to know how many pages this query has.
+     *
+     * @param pageNumber of type int
+     * @return List<Object> list of entries
+     * @throws FunctionDomainException when
+     * @throws TypeMismatchException when
+     * @throws QueryInvocationTargetException when
+     * @throws NameResolutionException when
+     */
     public List<Object> page(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         storePaginatedQueryInfoIfNeeded();
         if (!pageNumberExists(pageNumber)) {
@@ -87,19 +132,58 @@ public class PaginatedQuery {
         return entriesKeysForPage != null ? getSortedValues(entriesKeysForPage) : new ArrayList<Object>(0);
     }
 
+    /**
+     * Return next to current page.
+     * For the first call of this method it will be a first page.
+     * Use hasNext() method to check that the query has next page.
+     *
+     * @return List<Object> list of entries
+     * @throws FunctionDomainException when
+     * @throws QueryInvocationTargetException when
+     * @throws TypeMismatchException when
+     * @throws NameResolutionException when
+     */
     public List<Object> next() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         return page(++currentPageNumber);
     }
 
+    /**
+     * Return previous to current page.
+     * Use hasPrevious() method to check that the query has previous page.
+     *
+     * @return List<Object> list of entries
+     * @throws FunctionDomainException when
+     * @throws QueryInvocationTargetException when
+     * @throws TypeMismatchException when
+     * @throws NameResolutionException when
+     */
     public List<Object> previous() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         return page(--currentPageNumber);
     }
 
+    /**
+     * Returns total number of query entries.
+     *
+     * @return the totalNumberOfEntries (type int) of this PaginatedQuery object.
+     * @throws FunctionDomainException when
+     * @throws TypeMismatchException when
+     * @throws QueryInvocationTargetException when
+     * @throws NameResolutionException when
+     */
     public int getTotalNumberOfEntries() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         storePaginatedQueryInfoIfNeeded();
         return totalNumberOfEntries;
     }
 
+    /**
+     * Returns total number of query pages.
+     *
+     * @return the totalNumberOfPages (type int) of this PaginatedQuery object.
+     * @throws FunctionDomainException when
+     * @throws TypeMismatchException when
+     * @throws QueryInvocationTargetException when
+     * @throws NameResolutionException when
+     */
     public int getTotalNumberOfPages() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         storePaginatedQueryInfoIfNeeded();
         if (isEmpty()) {
@@ -112,18 +196,51 @@ public class PaginatedQuery {
         return total;
     }
 
+    /**
+     * Returns size of page.
+     *
+     * @return the pageSize (type int) of this PaginatedQuery object.
+     * @throws FunctionDomainException when
+     * @throws TypeMismatchException when
+     * @throws QueryInvocationTargetException when
+     * @throws NameResolutionException when
+     */
     public int getPageSize() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         return pageKey.getPageSize();
     }
 
+    /**
+     * Checks that query has next page.
+     *
+     * @return boolean
+     * @throws FunctionDomainException when
+     * @throws QueryInvocationTargetException when
+     * @throws TypeMismatchException when
+     * @throws NameResolutionException when
+     */
     public boolean hasNext() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         return pageNumberExists(currentPageNumber + 1);
     }
 
+    /**
+     * Checks that query has previous page.
+     * 
+     * @return boolean
+     * @throws FunctionDomainException when
+     * @throws QueryInvocationTargetException when
+     * @throws TypeMismatchException when
+     * @throws NameResolutionException when
+     */
     public boolean hasPrevious() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         return pageNumberExists(currentPageNumber - 1);
     }
 
+    /**
+     * Returns sorted values for given keys.
+     *
+     * @param entriesKeysForPage of type List<Object>
+     * @return List<Object>
+     */
     @SuppressWarnings({ "unchecked" })
     private List<Object> getSortedValues(List<Object> entriesKeysForPage) {
         if (entriesKeysForPage.size() == 0) {
@@ -145,10 +262,28 @@ public class PaginatedQuery {
         return values;
     }
 
+    /**
+     * Checks that a specified page number exists.
+     *
+     * @param pageNumber of type int
+     * @return boolean
+     * @throws FunctionDomainException when
+     * @throws TypeMismatchException when
+     * @throws QueryInvocationTargetException when
+     * @throws NameResolutionException when
+     */
     private boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         return !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
     }
 
+    /**
+     * Stores paginated query info if it was not stored.
+     *
+     * @throws FunctionDomainException when
+     * @throws QueryInvocationTargetException when
+     * @throws TypeMismatchException when
+     * @throws NameResolutionException when
+     */
     @SuppressWarnings({ "unchecked" })
     private void storePaginatedQueryInfoIfNeeded() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
@@ -157,7 +292,7 @@ public class PaginatedQuery {
         if (paginatedQueryGeneralInfo == null) {
             Query query = queryService.newQuery(pageKey.getQueryString());
             SelectResults<Object> results = (SelectResults<Object>) query.execute(pageKey.getQueryParameters());
-            storePaginatedQueryResultsInfo(results.asList());
+            storePaginatedQueryPagesAndGeneralInfo(results.asList());
         }
     }
 
@@ -167,8 +302,13 @@ public class PaginatedQuery {
         this.totalNumberOfEntries = totalNumberOfEntries;
     }
 
+    /**
+     * Stores paginated query pages and general info.
+     *
+     * @param keys of type List<Object>
+     */
     @SuppressWarnings({ "unchecked" })
-    private void storePaginatedQueryResultsInfo(List<Object> keys) {
+    private void storePaginatedQueryPagesAndGeneralInfo(List<Object> keys) {
         storePaginatedQueryGeneralInfo(keys.size());
 
         if (keys.size() > 0 && keys.get(0) instanceof Comparable) {
@@ -198,6 +338,11 @@ public class PaginatedQuery {
         }                    
     }
 
+    /**
+     * Checks that region is empty.
+     *
+     * @return the empty (type boolean) of this PaginatedQuery object.
+     */
     private boolean isEmpty() {
         return totalNumberOfEntries == 0;
     }
