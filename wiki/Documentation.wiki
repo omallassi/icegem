@@ -359,6 +359,13 @@ Query can be parametrized by an entry type. For example, a paginated query for w
 PaginatedQuery<Person> query = new PaginatedQuery<Person>(...);
 }}} 
 
+==Requirements==
+
+ # Member (client or peer/server) that wants to use a paginated query must have in it's local cache:
+  * region for querying;
+  * help region with name `PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME` for storing information about paginated queries. Expiration policy should be configured for this region. This region can be partitioned or replicated.  
+ # All members that store help region must have `icegem-core.jar` in it's ClassPath.
+
 ==Restrictions== 
 
  # A query string for paginated query can be arbitrarily complex but must return keys of entries that obtained during the query;
@@ -394,12 +401,15 @@ public int getTotalNumberOfEntries(){...};
  * `getTotalNumberOfPages()` - returns a total number of query pages;
  * `getTotalNumberOfEntries()` - returns a total number of query entries.
 
-TODO
-
 ==Workflow==
 
-TODO
+ # Using one of particular constructors member creates a paginated query based on a specified set of parameters.
+ # When the member invokes any of paginated query API methods (except `getPageSize()`) the query executes and it's results are stored into a help region. It happens only if query execution results have not been saved before. Otherwise query results loaded from the help region.
+ # Cached query results can be used during some period of time (depends on configuration of expiration policy for the help region). After this time query information will be expired and next time the query will be executed and results will be cached again. 
 
-==Usage example==*
+==Usage example==
 
-TODO
+Get first 10 persons from the region /person:
+{{{
+
+}}}
