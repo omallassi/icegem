@@ -178,7 +178,7 @@ public class BucketOrientedQueryServiceTest {
      * @throws InterruptedException when
      */
     private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class, new String[]{CacheUtils.START_EMBEDDED_LOCATOR_COMMAND});
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class);
         cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
     }
 
@@ -187,7 +187,7 @@ public class BucketOrientedQueryServiceTest {
      *
      * @throws IOException when
      */
-    private void stopCacheServers() throws IOException {
+    private void stopCacheServers() throws IOException, InterruptedException {
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }

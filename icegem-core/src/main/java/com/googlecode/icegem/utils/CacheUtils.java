@@ -11,6 +11,7 @@ import com.googlecode.icegem.utils.function.ClearPartitionedRegionFunction;
  * @author Andrey Stepanov aka standy
  */
 public class CacheUtils {
+    /** Field START_EMBEDDED_LOCATOR_COMMAND  */
     public static final String START_EMBEDDED_LOCATOR_COMMAND = "-startEmbeddedLocator";
     /**
      * Clears partitioned region.

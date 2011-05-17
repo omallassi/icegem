@@ -37,6 +37,7 @@ public class ClearPartitionedRegionFunction extends FunctionAdapter {
         for (Object key : keys) {
             region.destroy(key);
         }
+        System.out.println("Cleared");
         rs.lastResult(true);
     }
 

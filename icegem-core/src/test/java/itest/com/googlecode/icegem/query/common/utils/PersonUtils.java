@@ -21,7 +21,7 @@ public class PersonUtils {
      */
     public static boolean containsPersonWithSocialNumber(List<?> results, int socialNumber) {
         for (Object result : results) {
-            if (((Person)result).getSocialNumber() == socialNumber) {
+            if (((Person) result).getSocialNumber() == socialNumber) {
                 return true;
             }
         }
@@ -33,7 +33,7 @@ public class PersonUtils {
      *
      * @param region of type Region<Object, Object>
      * @param numberOfEntries number of entries for population
-     */
+     */   
     public static void populateRegionByPersons(Region<Object, Object> region, int numberOfEntries) {
         for (int i = 1; i <= numberOfEntries; i++) {
             region.put(i, new Person(i, Arrays.asList(Integer.toString(i), Integer.toString(i*2))));
