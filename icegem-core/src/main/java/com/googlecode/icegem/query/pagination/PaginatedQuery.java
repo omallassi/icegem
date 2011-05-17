@@ -126,10 +126,8 @@ public class PaginatedQuery<V> {
     public List<V> page(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         storePaginatedQueryInfoIfNeeded();
         if (!pageNumberExists(pageNumber)) {
-            IndexOutOfBoundsException exception = new IndexOutOfBoundsException("A page number {" + pageNumber + "} " +
+            throw new IndexOutOfBoundsException("A page number {" + pageNumber + "} " +
                     "was out of bounds: [1, " + getTotalNumberOfPages() + "]");
-            logger.warn(exception.getMessage());
-            throw exception;
         }
         pageKey.setPageNumber(pageNumber);
         List<Object> entriesKeysForPage = paginatedQueryInfoRegion.get(pageKey);
