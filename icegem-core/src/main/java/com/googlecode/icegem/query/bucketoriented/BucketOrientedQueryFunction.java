@@ -24,7 +24,7 @@ public class BucketOrientedQueryFunction extends FunctionAdapter {
     /** Field FUNCTION_ID  */
     private final static String FUNCTION_ID = BucketOrientedQueryFunction.class.getName();
     /** Field logger  */
-    private static Logger logger = LoggerFactory.getLogger(BucketOrientedQueryFunction.class);
+    private Logger logger = LoggerFactory.getLogger(BucketOrientedQueryFunction.class);
 
     /**
      * Executes specified via arguments query string.
