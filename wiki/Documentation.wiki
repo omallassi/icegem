@@ -361,9 +361,13 @@ PaginatedQuery<Person> query = new PaginatedQuery<Person>(...);
 
 ==Requirements==
 
- # Member (client or peer/server) that wants to use a paginated query must have in it's local cache:
+ # Member (client or peer/server) that wants to execute paginated queries must have in it's local cache:
   * region for querying;
-  * help region with name `PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME` for storing information about paginated queries. Expiration policy should be configured for this region. This region can be partitioned or replicated.  
+  * help region with name `PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME` for storing information about paginated queries. Expiration policy should be configured for this region. This region can be partitioned or replicated and must have the following configuration:
+{{{ 
+Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
+}}}  
+
  # All members that store help region must have `icegem-core.jar` in it's ClassPath.
 
 ==Restrictions== 
@@ -400,6 +404,9 @@ public int getTotalNumberOfEntries(){...};
  * `getPageSize()` - returns size of page (page size is 20 by default);
  * `getTotalNumberOfPages()` - returns a total number of query pages;
  * `getTotalNumberOfEntries()` - returns a total number of query entries.
+
+==Ordering of results==
+Query results can be ordered by entry keys, if a key object implements `java.lang.Comparable` interface.
 
 ==Workflow==
 
