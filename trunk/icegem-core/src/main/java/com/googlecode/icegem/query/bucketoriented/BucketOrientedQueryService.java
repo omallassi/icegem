@@ -105,11 +105,6 @@ public class BucketOrientedQueryService {
         return new int[] { Integer.parseInt(limitNumber.trim()), limitIndex };
     }
 
-    private static String extractRegionName(String queryString) {
-        // TODO
-        return null;
-    }
-
     /**
      * Collects and formats query results into SelectResults. Limits query results based on limit value.
      * 

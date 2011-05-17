@@ -35,7 +35,7 @@ public class Server {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         startCacheServer(CacheUtils.startLocator(args));
-
+        
         System.out.println("Cache Server has been started");
 
         ConsoleUtils.waitForEnter(JavaProcessLauncher.PROCESS_STARTUP_COMPLETED);
