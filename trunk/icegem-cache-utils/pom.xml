@@ -164,47 +164,7 @@
 					</descriptors>
 				</configuration>
 			</plugin>
-            
-			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>pre-clean-copy-lib</id>
-						<phase>pre-clean</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>com.gemstone.gemfire</groupId>
-									<artifactId>gemfire</artifactId>
-									<version>${com.gemstone.gemfire.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
-						</configuration>
-					</execution>
-					<execution>
-						<id>package-copy-lib</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>com.gemstone.gemfire</groupId>
-									<artifactId>gemfire</artifactId>
-									<version>${com.gemstone.gemfire.version}</version>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-            
+                        
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>

@@ -62,7 +62,6 @@ public class JavaProcessLauncher {
             if (line.equals(PROCESS_STARTUP_COMPLETED)) {
                 return process;
             }
-            System.err.println(line);
         }
         throw new InterruptedException("Process (" + klass.getCanonicalName() + ") " +
                 "has been already finished without startup complete confirmation");
@@ -126,11 +125,13 @@ public class JavaProcessLauncher {
      *
      * @param process of type Process
      * @throws IOException when
+     * @throws InterruptedException
      */
-    public void stopBySendingNewLineIntoProcess(Process process) throws IOException {
+    public void stopBySendingNewLineIntoProcess(Process process) throws IOException, InterruptedException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
         writer.newLine();
         writer.flush();
+        process.waitFor();
     }
 
     /**

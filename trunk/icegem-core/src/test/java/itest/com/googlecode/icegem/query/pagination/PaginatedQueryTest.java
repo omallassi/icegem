@@ -44,13 +44,13 @@ public class PaginatedQueryTest {
     }
 
     @AfterClass
-    public void tearDown() throws IOException {
+    public void tearDown() throws IOException, InterruptedException {
         cache.close();
         stopCacheServers();
     }
 
     @AfterMethod
-    public void after() {
+    public void after() throws InterruptedException {
         CacheUtils.clearPartitionedRegion(data);
         CacheUtils.clearPartitionedRegion(paginatedQueryInfo);
     }
@@ -365,7 +365,7 @@ public class PaginatedQueryTest {
      * @throws InterruptedException when
      */
     private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class, new String[]{CacheUtils.START_EMBEDDED_LOCATOR_COMMAND});
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class);
         cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
     }
 
@@ -373,8 +373,9 @@ public class PaginatedQueryTest {
      * Stops cache servers.
      *
      * @throws IOException when
+     * @throws InterruptedException
      */
-    private void stopCacheServers() throws IOException {
+    private void stopCacheServers() throws IOException, InterruptedException {
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }

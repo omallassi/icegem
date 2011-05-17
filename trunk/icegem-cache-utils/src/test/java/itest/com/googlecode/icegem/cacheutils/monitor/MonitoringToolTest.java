@@ -41,7 +41,7 @@ public class MonitoringToolTest {
     }
 
     @AfterClass
-    public void tearDown() throws IOException {
+    public void tearDown() throws IOException, InterruptedException {
         stopCacheServers();
     }
 
@@ -64,7 +64,7 @@ public class MonitoringToolTest {
         cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
     }
 
-    private void stopCacheServers() throws IOException {
+    private void stopCacheServers() throws IOException, InterruptedException {
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }

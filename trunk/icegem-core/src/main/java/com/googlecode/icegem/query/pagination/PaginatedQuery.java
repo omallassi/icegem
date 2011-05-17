@@ -12,13 +12,16 @@ import java.util.*;
  * This component allows to execute paginated queries both from client and peer/server sides.
  * It caches paginated query results in a help region and allows to iterate on them using paginated query API.
  * 
- * Query results can be sorted by keys, if key object implements Comparable interface.
+ * Query results will be ordered by entry keys automatically, if a key object implements java.lang.Comparable interface.
  * @see Comparable
  *
- * This query can be used both on client and server sides.
+ * See http://code.google.com/p/icegem/wiki/Documentation#Paginated_Query for more details.
  *
- * LIMITATIONS:
- * Query string that will be used for this paginated query must return entry keys.
+ * RESTRICTIONS:
+ * 1). A query string for paginated query can be arbitrarily complex
+ * but must return keys of entries that obtained during the query.
+ * 2). For partitioned regions a query string must meet the requirements
+ * described in a GemFire? documentation for querying partitioned regions.
  *
  * @author Andrey Stepanov aka standy
  */
@@ -47,7 +50,7 @@ public class PaginatedQuery<V> {
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server of client cache
+     * @param cache peer/server (Cache) or client cache (ClientCache)
      * @param regionName name of region for querying
      * @param queryString query string that must return entry keys
      * @throws RegionNotFoundException when query region or help region were not founded
@@ -59,7 +62,7 @@ public class PaginatedQuery<V> {
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server of client cache
+     * @param cache peer/server (Cache) or client cache (ClientCache)
      * @param regionName name of region for querying
      * @param queryString query string that must return entry keys
      * @param pageSize size of page
@@ -72,7 +75,7 @@ public class PaginatedQuery<V> {
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server of client cache
+     * @param cache peer/server (Cache) or client cache (ClientCache)
      * @param regionName name of region for querying
      * @param queryString query string that must return entry keys
      * @param queryParameters parameters for query execution
@@ -85,7 +88,7 @@ public class PaginatedQuery<V> {
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server of client cache
+     * @param cache peer/server (Cache) or client cache (ClientCache)
      * @param regionName name of region for querying
      * @param queryString query string that must return entry keys
      * @param queryParameters parameters for query execution
@@ -97,23 +100,29 @@ public class PaginatedQuery<V> {
 
         queryRegion = cache.getRegion(regionName);
         if (queryRegion == null) {
-            throw new RegionNotFoundException("Region for queries [" + PAGINATED_QUERY_INFO_REGION_NAME + "] has not been found");
+            RegionNotFoundException e = new RegionNotFoundException("Region for queries [" + PAGINATED_QUERY_INFO_REGION_NAME + "] has not been found");
+            logger.warn(e.getMessage());
+            throw e;
         }
 
         paginatedQueryInfoRegion = cache.getRegion(PAGINATED_QUERY_INFO_REGION_NAME);
         if (paginatedQueryInfoRegion == null) {
-            throw new RegionNotFoundException("Help region [" + PAGINATED_QUERY_INFO_REGION_NAME + "] for storing " +
+            RegionNotFoundException e =  new RegionNotFoundException("Help region [" + PAGINATED_QUERY_INFO_REGION_NAME + "] for storing " +
                     "information about paginated queries has not been found");
+            logger.warn(e.getMessage());
+            throw e;
         }
 
         if (pageSize < 1) {
-            throw new IllegalArgumentException("Page size must be positive");
+            IllegalArgumentException e = new IllegalArgumentException("Page size must be positive");
+            logger.warn(e.getMessage());
+            throw e;
         }
         pageKey = new PaginatedQueryPageKey(queryString, queryParameters, pageSize);
     }
 
     /**
-     * Return entries for a specified page number.
+     * Returns entries for a specified page number.
      * Use getTotalNumberOfPages() method to know how many pages this query has.
      *
      * @param pageNumber number of page to return
@@ -126,8 +135,10 @@ public class PaginatedQuery<V> {
     public List<V> page(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         storePaginatedQueryInfoIfNeeded();
         if (!pageNumberExists(pageNumber)) {
-            throw new IndexOutOfBoundsException("A page number {" + pageNumber + "} " +
+            IndexOutOfBoundsException e =  new IndexOutOfBoundsException("A page number {" + pageNumber + "} " +
                     "was out of bounds: [1, " + getTotalNumberOfPages() + "]");
+            logger.warn(e.getMessage());
+            throw e;
         }
         pageKey.setPageNumber(pageNumber);
         List<Object> entriesKeysForPage = paginatedQueryInfoRegion.get(pageKey);
@@ -136,9 +147,9 @@ public class PaginatedQuery<V> {
     }
 
     /**
-     * Return next to the current page.
-     * For the first call of this method it will be a first page.
-     * Use hasNext() method to check that the query has a next page.
+     * Return the next to the current page.
+     * For the first call of this method it will be the first page.
+     * Use hasNext() method to check that the query has the next page.
      *
      * @return List<V> list of entries
      * @throws FunctionDomainException when
@@ -151,7 +162,7 @@ public class PaginatedQuery<V> {
     }
 
     /**
-     * Return previous to the current page.
+     * Returns the previous to the current page.
      * Use hasPrevious() method to check that the query has a previous page.
      *
      * @return List<Object> list of entries
@@ -162,6 +173,32 @@ public class PaginatedQuery<V> {
      */
     public List<V> previous() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
         return page(--currentPageNumber);
+    }
+
+    /**
+     * Checks that query has the next page.
+     *
+     * @return boolean
+     * @throws FunctionDomainException when
+     * @throws QueryInvocationTargetException when
+     * @throws TypeMismatchException when
+     * @throws NameResolutionException when
+     */
+    public boolean hasNext() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+        return pageNumberExists(currentPageNumber + 1);
+    }
+
+    /**
+     * Checks that query has the previous page.
+     *
+     * @return boolean
+     * @throws FunctionDomainException when
+     * @throws QueryInvocationTargetException when
+     * @throws TypeMismatchException when
+     * @throws NameResolutionException when
+     */
+    public boolean hasPrevious() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+        return pageNumberExists(currentPageNumber - 1);
     }
 
     /**
@@ -179,7 +216,7 @@ public class PaginatedQuery<V> {
     }
 
     /**
-     * Returns total number of query pages.
+     * Returns a total number of query pages.
      *
      * @return total number of pages
      * @throws FunctionDomainException when
@@ -210,32 +247,6 @@ public class PaginatedQuery<V> {
      */
     public int getPageSize() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
         return pageKey.getPageSize();
-    }
-
-    /**
-     * Checks that query has next page.
-     *
-     * @return boolean
-     * @throws FunctionDomainException when
-     * @throws QueryInvocationTargetException when
-     * @throws TypeMismatchException when
-     * @throws NameResolutionException when
-     */
-    public boolean hasNext() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
-        return pageNumberExists(currentPageNumber + 1);
-    }
-
-    /**
-     * Checks that query has previous page.
-     *
-     * @return boolean
-     * @throws FunctionDomainException when
-     * @throws QueryInvocationTargetException when
-     * @throws TypeMismatchException when
-     * @throws NameResolutionException when
-     */
-    public boolean hasPrevious() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
-        return pageNumberExists(currentPageNumber - 1);
     }
 
     /**
