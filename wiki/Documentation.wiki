@@ -542,3 +542,51 @@ log4j.appender.file.layout.conversionPattern=%m%n
 # Logging levels
 log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
 }}}
+
+= Smart expiration =
+
+Allows to customize the expiration of region entries. It is possible to define own policy implementing the interface ExpirationPolicy.  
+
+
+== Example ==
+
+{{{
+ExpirationController expirationController = new ExpirationController(
+	"127.0.0.1", 10355);
+
+long destroyedEntriesNumberForData = expirationController.process("data",
+	new ExpirationPolicy() {
+
+		public boolean isExpired(Entry<Object, Object> entry) {
+			// TODO: Add some logic
+			return false;
+		}
+	});
+
+long destroyedEntriesNumberForErrors = expirationController.process("errors",
+	new ExpirationPolicy() {
+
+		public boolean isExpired(Entry<Object, Object> entry) {
+			// TODO: Add some logic
+			return false;
+		}
+	});
+
+expirationController.close();
+
+}}}
+
+== How to get access to the other regions inside of isExpired(Entry<Object, Object>) method ==
+
+{{{
+new ExpirationPolicy() {
+
+  public boolean isExpired(Entry<Object, Object> entry) {
+    RegionService regionService = entry.getRegion().getRegionService();
+    Region<Long, TransactionProcessingError> errorsRegion = regionService.getRegion("errors");
+
+    // TODO: Add some logic
+    return false;
+  }
+});
+}}}
