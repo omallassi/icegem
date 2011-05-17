@@ -406,7 +406,7 @@ public int getTotalNumberOfEntries(){...};
  * `getTotalNumberOfEntries()` - returns a total number of query entries.
 
 ==Ordering of results==
-Query results can be ordered by entry keys, if a key object implements `java.lang.Comparable` interface.
+Query results will be ordered by entry keys automaticly, if a key object implements `java.lang.Comparable` interface.
 
 ==Workflow==
 
