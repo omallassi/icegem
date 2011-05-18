@@ -6,12 +6,13 @@ import com.gemstone.gemfire.cache.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.LimitExceededException;
 import java.util.*;
 
 /**
  * This component allows to execute paginated queries both from client and peer/server sides.
  * It caches paginated query results in a help region and allows to iterate on them using paginated query API.
- * 
+ *
  * Query results will be ordered by entry keys automatically, if a key object implements java.lang.Comparable interface.
  * @see Comparable
  *
@@ -28,6 +29,8 @@ import java.util.*;
 public class PaginatedQuery<V> {
     /** page size by default  */
     public static final int DEFAULT_PAGE_SIZE = 20;
+    /** Default limit on query result  */
+    public static final int DEFAULT_QUERY_LIMIT = 1000000;
     /** number of page that will be store general information about paginated query (e.g. total number of query entries) */
     public static final int PAGE_NUMBER_FOR_GENERAL_INFO = -1;
     /** name of a help region for storing information about paginated queries  */
@@ -40,6 +43,8 @@ public class PaginatedQuery<V> {
     private int currentPageNumber = 0;
     /** Field queryService  */
     private QueryService queryService;
+    /** limit on query result */
+    private int queryLimit;
     /** region for querying  */
     private Region<Object, V> queryRegion;
     /** help region for storing information about paginated queries  */
@@ -56,7 +61,21 @@ public class PaginatedQuery<V> {
      * @throws RegionNotFoundException when query region or help region were not founded
      */
     public PaginatedQuery(GemFireCache cache, String regionName, String queryString) throws RegionNotFoundException {
-        this(cache, regionName, queryString, DEFAULT_PAGE_SIZE);
+        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, DEFAULT_PAGE_SIZE);
+    }
+
+    /**
+     * Creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryLimit limit on query result
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
+    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString)
+            throws RegionNotFoundException {
+        this(cache, queryLimit, regionName, queryString, DEFAULT_PAGE_SIZE);
     }
 
     /**
@@ -68,8 +87,24 @@ public class PaginatedQuery<V> {
      * @param pageSize size of page
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, int pageSize) throws RegionNotFoundException {
-        this(cache, regionName, queryString, new Object[]{}, pageSize);
+    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, int pageSize)
+            throws RegionNotFoundException {
+        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, new Object[]{}, pageSize);
+    }
+
+    /**
+     * Creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryLimit limit on query result
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @param pageSize size of page
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
+    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, int pageSize)
+            throws RegionNotFoundException {
+        this(cache, queryLimit, regionName, queryString, new Object[]{}, pageSize);
     }
 
     /**
@@ -81,8 +116,24 @@ public class PaginatedQuery<V> {
      * @param queryParameters parameters for query execution
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters) throws RegionNotFoundException {
-        this(cache, regionName, queryString, queryParameters, DEFAULT_PAGE_SIZE);
+    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters)
+            throws RegionNotFoundException {
+        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, queryParameters, DEFAULT_PAGE_SIZE);
+    }
+
+    /**
+     * Creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryLimit limit on query result
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @param queryParameters parameters for query execution
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
+    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString,
+                          Object[] queryParameters) throws RegionNotFoundException {
+        this(cache, queryLimit, regionName, queryString, queryParameters, DEFAULT_PAGE_SIZE);
     }
 
     /**
@@ -95,19 +146,38 @@ public class PaginatedQuery<V> {
      * @param pageSize size of page
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters, int pageSize) throws RegionNotFoundException {
+    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters,
+                          int pageSize) throws RegionNotFoundException {
+        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, queryParameters, pageSize);
+    }
+
+    /**
+     * Creates a new PaginatedQuery instance.
+     *
+     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryLimit limit on query result
+     * @param regionName name of region for querying
+     * @param queryString query string that must return entry keys
+     * @param queryParameters parameters for query execution
+     * @param pageSize size of page
+     * @throws RegionNotFoundException when query region or help region were not founded
+     */
+    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString,
+                          Object[] queryParameters, int pageSize) throws RegionNotFoundException {
         queryService = cache.getQueryService();
 
         queryRegion = cache.getRegion(regionName);
         if (queryRegion == null) {
-            RegionNotFoundException e = new RegionNotFoundException("Region for queries [" + PAGINATED_QUERY_INFO_REGION_NAME + "] has not been found");
+            RegionNotFoundException e = new RegionNotFoundException("Region for querying [" +
+                    regionName + "] has not been found");
             logger.warn(e.getMessage());
             throw e;
         }
 
         paginatedQueryInfoRegion = cache.getRegion(PAGINATED_QUERY_INFO_REGION_NAME);
         if (paginatedQueryInfoRegion == null) {
-            RegionNotFoundException e =  new RegionNotFoundException("Help region [" + PAGINATED_QUERY_INFO_REGION_NAME + "] for storing " +
+            RegionNotFoundException e =  new RegionNotFoundException("Help region [" +
+                    PAGINATED_QUERY_INFO_REGION_NAME + "] for storing " +
                     "information about paginated queries has not been found");
             logger.warn(e.getMessage());
             throw e;
@@ -118,6 +188,14 @@ public class PaginatedQuery<V> {
             logger.warn(e.getMessage());
             throw e;
         }
+
+        if (queryLimit < 1) {
+            IllegalArgumentException e = new IllegalArgumentException("Query limit must be positive");
+            logger.warn(e.getMessage());
+            throw e;
+        }
+        this.queryLimit = queryLimit;
+
         pageKey = new PaginatedQueryPageKey(queryString, queryParameters, pageSize);
     }
 
@@ -131,8 +209,10 @@ public class PaginatedQuery<V> {
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public List<V> page(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
+    public List<V> page(int pageNumber) throws FunctionDomainException, TypeMismatchException,
+            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
         storePaginatedQueryInfoIfNeeded();
         if (!pageNumberExists(pageNumber)) {
             IndexOutOfBoundsException e =  new IndexOutOfBoundsException("A page number {" + pageNumber + "} " +
@@ -143,7 +223,13 @@ public class PaginatedQuery<V> {
         pageKey.setPageNumber(pageNumber);
         List<Object> entriesKeysForPage = paginatedQueryInfoRegion.get(pageKey);
 
-        return entriesKeysForPage != null ? getSortedValues(entriesKeysForPage) : new ArrayList<V>(0);
+        if (entriesKeysForPage == null) {
+            IllegalStateException e = new IllegalStateException("There is no query results for page " + pageNumber);
+            logger.warn(e.getMessage());
+            throw e;
+        }
+
+        return getSortedValues(entriesKeysForPage);
     }
 
     /**
@@ -156,8 +242,10 @@ public class PaginatedQuery<V> {
      * @throws QueryInvocationTargetException when
      * @throws TypeMismatchException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public List<V> next() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+    public List<V> next() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
+            NameResolutionException, LimitExceededException {
         return page(++currentPageNumber);
     }
 
@@ -170,8 +258,10 @@ public class PaginatedQuery<V> {
      * @throws QueryInvocationTargetException when
      * @throws TypeMismatchException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public List<V> previous() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+    public List<V> previous() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
+            NameResolutionException, LimitExceededException {
         return page(--currentPageNumber);
     }
 
@@ -183,8 +273,10 @@ public class PaginatedQuery<V> {
      * @throws QueryInvocationTargetException when
      * @throws TypeMismatchException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public boolean hasNext() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+    public boolean hasNext() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
+            NameResolutionException, LimitExceededException {
         return pageNumberExists(currentPageNumber + 1);
     }
 
@@ -196,8 +288,10 @@ public class PaginatedQuery<V> {
      * @throws QueryInvocationTargetException when
      * @throws TypeMismatchException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public boolean hasPrevious() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+    public boolean hasPrevious() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
+            NameResolutionException, LimitExceededException {
         return pageNumberExists(currentPageNumber - 1);
     }
 
@@ -209,8 +303,10 @@ public class PaginatedQuery<V> {
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public int getTotalNumberOfEntries() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
+    public int getTotalNumberOfEntries() throws FunctionDomainException, TypeMismatchException,
+            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
         storePaginatedQueryInfoIfNeeded();
         return totalNumberOfEntries;
     }
@@ -223,9 +319,31 @@ public class PaginatedQuery<V> {
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public int getTotalNumberOfPages() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
-        storePaginatedQueryInfoIfNeeded();
+    public int getTotalNumberOfPages() throws FunctionDomainException, TypeMismatchException,
+            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+        return getTotalNumberOfPages(true);
+    }
+
+    /**
+     * Returns a total number of query pages.
+     *
+     * @param doCheck is true if paginated query info
+     *        should be stored if needed before returning
+     *        result of the method
+     * @return total number of pages
+     * @throws FunctionDomainException when
+     * @throws TypeMismatchException when
+     * @throws QueryInvocationTargetException when
+     * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     */
+    private int getTotalNumberOfPages(boolean doCheck) throws FunctionDomainException, TypeMismatchException,
+            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+        if (doCheck) {
+            storePaginatedQueryInfoIfNeeded();
+        }
         if (isEmpty()) {
             return 1;
         }
@@ -245,7 +363,8 @@ public class PaginatedQuery<V> {
      * @throws QueryInvocationTargetException when
      * @throws NameResolutionException when
      */
-    public int getPageSize() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
+    public int getPageSize() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException,
+            NameResolutionException {
         return pageKey.getPageSize();
     }
 
@@ -267,7 +386,7 @@ public class PaginatedQuery<V> {
         if (!(keys.get(0) instanceof Comparable)) {
             return new ArrayList<V> (entries.values());
         }
-        
+
         Collections.sort(keys, new Comparator<Object>() {
             public int compare(Object o1, Object o2) {
                 return ((Comparable) o1).compareTo(o2);
@@ -289,9 +408,10 @@ public class PaginatedQuery<V> {
      * @throws TypeMismatchException when
      * @throws QueryInvocationTargetException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    private boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException {
-        return !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
+    private boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+        return !(pageNumber < 1 || pageNumber > getTotalNumberOfPages(false));
     }
 
     /**
@@ -301,15 +421,22 @@ public class PaginatedQuery<V> {
      * @throws QueryInvocationTargetException when
      * @throws TypeMismatchException when
      * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
     @SuppressWarnings({ "unchecked" })
-    private void storePaginatedQueryInfoIfNeeded() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException {
+    private void storePaginatedQueryInfoIfNeeded() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException, LimitExceededException {
         pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
         List<Object> paginatedQueryGeneralInfo = paginatedQueryInfoRegion.get(pageKey);
 
         if (paginatedQueryGeneralInfo == null) {
-            Query query = queryService.newQuery(pageKey.getQueryString());
+            Query query = queryService.newQuery(addQueryLimit(pageKey.getQueryString()));
             SelectResults<Object> results = (SelectResults<Object>) query.execute(pageKey.getQueryParameters());
+            if (results.size() > queryLimit) {
+                LimitExceededException e = new LimitExceededException("Size of query results has exceeded limit ("
+                        + queryLimit + " entries). You should refine the query.");
+                logger.warn(e.getMessage());
+                throw e;
+            }
             storePaginatedQueryPagesAndGeneralInfo(results.asList());
         }
     }
@@ -368,5 +495,18 @@ public class PaginatedQuery<V> {
      */
     private boolean isEmpty() {
         return totalNumberOfEntries == 0;
+    }
+
+    private String addQueryLimit(String queryString) {
+        int limitIndex = queryString.lastIndexOf("limit");
+        if (limitIndex == -1) {
+            limitIndex = queryString.lastIndexOf("LIMIT");
+        }
+        if (limitIndex == -1) {
+            return queryString + " LIMIT " + (queryLimit + 1);
+        }
+        int limitNumber = Integer.parseInt(queryString.substring(limitIndex + 5).trim());
+        return (limitNumber > queryLimit) ?
+                queryString.substring(0, limitIndex) + " LIMIT " + (queryLimit + 1) : queryString;
     }
 }
