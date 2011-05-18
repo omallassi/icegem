@@ -30,7 +30,7 @@ public class PaginatedQuery<V> {
     /** page size by default  */
     public static final int DEFAULT_PAGE_SIZE = 20;
     /** Default limit on query result  */
-    public static final int DEFAULT_QUERY_LIMIT = 1000000;
+    public static final int DEFAULT_QUERY_LIMIT = 1000;
     /** number of page that will be store general information about paginated query (e.g. total number of query entries) */
     public static final int PAGE_NUMBER_FOR_GENERAL_INFO = -1;
     /** name of a help region for storing information about paginated queries  */
