@@ -338,14 +338,19 @@ This component allows to execute paginated queries both from client and peer/ser
 A paginated query can be created and configured using following constructors:
 {{{
 PaginatedQuery(GemFireCache cache, String regionName, String queryString);
+PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString);
 PaginatedQuery(GemFireCache cache, String regionName, String queryString, int pageSize);
+PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, int pageSize);
 PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters);
+PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, Object[] queryParameters);
 PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters, int pageSize);
+PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, Object[] queryParameters, int pageSize);
 }}}
 
 *Where:*
 
  * `cache` - an instance of a peer/server cache (`com.gemstone.gemfire.cache.Cache`) or a client cache (`com.gemstone.gemfire.cache.client.ClientCache`);
+ * `queryLimit` - a limit on size of query results (default is 1000 entries);
  * `regionName` - a name of a region for querying;
  * `queryString` - a query string^1^;
  * `queryParameters` - parameters for query execution;
@@ -407,6 +412,9 @@ public int getTotalNumberOfEntries(){...};
 
 ==Ordering of results==
 Query results will be ordered by entry keys automatically, if a key object implements `java.lang.Comparable` interface.
+
+==Limiting of results==
+Paginated query result can be limited. By default this limit is 1000 entries. If query results exceeds this limit, `javax.naming.LimitExceededException` will be thrown. 
 
 ==Workflow==
 
