@@ -105,9 +105,15 @@ public class ExpirationController {
 	 *            - the name of region
 	 * @param policy
 	 *            - the expiration policy
+	 * @param packetSize
+	 *            - the size of the consistently expired entries
+	 * @param packetDelay
+	 *            - the delay in processing after the packetSize entries,
+	 *            milliseconds
 	 * @return - the number of destroyed region entries
 	 */
-	public long process(String regionName, ExpirationPolicy policy) {
+	public long process(String regionName, ExpirationPolicy policy,
+		long packetSize, long packetDelay) {
 		if (cache == null) {
 			throw new IllegalStateException(
 				"It seems that the workflow of the controller is already finished");
@@ -139,6 +145,7 @@ public class ExpirationController {
 
 		DestroyedEntriesCountCollector collector = (DestroyedEntriesCountCollector) FunctionService
 			.onRegion(region)
+			.withArgs(new ExpirationFunctionArguments(packetSize, packetDelay))
 			.withCollector(new DestroyedEntriesCountCollector())
 			.execute(new ExpirationFunction(policy));
 
@@ -148,6 +155,22 @@ public class ExpirationController {
 		}
 
 		return destroyedEntriesNumber;
+	}
+
+	/**
+	 * Applies the specified policy on the specified region and returns number
+	 * of destroyed entries.
+	 * 
+	 * Do not use this method for processing the big region.
+	 * 
+	 * @param regionName
+	 *            - the name of region
+	 * @param policy
+	 *            - the expiration policy
+	 * @return - the number of destroyed region entries
+	 */
+	public long process(String regionName, ExpirationPolicy policy) {
+		return process(regionName, policy, 1, 0);
 	}
 
 	/**
