@@ -497,6 +497,12 @@ public class PaginatedQuery<V> {
         return totalNumberOfEntries == 0;
     }
 
+    /**
+     * Limits query results.
+     *
+     * @param queryString of type String
+     * @return String
+     */
     private String addQueryLimit(String queryString) {
         int limitIndex = queryString.lastIndexOf("limit");
         if (limitIndex == -1) {
