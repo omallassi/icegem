@@ -365,7 +365,7 @@ public class PaginatedQueryTest {
         query.next();
     }
 
-    @Test()
+    @Test
     public void testInitialQueryLimitThatLowerThanPaginatedQueryLimit() throws NameResolutionException,
             FunctionDomainException, QueryInvocationTargetException,
             TypeMismatchException, LimitExceededException {
@@ -394,7 +394,7 @@ public class PaginatedQueryTest {
         query.next();
     }
 
-    @Test()
+    @Test
     public void testInitialQueryLimitThatEqualToPaginatedQueryLimit() throws NameResolutionException,
             FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, LimitExceededException {
         PersonUtils.populateRegionByPersons(data, 100);
@@ -406,7 +406,7 @@ public class PaginatedQueryTest {
         Assertions.assertThat(results.size()).as("Initial limit was not used").isEqualTo(initialLimit);
     }
 
-    @Test()
+    @Test
     public void testInitialQueryLimitThatEqualToPaginatedQueryLimitForSmallSizeOfEntries() throws NameResolutionException, 
             FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, LimitExceededException {
         PersonUtils.populateRegionByPersons(data, 5);
@@ -427,15 +427,16 @@ public class PaginatedQueryTest {
      * If you plan to establish a client connection with more than one cache server,
      * use client connection to this servers via specified in client's pool locator.
      */
-    @SuppressWarnings({ "unchecked" })
     private void startClient() {
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
 //        ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolServer("SERVER_HOST", "SERVER_PORT");
         cache = clientCacheFactory.set("log-level", "warning").create();
-        ClientRegionFactory regionFactory =
+        ClientRegionFactory<Object, Object> regionFactory =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
         data = regionFactory.create("data");
-        paginatedQueryInfo = regionFactory.create(PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME);
+        ClientRegionFactory<PaginatedQueryPageKey, List<Object>> regionFactoryForHelpRegion =
+                cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
+        paginatedQueryInfo = regionFactoryForHelpRegion.create(PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME);
     }
 
     /**
