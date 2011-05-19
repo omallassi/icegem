@@ -60,12 +60,15 @@
 
     <modules>
         <module>icegem-core</module>
-        <module>icegem-examples-client</module>
-        <module>icegem-examples-server</module>
+        <!--<module>icegem-examples-client</module>
+        <module>icegem-examples-server</module>-->
         <module>icegem-performance</module>
         <module>icegem-spring</module>
         <module>icegem-cache-utils</module>
-	<module>icegem-serializer-generator</module>
+	    <module>icegem-serializer-generator</module>
+        <module>icegem-message-barrier</module>
+        <!--<module>icegem-message-barrier-example</module>-->
+        <!--<module>icegem-example-mojo</module>-->
     </modules>
 
     <properties>
@@ -75,7 +78,7 @@
         <org.ehoffman.version>0.5</org.ehoffman.version>
         <org.easytesting.version>1.2</org.easytesting.version>
         <commons-lang.version>2.5</commons-lang.version>
-        <org.springframework.version>3.0.3.RELEASE</org.springframework.version>
+        <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
         <javax.servlet.version>2.5</javax.servlet.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <jboss.version>1.0.3.GA</jboss.version>
