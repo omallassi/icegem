@@ -155,7 +155,21 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-            
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>com.googlecode.icegem.cacheutils.Launcher</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
@@ -164,7 +178,7 @@
 					</descriptors>
 				</configuration>
 			</plugin>
-                        
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -254,16 +268,6 @@
                 </executions>
             </plugin>
 		</plugins>
-		<resources>
-			<resource>
-				<directory>${project.basedir}/src/main/scripts</directory>
-				<filtering>true</filtering>
-			</resource>
-			<resource>
-				<directory>${project.basedir}/src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
 	</build>
 
 </project>
