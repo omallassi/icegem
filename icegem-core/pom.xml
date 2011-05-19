@@ -122,6 +122,22 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
+
+                    <execution>
+                        <id>clean-gemfire-test-environment</id>
+                        <phase>pre-clean</phase>
+
+                        <configuration>
+                            <target>
+                                <ant antfile="${project.build.testSourceDirectory}/../resources/testEnvironment.xml">
+                                    <target name="stop-gemfire-test-environment"/>
+                                </ant>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
 
