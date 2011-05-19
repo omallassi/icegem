@@ -9,10 +9,9 @@ import com.gemstone.gemfire.cache.query.QueryException;
 import com.gemstone.gemfire.cache.query.SelectResults;
 import com.gemstone.gemfire.cache.query.Struct;
 import com.googlecode.icegem.query.bucketoriented.BucketOrientedQueryService;
-import com.googlecode.icegem.utils.CacheUtils;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
-import itest.com.googlecode.icegem.query.common.domain.Person;
-import itest.com.googlecode.icegem.query.bucketoriented.Server;
+import com.googlecode.icegem.utils.ServerTemplate;
+import itest.com.googlecode.icegem.query.common.model.Person;
 import itest.com.googlecode.icegem.query.common.utils.PersonUtils;
 import org.fest.assertions.Assertions;
 import org.testng.annotations.*;
@@ -155,16 +154,9 @@ public class BucketOrientedQueryServiceTest {
 
     /**
      * Starts a client.
-     *
-     * Important:
-     * If you plan to establish a client connection with only one cache server,
-     * use direct connection to this server via client's pool.
-     * If you plan to establish a client connection with more than one cache server,
-     * use client connection to this servers via specified in client's pool locator.
      */
     private void startClient() {
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
-//        ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolServer("SERVER_HOST", "SERVER_PORT");
         cache = clientCacheFactory.set("log-level", "warning").create();
         ClientRegionFactory<Object, Object> regionFactory =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
@@ -178,14 +170,15 @@ public class BucketOrientedQueryServiceTest {
      * @throws InterruptedException when
      */
     private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class);
-        cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
+        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "bucketOrientedServerProperties.properties");
+        cacheServer2 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "bucketOrientedServerProperties.properties");
     }
 
     /**
      * Stops cache servers.
      *
      * @throws IOException when
+     * @throws InterruptedException
      */
     private void stopCacheServers() throws IOException, InterruptedException {
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
