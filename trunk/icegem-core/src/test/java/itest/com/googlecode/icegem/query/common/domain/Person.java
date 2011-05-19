@@ -1,10 +1,10 @@
-package itest.com.googlecode.icegem.query.common.domain;
+package itest.com.googlecode.icegem.query.common.model;
 
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * Domain class for tests.
+ * Simple domain model class for tests.
  *
  * @author Andrey Stepanov aka standy
  */
@@ -16,6 +16,7 @@ public class Person implements Serializable {
     /** Field children  */
     private List<String> children;
 
+    
     /**
      * Constructor Person creates a new Person instance.
      *
