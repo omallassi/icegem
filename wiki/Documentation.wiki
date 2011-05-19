@@ -599,3 +599,41 @@ new ExpirationPolicy() {
   }
 });
 }}}
+
+== Processing with delays ==
+
+In case of using the method `ExpirationController#process(String regionName, ExpirationPolicy policy)` the processing node can be blocked if there is a lot of entries. This can block the other processing on this node. 
+
+Due to this we introduce the method `ExpirationController#process(String regionName, ExpirationPolicy policy, long packetSize, long packetDelay)`. It will do the same actions as the method with two parameters but will also stop the processing for `packetDelay` milliseconds after processing each `packetSize` entries.
+
+How it is implemented in ExpirationFunction:
+{{{
+
+[...]
+long packetDelay = expirationFunctionArguments.getPacketDelay();
+long packetSize = expirationFunctionArguments.getPacketSize();
+
+Region<Object, Object> region = PartitionRegionHelper.getLocalDataForContext(context);
+
+Set<Entry<Object, Object>> entrySet = region.entrySet();
+
+long packetCounter = 1;
+for (Entry<Object, Object> entry : entrySet) {
+
+  if ((packetDelay > 0) && ((packetCounter % packetSize) == 0)) {
+    Thread.sleep(packetDelay);
+  }
+
+  if (entry instanceof Region.Entry) {
+    Region.Entry<Object, Object> regionEntry = (Region.Entry<Object, Object>) entry;
+
+    if ((policy != null) && policy.isExpired(regionEntry)) {
+      region.destroy(entry.getKey());
+      destroyedEntriesCount++;
+    }
+  }
+
+  packetCounter++;
+}
+
+}}}
