@@ -637,3 +637,26 @@ for (Entry<Object, Object> entry : entrySet) {
 }
 
 }}}
+
+= Cache utils =
+
+== Build ==
+To create a distributive of cache utils run command:
+
+{{{
+mvn clean assembly:assembly
+}}}
+
+This will produce a zip file like `icegem\icegem-cache-utils\target\icegem-cache-utils-0.7-SNAPSHOT.zip`.
+
+Extract this zip file and go inside folder icegem-cache-utils-0.7-SNAPSHOT.
+
+== Using ==
+
+To use a tool set run command:
+
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar
+}}}
+
+This jar has usage help for the tool set and for the separate command.
