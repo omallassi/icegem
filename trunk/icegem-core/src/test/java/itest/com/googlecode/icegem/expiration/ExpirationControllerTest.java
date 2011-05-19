@@ -1,5 +1,6 @@
 package itest.com.googlecode.icegem.expiration;
 
+import com.googlecode.icegem.utils.ServerTemplate;
 import itest.com.googlecode.icegem.expiration.model.Transaction;
 import itest.com.googlecode.icegem.expiration.model.TransactionProcessingError;
 
@@ -281,7 +282,6 @@ public class ExpirationControllerTest implements Serializable {
 		expirationController.close();
 
 		return destroyedEntriesNumber;
-
 	}
 
 	private long expire(boolean recursively) {
@@ -289,8 +289,8 @@ public class ExpirationControllerTest implements Serializable {
 	}
 
 	private void startCacheServers() throws IOException, InterruptedException {
-		cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class);
-		cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
+        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "expirationServerProperties.properties");
+        cacheServer2 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "expirationServerProperties.properties");
 	}
 
 	private void stopServer(Process server) throws IOException,

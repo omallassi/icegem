@@ -5,6 +5,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import com.googlecode.icegem.utils.ServerTemplate;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -22,18 +23,18 @@ public class MonitoringToolTest {
     /** Field javaProcessLauncher  */
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 
-	private class CountingNodeEventHandler implements NodeEventHandler {
+    private class CountingNodeEventHandler implements NodeEventHandler {
 
-		private int count = 0;
+        private int count = 0;
 
-		public void handle(NodeEvent event) {
-			count++;
-		}
+        public void handle(NodeEvent event) {
+            count++;
+        }
 
-		public int getCount() {
-			return count;
-		}
-	}
+        public int getCount() {
+            return count;
+        }
+    }
 
     @BeforeClass
     public void setUp() throws IOException, InterruptedException, TimeoutException {
@@ -45,23 +46,23 @@ public class MonitoringToolTest {
         stopCacheServers();
     }
 
-	@Test
-	public void testMain() throws Exception {
-		MonitoringTool tool = new MonitoringTool();
-		
-		CountingNodeEventHandler handler = new CountingNodeEventHandler();
-		tool.addNodeEventHandler(handler);
-		
-		tool.start();
-		
-		Thread.sleep(5 * 1000);
-		
-		assertThat(handler.getCount()).isEqualTo(4);
-	}
-	
+    @Test
+    public void testMain() throws Exception {
+        MonitoringTool tool = new MonitoringTool();
+
+        CountingNodeEventHandler handler = new CountingNodeEventHandler();
+        tool.addNodeEventHandler(handler);
+
+        tool.start();
+
+        Thread.sleep(5 * 1000);
+
+        assertThat(handler.getCount()).isEqualTo(4);
+    }
+
     private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runWithConfirmation(Server.class);
-        cacheServer2 = javaProcessLauncher.runWithConfirmation(Server.class);
+        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "monitoringToolServerProperties.properties");
+        cacheServer2 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "monitoringToolServerProperties.properties");
     }
 
     private void stopCacheServers() throws IOException, InterruptedException {

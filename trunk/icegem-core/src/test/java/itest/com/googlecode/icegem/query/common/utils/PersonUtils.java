@@ -1,7 +1,7 @@
 package itest.com.googlecode.icegem.query.common.utils;
 
 import com.gemstone.gemfire.cache.Region;
-import itest.com.googlecode.icegem.query.common.domain.Person;
+import itest.com.googlecode.icegem.query.common.model.Person;
 
 import java.util.Arrays;
 import java.util.List;

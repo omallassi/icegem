@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class JavaProcessLauncher {
     /** Each process that starts with confirmation
-     *  should write a startup completed string into it's standard output.
+     *  must write a startup completed string into it's standard output.
      *  Only after this command the process startup will be completed.
      */
     public static final String PROCESS_STARTUP_COMPLETED = "JavaProcessLauncher: startup complete";
@@ -38,7 +38,7 @@ public class JavaProcessLauncher {
      * @throws InterruptedException when
      */
     public Process runWithConfirmation(Class klass) throws IOException, InterruptedException {
-        return runWithConfirmation(klass, null);
+        return runWithConfirmation(klass, new String[0]);
     }
 
     /**
@@ -54,7 +54,34 @@ public class JavaProcessLauncher {
      */
     public Process runWithConfirmation(Class klass, String[] args) throws IOException, InterruptedException {
         Process process = startProcess(klass, args);
-        System.out.println("Wait startup complete confirmation for process (" + klass.getCanonicalName() + ")...");
+        System.out.println("Wait startup complete confirmation for a process (" + klass.getCanonicalName() + ")...");
+
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            if (line.equals(PROCESS_STARTUP_COMPLETED)) {
+                return process;
+            }
+        }
+        throw new InterruptedException("Process (" + klass.getCanonicalName() + ") " +
+                "has been already finished without startup complete confirmation");
+    }
+
+    /**
+     * Runs peer/server process based on a specified class in a separate VM using gemfire.properties file.
+     * To confirm that process completes startup it should write a startup completed string
+     * into it's standard output.
+     *
+     * @param klass of type Class
+     * @param pathToServerPropertiesFile of type String
+     * @return Process
+     * @throws IOException when
+     * @throws InterruptedException when
+     */
+    public Process runServerWithConfirmation(Class klass, String pathToServerPropertiesFile) throws IOException,
+            InterruptedException {
+        Process process = startServerProcess(klass, pathToServerPropertiesFile);
+        System.out.println("Wait startup complete confirmation for a cache server (" + klass.getCanonicalName() + ")...");
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
@@ -110,7 +137,8 @@ public class JavaProcessLauncher {
      * @throws InterruptedException when
      * @throws TimeoutException if process startup is not completed in time.
      */
-    public Process runWithStartupDelay(Class klass, long processStartupTime) throws IOException, InterruptedException, TimeoutException {
+    public Process runWithStartupDelay(Class klass, long processStartupTime) throws IOException, InterruptedException,
+            TimeoutException {
         Process process = startProcess(klass);
         if (processStartupTime > 0) {
             Thread.sleep(processStartupTime);
@@ -157,6 +185,16 @@ public class JavaProcessLauncher {
         return startProcess(klass, null);
     }
 
+    /**
+     * Starts process based on specified class using command line arguments.
+     * This process inherits a classpath from parent VM that starts it.
+     *
+     * @param klass of type Class
+     * @param args of type String[]
+     * @return Process
+     * @throws IOException when
+     * @throws InterruptedException when
+     */
     private Process startProcess(Class klass, String[] args) throws IOException, InterruptedException {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome +
@@ -172,6 +210,39 @@ public class JavaProcessLauncher {
         if (args != null && args.length > 0) {
             arguments.addAll(Arrays.asList(args));
         }
+
+        ProcessBuilder builder = new ProcessBuilder(arguments);
+
+        Process process = builder.start();
+        new StreamRedirector(process.getErrorStream(), klass.getSimpleName()).start();
+        return process;
+    }
+
+    /**
+     * Starts cache server process based on gemfire.properties file.
+     * This process inherits a classpath from parent VM that starts it.
+     *
+     * @param klass of type Class
+     * @param pathToPropertiesFile path to gemfire.properties file
+     * @return Process
+     * @throws IOException when
+     * @throws InterruptedException when
+     */
+    private Process startServerProcess(Class klass, String pathToPropertiesFile) throws IOException, InterruptedException {
+        String javaHome = System.getProperty("java.home");
+        String javaBin = javaHome +
+                File.separator + "bin" +
+                File.separator + "java";
+        String classpath = System.getProperty("java.class.path");
+
+        List<String> arguments = new ArrayList<String>();
+        arguments.add(javaBin);
+        arguments.add("-cp");
+        arguments.add(classpath);
+        if (pathToPropertiesFile != null && !pathToPropertiesFile.isEmpty()) {
+            arguments.add("-DgemfirePropertyFile=" + pathToPropertiesFile);
+        }
+        arguments.add(klass.getCanonicalName());
 
         ProcessBuilder builder = new ProcessBuilder(arguments);
 
