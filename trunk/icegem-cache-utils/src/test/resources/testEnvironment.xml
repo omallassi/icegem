@@ -7,7 +7,7 @@
     <target name="start-gemfire-test-environment" depends="start-locator, start-agent">
     </target>
 
-    <target name="start-locator" depends="copy-scripts, copy-locator-properties-file, copy-locator-license-file">
+    <target name="start-locator" depends="stop-gemfire-test-environment, copy-scripts, copy-locator-properties-file, copy-locator-license-file">
         <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.bat"/>
         <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/start-locator.sh"/>
