@@ -239,7 +239,7 @@ public class JavaProcessLauncher {
         arguments.add(javaBin);
         arguments.add("-cp");
         arguments.add(classpath);
-        if (pathToPropertiesFile != null && !pathToPropertiesFile.isEmpty()) {
+        if (pathToPropertiesFile != null && pathToPropertiesFile.length() != 0) {
             arguments.add("-DgemfirePropertyFile=" + pathToPropertiesFile);
         }
         arguments.add(klass.getCanonicalName());
