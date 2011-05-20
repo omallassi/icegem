@@ -7,7 +7,7 @@
     <target name="start-gemfire-test-environment" depends="start-locator, start-agent">
     </target>
 
-    <target name="start-locator" depends="stop-gemfire-test-environment, copy-scripts, copy-locator-properties-file, copy-locator-license-file">
+    <target name="start-locator" depends="copy-scripts, copy-locator-properties-file, copy-locator-license-file">
         <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.bat"/>
         <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/start-locator.sh"/>
@@ -34,7 +34,6 @@
 				<filter token="gemfire.jar" value="${project.build.directory}/lib/gemfire-${com.gemstone.gemfire.version}.jar" />
 			</filterset>
 		</copy>
-		<!--<chmod dir="${project.build.directory}" perm="755" includes="*.sh" />-->
 	</target>
 
     <target name="copy-resources">
@@ -45,12 +44,10 @@
 
     <target name="copy-agent-properties-file" depends="create-base-directories">
         <copy file="${project.build.testSourceDirectory}/../resources/agent.properties" todir="${agent.base.directory}"/>
-        <!--<chmod file="${agent.base.directory}/agent.properties" perm="644"/>-->
     </target>
 
     <target name="copy-locator-properties-file" depends="create-base-directories">
         <copy file="${project.build.testSourceDirectory}/../resources/locator.properties" todir="${locator.base.directory}"/>
-        <!--<chmod file="${agent.base.directory}/locator.properties" perm="644"/>-->
     </target>
 
     <!--To use this target add gemfireLicense.zip file into test/resources directory and uncomment this lines-->
