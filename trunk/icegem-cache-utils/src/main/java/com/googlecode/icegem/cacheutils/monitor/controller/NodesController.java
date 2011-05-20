@@ -36,7 +36,7 @@ public class NodesController {
 		this.propertiesHelper = propertiesHelper;
 		adminDistributedSystem = new AdminService(
 			propertiesHelper
-				.getStringProperty("com.googlecode.icegem.cacheutils.monitor.locators"),
+				.getStringProperty("icegem.cacheutils.monitor.locators"),
 			false).getAdmin();
 		poolFactory = PoolManager.createFactory();
 		bufferedNodeEventHandler = new BufferedNodeEventHandler();
@@ -120,7 +120,7 @@ public class NodesController {
 			.execute(
 				functionExecutionThread,
 				propertiesHelper
-					.getLongProperty("com.googlecode.icegem.cacheutils.monitor.function.timeout"));
+					.getLongProperty("icegem.cacheutils.monitor.function.timeout"));
 		int zero = functionExecutionThread.getZero();
 
 		if (zero == 0) {
@@ -163,10 +163,10 @@ public class NodesController {
 				.getInstance()
 				.send(
 					propertiesHelper
-						.getStringProperty("com.googlecode.icegem.cacheutils.monitor.email.alert.subject"),
+						.getStringProperty("icegem.cacheutils.monitor.email.alert.subject"),
 					propertiesHelper
 						.getStringProperty(
-							"com.googlecode.icegem.cacheutils.monitor.email.alert.content",
+							"icegem.cacheutils.monitor.email.alert.content",
 							toContentStringHTML(eventsList),
 							Utils.currentDate()));
 		}

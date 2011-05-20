@@ -42,10 +42,10 @@ public class MonitoringTool {
 						.getInstance()
 						.send(
 							propertiesHelper
-								.getStringProperty("com.googlecode.icegem.cacheutils.monitor.email.exception.subject"),
+								.getStringProperty("icegem.cacheutils.monitor.email.exception.subject"),
 							propertiesHelper
 								.getStringProperty(
-									"com.googlecode.icegem.cacheutils.monitor.email.exception.content",
+									"icegem.cacheutils.monitor.email.exception.content",
 									t.getMessage(), new Date()));
 				} catch (MessagingException me) {
 					me.printStackTrace();
@@ -83,9 +83,9 @@ public class MonitoringTool {
 			.schedule(
 				new IsAliveTimerTask(),
 				propertiesHelper
-					.getLongProperty("com.googlecode.icegem.cacheutils.monitor.timer.delay"),
+					.getLongProperty("icegem.cacheutils.monitor.timer.delay"),
 				propertiesHelper
-					.getLongProperty("com.googlecode.icegem.cacheutils.monitor.timer.period"));
+					.getLongProperty("icegem.cacheutils.monitor.timer.period"));
 	}
 
 	public void addNodeEventHandler(NodeEventHandler handler) {
