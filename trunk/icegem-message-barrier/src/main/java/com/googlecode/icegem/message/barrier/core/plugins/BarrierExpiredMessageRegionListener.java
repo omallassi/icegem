@@ -37,8 +37,6 @@ public class BarrierExpiredMessageRegionListener extends CacheListenerAdapter im
         return expiredMsgCount.get();
     }
 
-    @Override
-    public void init(Properties properties) {
-
-    }
+    
+    public void init(Properties properties) {}
 }

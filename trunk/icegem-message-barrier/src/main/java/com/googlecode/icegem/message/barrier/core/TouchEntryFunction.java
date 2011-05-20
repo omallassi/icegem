@@ -18,7 +18,6 @@ public class TouchEntryFunction extends FunctionAdapter implements Declarable{
 
     private static Logger logger = LoggerFactory.getLogger(TouchEntryFunction.class);
 
-    @Override
     public void init(Properties properties) {}
 
     @Override
