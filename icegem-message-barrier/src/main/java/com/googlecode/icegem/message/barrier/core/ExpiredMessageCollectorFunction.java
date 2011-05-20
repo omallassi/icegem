@@ -20,12 +20,11 @@ public class ExpiredMessageCollectorFunction implements Function, Declarable {
     private static Logger logger = LoggerFactory.getLogger(ExpiredMessageCollectorFunction.class);
     private static int COLLECTING_MSG_COUNT = 1000;
 
-    @Override
+    
     public boolean hasResult() {
         return true;
     }
 
-    @Override
     public void execute(FunctionContext functionContext) {
         logger.trace("start gathering expired messages");
         RegionFunctionContext context = (RegionFunctionContext) functionContext;
@@ -69,15 +68,11 @@ public class ExpiredMessageCollectorFunction implements Function, Declarable {
         context.getResultSender().lastResult((HashMap) eventSequences);
     }
 
-    @Override
     public String getId() { return getClass().getName(); }
-
-    @Override
+    
     public boolean optimizeForWrite() { return true; }
 
-    @Override
     public boolean isHA() { return true; }
 
-    @Override
     public void init(Properties properties) {}
 }
