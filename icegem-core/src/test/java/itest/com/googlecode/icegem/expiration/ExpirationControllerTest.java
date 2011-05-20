@@ -1,6 +1,5 @@
 package itest.com.googlecode.icegem.expiration;
 
-import com.googlecode.icegem.utils.ServerTemplate;
 import itest.com.googlecode.icegem.expiration.model.Transaction;
 import itest.com.googlecode.icegem.expiration.model.TransactionProcessingError;
 
@@ -9,8 +8,8 @@ import java.io.Serializable;
 import java.util.concurrent.TimeoutException;
 
 import org.fest.assertions.Assertions;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.gemstone.gemfire.cache.Region;
@@ -22,8 +21,8 @@ import com.gemstone.gemfire.cache.client.ClientRegionFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.expiration.ExpirationController;
 import com.googlecode.icegem.expiration.ExpirationPolicy;
-import com.googlecode.icegem.utils.CacheUtils;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.ServerTemplate;
 
 /**
  * <p>
@@ -128,13 +127,13 @@ public class ExpirationControllerTest implements Serializable {
 
 	}
 
-	@BeforeClass
+	@BeforeMethod
 	public void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 		startCacheServers();
 	}
 
-	@AfterClass
+	@AfterMethod
 	public void tearDown() throws IOException, InterruptedException {
 		stopCacheServers();
 	}
@@ -206,11 +205,9 @@ public class ExpirationControllerTest implements Serializable {
 
 		Region<Long, Transaction> transactionsRegion = getRegion(cache,
 			"transactions");
-		CacheUtils.clearPartitionedRegion(transactionsRegion);
 
 		Region<Long, TransactionProcessingError> errorsRegion = getRegion(
 			cache, "errors");
-		CacheUtils.clearPartitionedRegion(errorsRegion);
 
 		for (long i = 1, id = 1; i <= count; i++, id += 5) {
 			if ((i % 1000) == 0) {
