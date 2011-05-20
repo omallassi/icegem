@@ -228,7 +228,6 @@ public class PaginatedQuery<V> {
             logger.warn(e.getMessage());
             throw e;
         }
-
         return getSortedValues(entriesKeysForPage);
     }
 
@@ -323,27 +322,7 @@ public class PaginatedQuery<V> {
      */
     public int getTotalNumberOfPages() throws FunctionDomainException, TypeMismatchException,
             QueryInvocationTargetException, NameResolutionException, LimitExceededException {
-        return getTotalNumberOfPages(true);
-    }
-
-    /**
-     * Returns a total number of query pages.
-     *
-     * @param doCheck is true if paginated query info
-     *        should be stored if needed before returning
-     *        result of the method
-     * @return total number of pages
-     * @throws FunctionDomainException when
-     * @throws TypeMismatchException when
-     * @throws QueryInvocationTargetException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
-     */
-    private int getTotalNumberOfPages(boolean doCheck) throws FunctionDomainException, TypeMismatchException,
-            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
-        if (doCheck) {
-            storePaginatedQueryInfoIfNeeded();
-        }
+        storePaginatedQueryInfoIfNeeded();
         if (isEmpty()) {
             return 1;
         }
@@ -410,8 +389,8 @@ public class PaginatedQuery<V> {
      * @throws NameResolutionException when
      * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    private boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException, LimitExceededException {
-        return !(pageNumber < 1 || pageNumber > getTotalNumberOfPages(false));
+    public boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+        return pageNumber == 1 || !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
     }
 
     /**

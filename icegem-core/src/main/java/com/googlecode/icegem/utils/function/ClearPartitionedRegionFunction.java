@@ -8,6 +8,7 @@ import com.gemstone.gemfire.cache.execute.FunctionContext;
 import com.gemstone.gemfire.cache.execute.ResultSender;
 import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,6 +27,7 @@ public class ClearPartitionedRegionFunction extends FunctionAdapter {
             rs.sendException(new IllegalStateException("Function parameter must be instance of String.class"));
             return;
         }
+
         String regionName = (String) arg;
 
         Region<Object, Object> region = CacheFactory.getAnyInstance().getRegion(regionName);
@@ -37,7 +39,6 @@ public class ClearPartitionedRegionFunction extends FunctionAdapter {
         for (Object key : keys) {
             region.destroy(key);
         }
-        System.out.println("Cleared");
         rs.lastResult(true);
     }
 
