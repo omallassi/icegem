@@ -447,106 +447,6 @@ PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", query
 List<Person> pageEntries = query.page(1);
 }}}
 
-= Monitoring tool =
-
-Informs about the changes in the GemFire nodes network. It sends email in case of some node has been added, hanged or removed, and in case of some exception. It is also possible to add custom handlers of the monitoring tool events.
-
-== Example ==
-
-{{{
-MonitoringTool tool = new MonitoringTool();
-
-tool.addNodeEventHandler(new NodeEventHandler() {
-
-	private int count = 0;
-
-	public void handle(NodeEvent event) {
-		count++;
-	}
-
-	public int getCount() {
-		return count;
-	}
-});
-
-tool.start();
-}}}
-
-
-== Configuration ==
-
-All the configuration of the monitoring tool is in the two property files:
-  * monitoring.properties - the main configuration file which points the tool to the GemFire network, sets delay and period, configures email texts and setups the email SMTP server settings
-  * log4j.properties - configures logging
-
-=== monitoring.properties ===
-{{{
-# Gmail SMTP settings
-mail.smtp.host=smtp.gmail.com
-mail.smtp.socketFactory.port=465
-mail.smtp.socketFactory.class=javax.net.ssl.SSLSocketFactory
-mail.smtp.auth=true
-mail.smtp.port=465
-
-# Send emails using this account
-mail.user=john.smith.sendmail@gmail.com
-mail.password=JohnSmithSendmail
-
-# The email FROM address
-mail.from=alerts@icegem.googlecode.com
-# The addresses to whom send the alert email
-mail.to=john.smith.sendmail@gmail.com
-
-# List of locators
-com.googlecode.icegem.cacheutils.monitor.locators=localhost[10355]
-
-# Delay before the first run
-com.googlecode.icegem.cacheutils.monitor.timer.delay=0
-
-# Period of run
-com.googlecode.icegem.cacheutils.monitor.timer.period=10000
-
-# Timeout of the checking function, ms
-com.googlecode.icegem.cacheutils.monitor.function.timeout=3000
-
-# Subject of the alert email
-com.googlecode.icegem.cacheutils.monitor.email.alert.subject=IceGem monitoring tool alert
-
-# Content of the alert email
-com.googlecode.icegem.cacheutils.monitor.email.alert.content=<body style="font: 14px Georgia"><p>The system has changed its status. This is the list of last events:</p>{0}<br /><p>IceGem monitoring tool,<br />{1}</p></body>
-
-# Subject of the exception email
-com.googlecode.icegem.cacheutils.monitor.email.exception.subject=IceGem monitoring tool exception
-
-# Content of the exception email
-com.googlecode.icegem.cacheutils.monitor.email.exception.content=<body style="font: 14px Georgia"><p>The following exception detected:</p><p>{0}</p><br /><p>IceGem monitoring tool,<br />{1}</p></body>
-}}}
-
-
-=== log4j.properties ===
-{{{
-# The format of the next line is [log_level, [appender1[,appender2][,appenderN]]]
-# log4j.rootLogger=error, stdout, file
-log4j.rootLogger=error, stdout
-
-# Console appender
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.target=System.out
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.conversionPattern=%m%n
-
-# File appender
-log4j.appender.file=org.apache.log4j.RollingFileAppender
-log4j.appender.file.maxFileSize=1024KB
-log4j.appender.file.maxBackupIndex=10
-log4j.appender.file.file=monitor.log
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-log4j.appender.file.layout.conversionPattern=%m%n
-
-# Logging levels
-log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
-}}}
-
 = Smart expiration =
 
 Allows to customize the expiration of region entries. It is possible to define own policy implementing the interface ExpirationPolicy.  
@@ -691,6 +591,105 @@ The following command will start comparator utility. Replicated region with path
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar comparator -p /data -s localhost[40402],localhost[40403],localhost[40405]
 }}}
 
+=== Monitor ===
+
+Informs about the changes in the GemFire nodes network. It sends email in case of some node has been added, hanged or removed, and in case of some exception. It is also possible to add custom handlers of the monitoring tool events.
+
+==== Example ====
+
+{{{
+MonitoringTool tool = new MonitoringTool();
+
+tool.addNodeEventHandler(new NodeEventHandler() {
+
+	private int count = 0;
+
+	public void handle(NodeEvent event) {
+		count++;
+	}
+
+	public int getCount() {
+		return count;
+	}
+});
+
+tool.start();
+}}}
+
+
+==== Configuration ====
+
+All the configuration of the monitoring tool is in the two property files:
+  * monitoring.properties - the main configuration file which points the tool to the GemFire network, sets delay and period, configures email texts and setups the email SMTP server settings
+  * log4j.properties - configures logging
+
+===== monitoring.properties =====
+{{{
+# Gmail SMTP settings
+mail.smtp.host=smtp.gmail.com
+mail.smtp.socketFactory.port=465
+mail.smtp.socketFactory.class=javax.net.ssl.SSLSocketFactory
+mail.smtp.auth=true
+mail.smtp.port=465
+
+# Send emails using this account
+mail.user=john.smith.sendmail@gmail.com
+mail.password=JohnSmithSendmail
+
+# The email FROM address
+mail.from=alerts@icegem.googlecode.com
+# The addresses to whom send the alert email
+mail.to=john.smith.sendmail@gmail.com
+
+# List of locators
+com.googlecode.icegem.cacheutils.monitor.locators=localhost[10355]
+
+# Delay before the first run
+com.googlecode.icegem.cacheutils.monitor.timer.delay=0
+
+# Period of run
+com.googlecode.icegem.cacheutils.monitor.timer.period=10000
+
+# Timeout of the checking function, ms
+com.googlecode.icegem.cacheutils.monitor.function.timeout=3000
+
+# Subject of the alert email
+com.googlecode.icegem.cacheutils.monitor.email.alert.subject=IceGem monitoring tool alert
+
+# Content of the alert email
+com.googlecode.icegem.cacheutils.monitor.email.alert.content=<body style="font: 14px Georgia"><p>The system has changed its status. This is the list of last events:</p>{0}<br /><p>IceGem monitoring tool,<br />{1}</p></body>
+
+# Subject of the exception email
+com.googlecode.icegem.cacheutils.monitor.email.exception.subject=IceGem monitoring tool exception
+
+# Content of the exception email
+com.googlecode.icegem.cacheutils.monitor.email.exception.content=<body style="font: 14px Georgia"><p>The following exception detected:</p><p>{0}</p><br /><p>IceGem monitoring tool,<br />{1}</p></body>
+}}}
+
+
+===== log4j.properties =====
+{{{
+# The format of the next line is [log_level, [appender1[,appender2][,appenderN]]]
+# log4j.rootLogger=error, stdout, file
+log4j.rootLogger=error, stdout
+
+# Console appender
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.conversionPattern=%m%n
+
+# File appender
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.maxFileSize=1024KB
+log4j.appender.file.maxBackupIndex=10
+log4j.appender.file.file=monitor.log
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.conversionPattern=%m%n
+
+# Logging levels
+log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
+}}}
 
 === Updater ===
 
