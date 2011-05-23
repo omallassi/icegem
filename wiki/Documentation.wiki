@@ -690,3 +690,36 @@ The following command will start comparator utility. Replicated region with path
 {{{
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar comparator -p /data -s localhost[40402],localhost[40403],localhost[40405]
 }}}
+
+
+=== Updater ===
+
+Simply gets the value for each entry of the region and puts it back to the same key. This cause "update" of the value.
+
+==== Usage help ====
+
+This is the application help for the command "updater":
+{{{
+D:\Temp\icegem-cache-utils-0.7-SNAPSHOT>java -jar icegem-cache-utils-0.7-SNAPSHOT.jar updater
+usage: updater
+ -a,--all              Update all regions in system
+ -c,--subregions       Indicate whether to update all subregions of
+                       mentioned regions
+ -h,--help             Print usage information
+ -l,--locator <arg>    Locator of GemFire system. Example: host[port]
+ -p,--packages <arg>   Enumerate packages to scan for @AutoSerializable
+                       model classes. Delimiter is a comma sign.
+ -r,--regions <arg>    Enumerate regions to be updated here. Delimiter is
+                       a comma sign. Example: region1,region2,region3...
+ -s,--server <arg>     Server of GemFire system. Example: host[port]
+}}}
+
+Examples of usage:
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar updater -a -l localhost[10355] -s localhost[40404]
+}}}
+This will cause updater to update all regions in distributed system with locator `localhost[10355]` and cache server `localhost[40404]`
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar updater -r region1,region2 -c -l localhost[10355] -s localhost[40404]
+}}}
+This will cause updater to update regions region1 and region2 with all its' subregions in distributed system with locator `localhost[10355]` and cache server `localhost[40404]`
