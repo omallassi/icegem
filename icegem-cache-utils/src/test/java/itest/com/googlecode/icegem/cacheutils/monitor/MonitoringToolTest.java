@@ -5,69 +5,86 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import com.googlecode.icegem.utils.ServerTemplate;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.googlecode.icegem.cacheutils.monitor.MonitoringTool;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEvent;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.ServerTemplate;
 
 public class MonitoringToolTest {
 
-    private static Process cacheServer1;
-    /** Field cacheServer2  */
-    private static Process cacheServer2;
-    /** Field javaProcessLauncher  */
-    private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
+	private static Process cacheServer1;
+	/** Field cacheServer2 */
+	private static Process cacheServer2;
+	/** Field javaProcessLauncher */
+	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 
-    private class CountingNodeEventHandler implements NodeEventHandler {
+	private class CountingNodeEventHandler implements NodeEventHandler {
 
-        private int count = 0;
+		private int count = 0;
 
-        public void handle(NodeEvent event) {
-            count++;
-        }
+		public void handle(NodeEvent event) {
+			count++;
+		}
 
-        public int getCount() {
-            return count;
-        }
-    }
+		public int getCount() {
+			return count;
+		}
+	}
 
-    @BeforeClass
-    public void setUp() throws IOException, InterruptedException, TimeoutException {
-        startCacheServers();
-    }
+	@BeforeMethod
+	public void setUp() throws IOException, InterruptedException,
+		TimeoutException {
+		startCacheServers();
+	}
 
-    @AfterClass
-    public void tearDown() throws IOException, InterruptedException {
-        stopCacheServers();
-    }
+	@AfterMethod
+	public void tearDown() throws IOException, InterruptedException {
+		stopCacheServers();
+	}
 
-    @Test
-    public void testMain() throws Exception {
-        MonitoringTool tool = new MonitoringTool();
+	@Test
+	public void testMain() throws Exception {
+		MonitoringTool tool = new MonitoringTool();
 
-        CountingNodeEventHandler handler = new CountingNodeEventHandler();
-        tool.addNodeEventHandler(handler);
+		CountingNodeEventHandler handler = new CountingNodeEventHandler();
+		tool.addNodeEventHandler(handler);
 
-        tool.start();
+		tool.start();
 
-        Thread.sleep(5 * 1000);
+		Thread.sleep(5 * 1000);
 
-        assertThat(handler.getCount()).isEqualTo(4);
-    }
+		assertThat(handler.getCount()).isEqualTo(4);
+		
+		tool.shutdown();
+	}
 
-    private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "monitoringToolServerProperties.properties");
-        cacheServer2 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "monitoringToolServerProperties.properties");
-    }
+	@Test
+	public void testIsServerAlivePositive() throws Exception {
+		boolean serverAlive = MonitoringTool.isServerAlive("localhost", 40404);
+		assertThat(serverAlive).isTrue();
+	}
 
-    private void stopCacheServers() throws IOException, InterruptedException {
-        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
-        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
-    }
+	@Test
+	public void testIsServerAliveNegative() throws Exception {
+		boolean serverAlive = MonitoringTool.isServerAlive("localhost", 50505);
+		assertThat(serverAlive).isFalse();
+	}
+
+	private void startCacheServers() throws IOException, InterruptedException {
+		cacheServer1 = javaProcessLauncher.runServerWithConfirmation(
+			ServerTemplate.class, "monitoringToolServerProperties40404.properties");
+		cacheServer2 = javaProcessLauncher.runServerWithConfirmation(
+			ServerTemplate.class, "monitoringToolServerProperties40405.properties");
+	}
+
+	private void stopCacheServers() throws IOException, InterruptedException {
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
+	}
 
 }
