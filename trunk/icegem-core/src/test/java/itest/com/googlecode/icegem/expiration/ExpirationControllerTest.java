@@ -1,5 +1,6 @@
 package itest.com.googlecode.icegem.expiration;
 
+import com.googlecode.icegem.utils.RegionUtils;
 import itest.com.googlecode.icegem.expiration.model.Transaction;
 import itest.com.googlecode.icegem.expiration.model.TransactionProcessingError;
 
@@ -8,9 +9,7 @@ import java.io.Serializable;
 import java.util.concurrent.TimeoutException;
 
 import org.fest.assertions.Assertions;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.Region.Entry;
@@ -127,13 +126,13 @@ public class ExpirationControllerTest implements Serializable {
 
 	}
 
-	@BeforeMethod
+	@BeforeClass
 	public void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 		startCacheServers();
 	}
 
-	@AfterMethod
+	@AfterClass
 	public void tearDown() throws IOException, InterruptedException {
 		stopCacheServers();
 	}
@@ -205,9 +204,10 @@ public class ExpirationControllerTest implements Serializable {
 
 		Region<Long, Transaction> transactionsRegion = getRegion(cache,
 			"transactions");
-
+        RegionUtils.clearPartitionedRegion(transactionsRegion);
 		Region<Long, TransactionProcessingError> errorsRegion = getRegion(
 			cache, "errors");
+        RegionUtils.clearPartitionedRegion(errorsRegion);
 
 		for (long i = 1, id = 1; i <= count; i++, id += 5) {
 			if ((i % 1000) == 0) {
@@ -290,14 +290,9 @@ public class ExpirationControllerTest implements Serializable {
         cacheServer2 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "expirationServerProperties.properties");
 	}
 
-	private void stopServer(Process server) throws IOException,
-		InterruptedException {
-		javaProcessLauncher.stopBySendingNewLineIntoProcess(server);
-	}
-
 	private void stopCacheServers() throws IOException, InterruptedException {
-		stopServer(cacheServer1);
-		stopServer(cacheServer2);
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
 	}
 
 }

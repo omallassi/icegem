@@ -16,8 +16,8 @@ import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 public class MonitoringToolTest {
-
-	private static Process cacheServer1;
+	/** Field cacheServer1  */
+    private static Process cacheServer1;
 	/** Field cacheServer2 */
 	private static Process cacheServer2;
 	/** Field javaProcessLauncher */

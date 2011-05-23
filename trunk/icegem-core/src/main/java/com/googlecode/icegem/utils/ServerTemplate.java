@@ -23,14 +23,8 @@ public class ServerTemplate {
      */
     public static void main(String[] args) {
         startCacheServer();
-        
-        System.out.println("Cache Server has been started");
-
         ConsoleUtils.waitForEnter(JavaProcessLauncher.PROCESS_STARTUP_COMPLETED);
-        
         stopCacheServer();
-
-        System.err.println("Cache Server has been stopped");
     }
 
     public static void startCacheServer() {
