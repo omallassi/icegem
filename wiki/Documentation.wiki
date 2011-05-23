@@ -691,6 +691,13 @@ log4j.appender.file.layout.conversionPattern=%m%n
 log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
 }}}
 
+==== Example of usage ====
+
+Check the configuration files and run the following command:
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor
+}}}
+
 === Updater ===
 
 Simply gets the value for each entry of the region and puts it back to the same key. This cause "update" of the value.
