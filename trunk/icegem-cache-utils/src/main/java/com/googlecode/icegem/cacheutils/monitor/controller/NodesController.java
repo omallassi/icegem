@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.mail.MessagingException;
 
-import com.gemstone.gemfire.admin.AdminDistributedSystem;
 import com.gemstone.gemfire.admin.AdminException;
 import com.gemstone.gemfire.admin.OperationCancelledException;
 import com.gemstone.gemfire.admin.SystemMember;
@@ -27,17 +26,19 @@ import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 public class NodesController {
 
 	private NodesContainer nodes = new NodesContainer();
-	private AdminDistributedSystem adminDistributedSystem;
+	private AdminService adminService;
 	private PropertiesHelper propertiesHelper;
 	private PoolFactory poolFactory;
 	private BufferedNodeEventHandler bufferedNodeEventHandler;
 
-	public NodesController(PropertiesHelper propertiesHelper) throws Exception {
+	public NodesController(PropertiesHelper propertiesHelper, boolean useLocator)
+		throws Exception {
 		this.propertiesHelper = propertiesHelper;
-		adminDistributedSystem = new AdminService(
-			propertiesHelper
-				.getStringProperty("icegem.cacheutils.monitor.locators"),
-			false).getAdmin();
+
+		adminService = new AdminService(
+			useLocator ? propertiesHelper.getStringProperty("icegem.cacheutils.monitor.locators")
+				: null, false);
+
 		poolFactory = PoolManager.createFactory();
 		bufferedNodeEventHandler = new BufferedNodeEventHandler();
 		nodes.addNodeEventHandler(bufferedNodeEventHandler);
@@ -90,7 +91,7 @@ public class NodesController {
 	}
 
 	private void detectNewNodes() throws AdminException {
-		SystemMember[] systemMemberApplications = adminDistributedSystem
+		SystemMember[] systemMemberApplications = adminService.getAdmin()
 			.getSystemMemberApplications();
 
 		for (SystemMember member : systemMemberApplications) {
@@ -111,16 +112,13 @@ public class NodesController {
 		}
 	}
 
-	private boolean isOperable(Node node) {
+	private boolean isOperable(Pool pool) {
 		boolean operable = false;
 
 		FunctionExecutionThread functionExecutionThread = new FunctionExecutionThread(
-			node.getPool());
-		Utils
-			.execute(
-				functionExecutionThread,
-				propertiesHelper
-					.getLongProperty("icegem.cacheutils.monitor.function.timeout"));
+			pool);
+		Utils.execute(functionExecutionThread, propertiesHelper
+			.getLongProperty("icegem.cacheutils.monitor.function.timeout"));
 		int zero = functionExecutionThread.getZero();
 
 		if (zero == 0) {
@@ -132,7 +130,7 @@ public class NodesController {
 
 	private void detectDeadNodes() {
 		for (Node node : nodes.getAll()) {
-			boolean operable = isOperable(node);
+			boolean operable = isOperable(node.getPool());
 
 			if (operable) {
 				nodes.markAsAlive(node);
@@ -164,11 +162,9 @@ public class NodesController {
 				.send(
 					propertiesHelper
 						.getStringProperty("icegem.cacheutils.monitor.email.alert.subject"),
-					propertiesHelper
-						.getStringProperty(
-							"icegem.cacheutils.monitor.email.alert.content",
-							toContentStringHTML(eventsList),
-							Utils.currentDate()));
+					propertiesHelper.getStringProperty(
+						"icegem.cacheutils.monitor.email.alert.content",
+						toContentStringHTML(eventsList), Utils.currentDate()));
 		}
 	}
 
@@ -203,7 +199,16 @@ public class NodesController {
 		sendAlertEmail();
 	}
 
+	public boolean isServerAlive(String host, int port) {
+		Pool pool = findOrCreatePool(host, port);
+		return isOperable(pool);
+	}
+
 	public void addNodeEventHandler(NodeEventHandler handler) {
 		nodes.addNodeEventHandler(handler);
+	}
+
+	public void shutdown() {
+		adminService.close();
 	}
 }

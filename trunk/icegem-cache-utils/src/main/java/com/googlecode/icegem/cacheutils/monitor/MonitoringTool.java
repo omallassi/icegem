@@ -6,6 +6,11 @@ import java.util.TimerTask;
 
 import javax.mail.MessagingException;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 
 import com.googlecode.icegem.cacheutils.monitor.controller.NodesController;
@@ -20,7 +25,11 @@ import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
  */
 public class MonitoringTool {
 	private static final Logger log = Logger.getLogger(MonitoringTool.class);
-	
+
+	private static boolean allOption;
+	private static String serverHostOption;
+	private static int serverPortOption;
+
 	private NodesController nodesController;
 	private PropertiesHelper propertiesHelper;
 	private Timer timer;
@@ -63,35 +72,55 @@ public class MonitoringTool {
 	 */
 	public MonitoringTool() throws Exception {
 		log.info(Utils.currentDate() + "");
-		log.info(Utils.currentDate() + "  --------------------------------------------------");
+		log.info(Utils.currentDate()
+			+ "  --------------------------------------------------");
 		log.info(Utils.currentDate() + "  Monitoring tool started");
-		log.info(Utils.currentDate() + "  --------------------------------------------------");
+		log.info(Utils.currentDate()
+			+ "  --------------------------------------------------");
 
 		propertiesHelper = new PropertiesHelper("/monitoring.properties");
-		
-		nodesController = new NodesController(propertiesHelper);
+
+		nodesController = new NodesController(propertiesHelper, true);
 		nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
-		
+
 		timer = new Timer();
 	}
 
 	/**
-	 * Starts the checking task 
+	 * Starts the checking task
 	 */
 	public void start() {
-		timer
-			.schedule(
-				new IsAliveTimerTask(),
-				propertiesHelper
-					.getLongProperty("icegem.cacheutils.monitor.timer.delay"),
-				propertiesHelper
-					.getLongProperty("icegem.cacheutils.monitor.timer.period"));
+		timer.schedule(new IsAliveTimerTask(), propertiesHelper
+			.getLongProperty("icegem.cacheutils.monitor.timer.delay"),
+			propertiesHelper
+				.getLongProperty("icegem.cacheutils.monitor.timer.period"));
+	}
+
+	public void shutdown() {
+		nodesController.shutdown();
+
+		timer.cancel();
+		timer = null;
+	}
+
+	public static boolean isServerAlive(String host, int port) throws Exception {
+		PropertiesHelper propertiesHelper = new PropertiesHelper(
+			"/monitoring.properties");
+
+		NodesController nodesController = new NodesController(propertiesHelper,
+			false);
+
+		boolean serverAlive = nodesController.isServerAlive(host, port);
+
+		nodesController.shutdown();
+
+		return serverAlive;
 	}
 
 	public void addNodeEventHandler(NodeEventHandler handler) {
 		nodesController.addNodeEventHandler(handler);
 	}
-	
+
 	/**
 	 * Starts the monitoring tool
 	 * 
@@ -99,8 +128,94 @@ public class MonitoringTool {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		MonitoringTool monitoringTool = new MonitoringTool();
-		monitoringTool.start();
+		parseCommandLineArguments(args);
+
+		if (serverHostOption != null) {
+			boolean serverAlive = MonitoringTool.isServerAlive(
+				serverHostOption, serverPortOption);
+
+			int status;
+			if (serverAlive) {
+				status = 0;
+				
+				System.out.println("alive");
+			} else {
+				status = 1;
+				
+				System.out.println("down");
+			}
+
+			System.exit(status);
+		} else if (allOption) {
+			MonitoringTool monitoringTool = new MonitoringTool();
+			monitoringTool.start();
+		} else {
+			throw new IllegalStateException("Cannot define application mode");
+		}
+	}
+
+	private static void parseCommandLineArguments(String[] commandLineArguments) {
+		Options options = constructGnuOptions();
+
+		if (commandLineArguments.length < 1) {
+			printHelp(options);
+			System.exit(-1);
+		}
+
+		CommandLineParser parser = new GnuParser();
+		try {
+			CommandLine line = parser.parse(options, commandLineArguments);
+
+			if (line.hasOption("help")) {
+				printHelp(options);
+				System.exit(0);
+			}
+			
+			boolean allOptionTemp = line.hasOption("all");
+			String serverOptionTemp = line.getOptionValue("server");
+
+			if (serverOptionTemp != null) {
+				int indexOfPortStart = serverOptionTemp.indexOf('[');
+				int indexOfPortEnd = serverOptionTemp.indexOf(']');
+				serverHostOption = serverOptionTemp.substring(0, indexOfPortStart);
+				String portString = serverOptionTemp.substring(indexOfPortStart + 1, indexOfPortEnd);
+				serverPortOption = Integer.parseInt(portString);
+			} else if (allOptionTemp) {
+				allOption = allOptionTemp;
+			} else {
+				printHelp(options);
+				System.exit(-1);
+			}
+
+		} catch (Throwable t) {
+			System.err.println("Parsing of options failed. Please check that you use correct option or specify a server in format host[port].");
+			printHelp(options);
+			System.exit(-1);
+		}
+	}
+
+	private static void printHelp(final Options options) {
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("monitor", options);
+	}
+
+	private static Options constructGnuOptions() {
+		final Options gnuOptions = new Options();
+
+		gnuOptions
+			.addOption(
+				"s",
+				"server",
+				true,
+				"Check one server and exit with status 0 if server alive, or with status 1 if server is dead or down. Server should be in format host[port].")
+			.addOption(
+				"a",
+				"all",
+				false,
+				"Periodically check all the servers related to locators specified in monitoring.properties file")
+			.addOption("h", "help", false, "Print usage information");
+
+		return gnuOptions;
 	}
 
 }
