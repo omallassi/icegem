@@ -635,23 +635,58 @@ for (Entry<Object, Object> entry : entrySet) {
 
 = Cache utils =
 
-== Build ==
-To create a distributive of cache utils run command:
+== Usage ==
 
-{{{
-mvn clean assembly:assembly
-}}}
-
-This will produce a zip file like `icegem\icegem-cache-utils\target\icegem-cache-utils-0.7-SNAPSHOT.zip`.
-
-Extract this zip file and go inside folder icegem-cache-utils-0.7-SNAPSHOT.
-
-== Using ==
-
-To use a tool set run command:
+To use a tool set run the following command:
 
 {{{
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar
 }}}
 
 This jar has usage help for the tool set and for the separate command.
+
+== Commands ==
+
+This is the list of available commands:
+
+  * comparator
+  * latency-measure
+  * monitor
+  * updater
+
+
+=== Comparator ===
+
+Compares data of the specified region in specified cache servers (mode REPLICATION) or specified locators of the same cluster. It is also pissible to provide list of java packages to restrict comparison.
+
+==== Result of comparison ====
+
+Result of comparison - list of the results for the each checked node. For each node there is complex object which contains:
+  * set of missing keys (set of all keys minus set of local keys)
+  * set of extra keys (set of local keys minus set of all keys)
+  * set of different keys (key is present in both sets - local and all, but values are different)
+  * node identifier
+
+==== Usage help ====
+
+This is the application help for the command "comparator":
+
+{{{
+D:\Temp\icegem-cache-utils-0.7-SNAPSHOT>java -jar icegem-cache-utils-0.7-SNAPSHOT.jar comparator
+usage: comparator
+ -c,--packages <arg>   Enumerate packages to scan for @AutoSerializable
+                       model classes. Delimiter is a comma sign.
+ -h,--help             Print usage information
+ -l,--locators <arg>   Locators of GemFire system. For intra-cluster
+                       checking. Example: host1[port1],host2[port2]
+ -p,--path <arg>       Region path to be compared. Only replicated region
+                       could be used. Example: /region1/region2
+ -s,--servers <arg>    Servers of GemFire system. For multi-cluster
+                       systems. Example: host1[port1],host2[port2]
+}}}
+
+The following command will start comparator utility. Replicated region with path "/data" will be compared on the cache servers `localhost[40402]`,`localhost[40403]` and `localhost[40405]` :
+
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar comparator -p /data -s localhost[40402],localhost[40403],localhost[40405]
+}}}
