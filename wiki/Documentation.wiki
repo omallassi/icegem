@@ -373,7 +373,6 @@ PaginatedQuery<Person> query = new PaginatedQuery<Person>(...);
 {{{ 
 Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
 }}}  
-
  # All members that store help region must have `icegem-core.jar` in it's ClassPath.
 
 ==Restrictions== 
