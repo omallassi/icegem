@@ -6,12 +6,11 @@ import com.gemstone.gemfire.cache.execute.ResultCollector;
 import com.googlecode.icegem.utils.function.ClearPartitionedRegionFunction;
 
 /**
- * Help class for common operations with cache and regions that are used in tests.
+ * Help class for common operations with regions.
  *
  * @author Andrey Stepanov aka standy
  */
-public class CacheUtils {
-    // TODO: Do not use!
+public class RegionUtils {
     /**
      * Clears partitioned region.
      *
