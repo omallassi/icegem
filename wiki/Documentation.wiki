@@ -62,7 +62,7 @@ public Object fromData(DataInput in) throws IOException, ClassNotFoundException;
   * `getSupportedClasses()` - this method will return sole class for which serializer is created
   * `getId()` - will return unique identifier of DataSerializer
   * `toData(...)` - will serialize an object to a `DataOutput`
-  * `fromData(...)` -will read an object from a `DataInput`
+  * `fromData(...)` - will read an object from a `DataInput`
 
 Class generation is performed with the help of [http://www.csg.is.titech.ac.jp/~chiba/javassist/ javassist library]. 
 
@@ -395,6 +395,7 @@ public boolean hasPrevious(){...};
 public int getPageSize(){...};
 public int getTotalNumberOfPages(){...};
 public int getTotalNumberOfEntries(){...};
+public boolean pageNumberExists(int pageNumber){...};
 ...
 }
 }}}
@@ -408,7 +409,8 @@ public int getTotalNumberOfEntries(){...};
  * 'hasPrevious()` - checks that query has the previous page;
  * `getPageSize()` - returns size of page (page size is 20 by default);
  * `getTotalNumberOfPages()` - returns a total number of query pages;
- * `getTotalNumberOfEntries()` - returns a total number of query entries.
+ * `getTotalNumberOfEntries()` - returns a total number of query entries;
+ * `pageNumberExists(int pageNumber)` - checks that a specified page number exists.
 
 ==Ordering of results==
 Query results will be ordered by entry keys automatically, if a key object implements `java.lang.Comparable` interface.
