@@ -690,12 +690,32 @@ log4j.appender.file.layout.conversionPattern=%m%n
 log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
 }}}
 
-==== Example of usage ====
+==== Usage help ====
 
-Check the configuration files and run the following command:
+This is the application help for the command "monitor":
+
 {{{
-java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor
+D:\Temp\icegem-cache-utils-0.7-SNAPSHOT>java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor
+usage: monitor
+ -a,--all            Periodically check all the servers related to
+                     locators specified in monitoring.properties file
+ -h,--help           Print usage information
+ -s,--server <arg>   Check one server and exit with status 0 if server
+                     alive, or with status 1 if server is dead or down.
+                     Server should be in format host[port].
 }}}
+
+Examples of usage:
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor -s localhost[40404]
+}}}
+Checks that server on host=localhost and port=40404 is alive. Returns exit code `0` in case of the server alive, 1 in case of its down, -1 in case of there is some other error like misconfiguration.
+
+
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor -a
+}}}
+Monitor will check periodically all the servers related to locators specified in property `icegem.cacheutils.monitor.locators` of property file `monitoring properties`, write to console and log file, and also will send alert messages.
 
 === Updater ===
 
