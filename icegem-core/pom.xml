@@ -4,13 +4,13 @@
     <groupId>com.googlecode.icegem</groupId>
     <artifactId>icegem-core</artifactId>
     <name>Core</name>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>com.googlecode.icegem</groupId>
         <artifactId>icegem-root</artifactId>
-        <version>0.7-SNAPSHOT</version>
+        <version>0.7</version>
     </parent>
 
     <dependencies>
@@ -98,7 +98,7 @@
                         <configuration>
                             <target>
                                 <ant antfile="${project.build.testSourceDirectory}/../resources/testEnvironment.xml">
-                                    <target name="start-gemfire-test-environment"/>
+                                    <target name="start-gemfire-test-environment" />
                                 </ant>
                             </target>
                         </configuration>
@@ -114,7 +114,7 @@
                         <configuration>                           
                             <target>
                                 <ant antfile="${project.build.testSourceDirectory}/../resources/testEnvironment.xml">
-                                    <target name="stop-gemfire-test-environment"/>
+                                    <target name="stop-gemfire-test-environment" />
                                 </ant>
                             </target>
                         </configuration>
