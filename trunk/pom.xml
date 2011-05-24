@@ -66,7 +66,7 @@
         <module>icegem-spring</module>
         <module>icegem-cache-utils</module>
 	    <module>icegem-serializer-generator</module>
-        <module>icegem-message-barrier</module>
+        <!--<module>icegem-message-barrier</module>-->
         <!--<module>icegem-message-barrier-example</module>-->
         <!--<module>icegem-example-mojo</module>-->
     </modules>
