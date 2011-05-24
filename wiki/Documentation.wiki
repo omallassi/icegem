@@ -62,7 +62,7 @@ public Object fromData(DataInput in) throws IOException, ClassNotFoundException;
   * `getSupportedClasses()` - this method will return sole class for which serializer is created
   * `getId()` - will return unique identifier of DataSerializer
   * `toData(...)` - will serialize an object to a `DataOutput`
-  * `fromData(...)` - will read an object from a `DataInput`
+  * `fromData(...)` -will read an object from a `DataInput`
 
 Class generation is performed with the help of [http://www.csg.is.titech.ac.jp/~chiba/javassist/ javassist library]. 
 
@@ -395,7 +395,6 @@ public boolean hasPrevious(){...};
 public int getPageSize(){...};
 public int getTotalNumberOfPages(){...};
 public int getTotalNumberOfEntries(){...};
-public boolean pageNumberExists(int pageNumber){...};
 ...
 }
 }}}
@@ -409,8 +408,7 @@ public boolean pageNumberExists(int pageNumber){...};
  * 'hasPrevious()` - checks that query has the previous page;
  * `getPageSize()` - returns size of page (page size is 20 by default);
  * `getTotalNumberOfPages()` - returns a total number of query pages;
- * `getTotalNumberOfEntries()` - returns a total number of query entries;
- * `pageNumberExists(int pageNumber)` - checks that a specified page number exists.
+ * `getTotalNumberOfEntries()` - returns a total number of query entries.
 
 ==Ordering of results==
 Query results will be ordered by entry keys automatically, if a key object implements `java.lang.Comparable` interface.
@@ -536,19 +534,9 @@ for (Entry<Object, Object> entry : entrySet) {
 
 = Cache utils =
 
-== Usage ==
+Cache utils consists of several utilities which can help with testing, deploying and monitoring of GemFire-related applications.
 
-To use a tool set run the following command:
-
-{{{
-java -jar icegem-cache-utils-0.7-SNAPSHOT.jar
-}}}
-
-This jar has usage help for the tool set and for the separate command.
-
-== Commands ==
-
-This is the list of available commands:
+This is the list of available utils:
 
   * comparator
   * latency-measure
@@ -556,11 +544,11 @@ This is the list of available commands:
   * updater
 
 
-=== Comparator ===
+== Comparator ==
 
-Compares data of the specified region in specified cache servers (mode REPLICATION) or specified locators of the same cluster. It is also pissible to provide list of java packages to restrict comparison.
+Compares data of the specified region in specified cache servers (mode REPLICATION) or specified locators of the same cluster. It is also possible to provide list of java packages to restrict comparison.
 
-==== Result of comparison ====
+=== Result of comparison ===
 
 Result of comparison - list of the results for the each checked node. For each node there is complex object which contains:
   * set of missing keys (set of all keys minus set of local keys)
@@ -568,7 +556,7 @@ Result of comparison - list of the results for the each checked node. For each n
   * set of different keys (key is present in both sets - local and all, but values are different)
   * node identifier
 
-==== Usage help ====
+=== Usage help ===
 
 This is the application help for the command "comparator":
 
@@ -592,11 +580,11 @@ The following command will start comparator utility. Replicated region with path
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar comparator -p /data -s localhost[40402],localhost[40403],localhost[40405]
 }}}
 
-=== Monitor ===
+== Monitor ==
 
 Informs about the changes in the GemFire nodes network. It sends email in case of some node has been added, hanged or removed, and in case of some exception. It is also possible to add custom handlers of the monitoring tool events.
 
-==== Example ====
+=== Example ===
 
 {{{
 MonitoringTool tool = new MonitoringTool();
@@ -615,16 +603,20 @@ tool.addNodeEventHandler(new NodeEventHandler() {
 });
 
 tool.start();
+
+// Monitor works
+
+tool.shutdown();
 }}}
 
 
-==== Configuration ====
+=== Configuration ===
 
 All the configuration of the monitoring tool is in the two property files:
   * monitoring.properties - the main configuration file which points the tool to the GemFire network, sets delay and period, configures email texts and setups the email SMTP server settings
   * log4j.properties - configures logging
 
-===== monitoring.properties =====
+==== monitoring.properties ====
 {{{
 # Gmail SMTP settings
 mail.smtp.host=smtp.gmail.com
@@ -668,7 +660,7 @@ com.googlecode.icegem.cacheutils.monitor.email.exception.content=<body style="fo
 }}}
 
 
-===== log4j.properties =====
+==== log4j.properties ====
 {{{
 # The format of the next line is [log_level, [appender1[,appender2][,appenderN]]]
 # log4j.rootLogger=error, stdout, file
@@ -692,7 +684,7 @@ log4j.appender.file.layout.conversionPattern=%m%n
 log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
 }}}
 
-==== Usage help ====
+=== Usage help ===
 
 This is the application help for the command "monitor":
 
@@ -719,11 +711,11 @@ java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor -a
 }}}
 Monitor will check periodically all the servers related to locators specified in property `icegem.cacheutils.monitor.locators` of property file `monitoring properties`, write to console and log file, and also will send alert messages.
 
-=== Updater ===
+== Updater ==
 
 Simply gets the value for each entry of the region and puts it back to the same key. This cause "update" of the value.
 
-==== Usage help ====
+=== Usage help ===
 
 This is the application help for the command "updater":
 {{{
