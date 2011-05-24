@@ -271,9 +271,11 @@ public class JavaProcessLauncher {
             arguments.add("-DgemfirePropertyFile=" + pathToPropertiesFile);
         }
         arguments.add(klass.getCanonicalName());
-        Process process = new ProcessBuilder(arguments).start();
+        ProcessBuilder processBuilder = new ProcessBuilder(arguments);
+        Process process = processBuilder.start();
+        
         new StreamRedirector(process.getErrorStream(), klass.getSimpleName() + PROCESS_ERROR_STREAM_PREFIX,
-                redirectProcessErrorStreamToParentProcessStdOut).start();
+                redirectProcessErrorStreamToParentProcessStdOut).start(); 
         if (!withConfirmation) {
             new StreamRedirector(process.getInputStream(), klass.getSimpleName() + PROCESS_STDOUT_STREAM_PREFIX,
                     redirectProcessInputStreamToParentProcessStdOut).start();
@@ -312,6 +314,7 @@ public class JavaProcessLauncher {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         while ((line = bufferedReader.readLine()) != null) {
+        	System.out.println(line);
             if (line.equals(PROCESS_STARTUP_COMPLETED)) {
                 System.out.println("The process (" + className + ") has been started successfully");
                 return;
