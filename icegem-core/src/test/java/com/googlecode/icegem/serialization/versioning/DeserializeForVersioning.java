@@ -23,13 +23,13 @@ import java.util.Arrays;
  */
 public class DeserializeForVersioning {
 
-    @BeforeTest (enabled = true)
+    @BeforeTest(enabled = false)
     public void before() throws InvalidClassException, CannotCompileException {
         HierarchyRegistry.registerAll(DeserializeForVersioning.class.getClassLoader(),
                 Dog.class, Company.class, IllegalVersion.class, Son.class, Car.class, Person.class);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void deserializeSingleVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("dog.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("dog.versionTest"));
@@ -41,7 +41,7 @@ public class DeserializeForVersioning {
         assertThat(dog.getName()).isEqualTo("Rex");
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void deserializePreviousVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("simpleCompany.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("simpleCompany.versionTest"));
@@ -54,7 +54,7 @@ public class DeserializeForVersioning {
         assertThat(c2.getName()).isNull();
     }
 
-    @Test(expectedExceptions = ClassCastException.class, enabled = true)
+    @Test(expectedExceptions = ClassCastException.class, enabled = false)
     public void deserializeNewVersionFromOldClass() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("restoreNewClassVersion.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("restoreNewClassVersion.versionTest"));
@@ -93,7 +93,7 @@ public class DeserializeForVersioning {
         assertThat(car.isSedan()).isTrue();
     }
 
-    @Test(expectedExceptions = ClassCastException.class, enabled = true)
+    @Test(expectedExceptions = ClassCastException.class, enabled = false)
     public void deserializeWiithNewClassModelAndOldBeanVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("person.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("person.versionTest"));
