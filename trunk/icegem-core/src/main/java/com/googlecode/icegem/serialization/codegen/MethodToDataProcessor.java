@@ -53,6 +53,9 @@ public class MethodToDataProcessor {
             throw new RuntimeException("class must be annotated with @BeanVersion: " + element.getType().getCanonicalName());
         }
 
+        //save class model hash code
+        builder.append(tab("out.writeInt(" + CodeGenUtils.getClassModelHashCodeBasedOnClassFields(fields) +");"));
+
         for (XField field : fields) {
             builder.append("\n");
             builder.append(tab("// this." + field.getName() + " -> byte[]\n")); //todo: can be name collision between parent/child fields

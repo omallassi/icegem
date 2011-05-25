@@ -2,27 +2,32 @@
 <project name="star-stop-gemfire-test-environment">
     <property name="locator.base.directory" value="${project.build.directory}/locator"/>
     <property name="agent.base.directory" value="${project.build.directory}/agent"/>
+    <property name="locator.port" value="10355"/>
 
     <!--Set of targets for starting GemFire test environment-->
     <target name="start-gemfire-test-environment" depends="start-locator, start-agent">
     </target>
 
     <target name="start-locator" depends="copy-scripts, copy-locator-properties-file, copy-locator-license-file">
-        <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.bat"/>
-        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/start-locator.bat" failonerror="true"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/start-locator.sh"/>
         </exec>
-        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/start-locator.sh"/>
         </exec>
+        <available file="${locator.base.directory}/locator${locator.port}state.dat" property="isLocatorStarted" />
+        <fail unless="isLocatorStarted" message="Locator has not been started. Check that GemFire was installed locally and environment variable GEMFIRE is available." />
     </target>
 
     <target name="start-agent" depends="copy-scripts, copy-agent-properties-file">
-        <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-agent.bat"/>
-        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/start-agent.bat" failonerror="true"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/start-agent.sh"/>
         </exec>
-        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/start-agent.sh"/>
         </exec>
     </target>
@@ -31,7 +36,7 @@
 		<copy todir="${project.build.directory}" filtering="true">
 			<fileset dir="${project.build.testSourceDirectory}/../scripts" />
 			<filterset begintoken="${" endtoken="}">
-				<filter token="gemfire.jar" value="${project.build.directory}/lib/gemfire-${com.gemstone.gemfire.version}.jar" />
+				<filter token="locator-port" value="${locator.port}"/>
 			</filterset>
 		</copy>
 	</target>
@@ -66,21 +71,24 @@
     </target>
 
     <target name="stop-locator" depends="copy-scripts, copy-locator-properties-file, copy-locator-license-file">
-        <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.bat"/>
-        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/stop-locator.bat" failonerror="true"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/stop-locator.sh"/>
         </exec>
-        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/stop-locator.sh"/>
         </exec>
+        <delete file="${locator.base.directory}/locator${locator.port}state.dat"/>
     </target>
 
     <target name="stop-agent" depends="copy-scripts, copy-agent-properties-file">
-        <exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/stop-agent.bat"/>
-        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/stop-agent.bat" failonerror="true"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/stop-agent.sh"/>
         </exec>
-        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/stop-agent.sh"/>
         </exec>
     </target>

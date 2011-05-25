@@ -2,11 +2,13 @@ package com.googlecode.icegem.serialization.versioning;
 
 import com.gemstone.gemfire.DataSerializer;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.versioning.beans.beanv2.Company;
-import com.googlecode.icegem.serialization.versioning.incorrect.v2.IllegalVersion;
-import com.googlecode.icegem.serialization.versioning.inheritance.v2.Son;
-import com.googlecode.icegem.serialization.versioning.manyVersions.v3.Car;
+import com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv2.Company;
+import com.googlecode.icegem.serialization.versioning.beans.modified.beanv2.Person;
+import com.googlecode.icegem.serialization.versioning.beans.incorrect.v2.IllegalVersion;
+import com.googlecode.icegem.serialization.versioning.beans.inheritance.v2.Son;
+import com.googlecode.icegem.serialization.versioning.beans.manyVersions.v3.Car;
 
+import com.googlecode.icegem.serialization.versioning.beans.singleversion.Dog;
 import javassist.CannotCompileException;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -21,12 +23,25 @@ import java.util.Arrays;
  */
 public class DeserializeForVersioning {
 
-    @BeforeTest (enabled = false)
+    @BeforeTest (enabled = true)
     public void before() throws InvalidClassException, CannotCompileException {
         HierarchyRegistry.registerAll(DeserializeForVersioning.class.getClassLoader(),
-                Company.class, IllegalVersion.class, Son.class, Car.class);
+                Dog.class, Company.class, IllegalVersion.class, Son.class, Car.class, Person.class);
     }
-    @Test(enabled = false)
+
+    @Test(enabled = true)
+    public void deserializeSingleVersion() throws IOException, CannotCompileException, ClassNotFoundException {
+        byte[] buf = new byte[(int) new File("dog.versionTest").length()];
+        DataInputStream in = new DataInputStream(new FileInputStream("dog.versionTest"));
+        in.readFully(buf);
+
+        ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
+
+        Dog dog = DataSerializer.readObject(new DataInputStream(byteArray));
+        assertThat(dog.getName()).isEqualTo("Rex");
+    }
+
+    @Test(enabled = true)
     public void deserializePreviousVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("simpleCompany.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("simpleCompany.versionTest"));
@@ -39,20 +54,20 @@ public class DeserializeForVersioning {
         assertThat(c2.getName()).isNull();
     }
 
-    @Test(expectedExceptions = ClassCastException.class, enabled = false)
-    public void deserializeNewVersionWithOldCLass() throws IOException, ClassNotFoundException {
+    @Test(expectedExceptions = ClassCastException.class, enabled = true)
+    public void deserializeNewVersionFromOldClass() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("restoreNewClassVersion.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("restoreNewClassVersion.versionTest"));
         in.readFully(buf);
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
-        IllegalVersion illegalVersion = DataSerializer.readObject(new DataInputStream(byteArray));
+        DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
     @Test(enabled = false)
     public void deserializeWithInheritance() throws IOException, ClassNotFoundException {
-        byte[] buf = new byte[(int) new File("restoreNewClassVersion.versionTest").length()];
-        DataInputStream in = new DataInputStream(new FileInputStream("restoreNewClassVersion.versionTest"));
+        byte[] buf = new byte[(int) new File("son.versionTest").length()];
+        DataInputStream in = new DataInputStream(new FileInputStream("son.versionTest"));
         in.readFully(buf);
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
@@ -78,6 +93,14 @@ public class DeserializeForVersioning {
         assertThat(car.isSedan()).isTrue();
     }
 
+    @Test(expectedExceptions = ClassCastException.class, enabled = true)
+    public void deserializeWiithNewClassModelAndOldBeanVersion() throws IOException, CannotCompileException, ClassNotFoundException {
+        byte[] buf = new byte[(int) new File("person.versionTest").length()];
+        DataInputStream in = new DataInputStream(new FileInputStream("person.versionTest"));
+        in.readFully(buf);
+        ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
+        DataSerializer.readObject(new DataInputStream(byteArray));
+    }
 
     @AfterTest
     public void deleteDataFile() {
@@ -90,6 +113,4 @@ public class DeserializeForVersioning {
         }))
             file.delete();
     }
-
-
 }

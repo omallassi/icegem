@@ -1,4 +1,4 @@
-package com.googlecode.icegem.serialization.versioning.beans.beanv1;
+package com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv1;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;

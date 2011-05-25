@@ -1,5 +1,7 @@
 package com.googlecode.icegem.serialization.codegen;
 
+import java.util.List;
+
 /**
  * @author igolovach
  */
@@ -67,5 +69,23 @@ public class CodeGenUtils {
                 return naiveName.substring(count + 1, naiveName.length() - 1) + ending;
             }
         }
+    }
+
+    /**
+     * Returns a hash code of a class model.
+     * Class model is defined by an ordered list of class's fields and represented as a string.
+     * This string is formed by appending a field's type and name to it.
+     *
+     * Note: Use XClass.getSerialisedSortedFields() method for providing a constant order of the fields for this method.
+     *  
+     * @param classFields an ordered list of class's fields.
+     * @return int
+     */
+    public static int getClassModelHashCodeBasedOnClassFields(List<XField> classFields) {
+        StringBuilder builder = new StringBuilder();
+        for (XField field : classFields) {
+            builder.append(field.getType()).append(field.getName());
+        }
+        return builder.toString().hashCode();
     }
 }
