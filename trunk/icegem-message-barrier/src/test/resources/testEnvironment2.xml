@@ -1,47 +1,64 @@
 <?xml version="1.0"?>
-<!--<project name="star-stop-gemfire-test-environment" basedir="${project.basedir}">-->
 <project name="star-stop-gemfire-test-environment">
     <property name="locator.base.directory" value="${project.build.directory}/locator"/>
     <property name="agent.base.directory" value="${project.build.directory}/agent"/>
+    <property name="locator.port" value="10355"/>
 
     <!--Set of targets for starting GemFire test environment-->
-    <target name="start-gemfire-test-environment" depends="stop-gemfire-test-environment, start-locator, start-agent">
+    <target name="start-gemfire-test-environment" depends="start-locator, start-agent">
     </target>
 
-    <target name="start-locator" depends="copy-scripts">
-        <!--<exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.bat"/>-->
-        <exec osfamily="windows" dir="${project.build.directory}" executable="cmd">
-            <arg file="${project.build.directory}/start-locator.bat"/>
-        </exec>
-        <!--<exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.sh"/>-->
-        <!--<exec osfamily="unix" dir="${project.build.directory}" executable="${project.build.directory}/start-locator.sh"/>-->
-        <exec osfamily="unix" dir="${project.build.directory}" executable="sh">
+    <target name="start-locator" depends="copy-scripts, copy-locator-properties-file, copy-locator-license-file">
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/start-locator.bat" failonerror="true"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
             <arg file="${project.build.directory}/start-locator.sh"/>
         </exec>
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
+            <arg file="${project.build.directory}/start-locator.sh"/>
+        </exec>
+        <available file="${locator.base.directory}/locator${locator.port}state.dat" property="isLocatorStarted" />
+        <fail unless="isLocatorStarted" message="Locator has not been started. Check that GemFire was installed locally and environment variable GEMFIRE is available." />
     </target>
 
     <target name="start-agent" depends="copy-scripts, copy-agent-properties-file">
-        <!--<exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/start-agent.bat"/>-->
-        <exec osfamily="windows" dir="${project.build.directory}" executable="cmd">
-            <arg file="${project.build.directory}/start-agent.bat"/>
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/start-agent.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
+            <arg file="${project.build.directory}/start-agent.sh"/>
         </exec>
-        <!--<exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/start-agent.sh"/>-->
-        <!--<exec osfamily="unix" dir="${project.build.directory}" executable="${project.build.directory}/start-agent.sh"/>-->
-        <exec osfamily="unix" dir="${project.build.directory}" executable="sh">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/start-agent.sh"/>
         </exec>
     </target>
 
-    <target name="copy-scripts" depends="create-base-directories">
-        <copy todir="${project.build.directory}">
-            <fileset dir="${project.build.testSourceDirectory}/../scripts"/>
-        </copy>
-        <chmod dir="${project.build.directory}" perm="777" includes="*.sh"/>
-    </target>
+    <target name="copy-scripts" depends="create-base-directories, copy-resources">
+		<copy todir="${project.build.directory}" filtering="true">
+			<fileset dir="${project.build.testSourceDirectory}/../scripts" />
+			<filterset begintoken="${" endtoken="}">
+				<filter token="locator-port" value="${locator.port}"/>
+			</filterset>
+		</copy>
+	</target>
+
+    <target name="copy-resources">
+		<copy todir="${project.build.directory}">
+			<fileset dir="${project.build.testSourceDirectory}/../resources" />
+		</copy>
+	</target>
 
     <target name="copy-agent-properties-file" depends="create-base-directories">
         <copy file="${project.build.testSourceDirectory}/../resources/agent.properties" todir="${agent.base.directory}"/>
-        <chmod file="${agent.base.directory}/agent.properties" perm="644"/>
+    </target>
+
+    <target name="copy-locator-properties-file" depends="create-base-directories">
+        <copy file="${project.build.testSourceDirectory}/../resources/locator.properties" todir="${locator.base.directory}"/>
+    </target>
+
+    <!--To use this target add gemfireLicense.zip file into test/resources directory and uncomment this lines-->
+    <target name="copy-locator-license-file" depends="create-base-directories">
+<!--        <copy file="${project.build.testSourceDirectory}/../resources/gemfireLicense.zip" todir="${locator.base.directory}"/>
+        <chmod file="${agent.base.directory}/gemfireLicense.zip" perm="644"/>-->
     </target>
 
     <target name="create-base-directories">
@@ -53,25 +70,26 @@
     <target name="stop-gemfire-test-environment" depends="stop-agent, stop-locator">
     </target>
 
-    <target name="stop-locator" depends="copy-scripts">
-        <!--<exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.bat"/>-->
-        <exec osfamily="windows" dir="${project.build.directory}" executable="cmd">
-            <arg file="${project.build.directory}/stop-locator.bat"/>
-        </exec>
-        <!--<exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/stop-locator.sh"/>-->
-        <exec osfamily="unix" dir="${project.build.directory}" executable="sh">
+    <target name="stop-locator" depends="copy-scripts, copy-locator-properties-file, copy-locator-license-file">
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/stop-locator.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/stop-locator.sh"/>
         </exec>
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+            <arg file="${project.build.directory}/stop-locator.sh"/>
+        </exec>
+        <delete file="${locator.base.directory}/locator${locator.port}state.dat"/>
     </target>
 
     <target name="stop-agent" depends="copy-scripts, copy-agent-properties-file">
-        <!--<exec osfamily="windows" dir="${project.build.directory}" executable="${project.build.directory}/stop-agent.bat"/>-->
-        <exec osfamily="windows" dir="${project.build.directory}" executable="cmd">
-            <arg file="${project.build.directory}/stop-agent.bat"/>
-        </exec>
-        <!--<exec osfamily="mac" dir="${project.build.directory}" executable="${project.build.directory}/stop-agent.sh"/>-->
-        <exec osfamily="unix" dir="${project.build.directory}" executable="sh">
+        <exec osfamily="windows" dir="${project.build.directory}"
+              executable="${project.build.directory}/stop-agent.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/stop-agent.sh"/>
-        </exec> <!--${project.build.directory}/-->
+        </exec>
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
+            <arg file="${project.build.directory}/stop-agent.sh"/>
+        </exec>
     </target>
 </project>
