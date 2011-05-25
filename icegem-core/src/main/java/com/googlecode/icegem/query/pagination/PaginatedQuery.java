@@ -348,6 +348,21 @@ public class PaginatedQuery<V> {
     }
 
     /**
+     * Checks that a specified page number exists.
+     *
+     * @param pageNumber of type int
+     * @return boolean
+     * @throws FunctionDomainException when
+     * @throws TypeMismatchException when
+     * @throws QueryInvocationTargetException when
+     * @throws NameResolutionException when
+     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     */
+    public boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+        return pageNumber == 1 || !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
+    }
+
+    /**
      * Returns sorted by keys values for given keys.
      * Values will be sorted by keys, if keys implement Comparable interface.
      *
@@ -376,21 +391,6 @@ public class PaginatedQuery<V> {
             values.add(entries.get(key));
         }
         return values;
-    }
-
-    /**
-     * Checks that a specified page number exists.
-     *
-     * @param pageNumber of type int
-     * @return boolean
-     * @throws FunctionDomainException when
-     * @throws TypeMismatchException when
-     * @throws QueryInvocationTargetException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
-     */
-    public boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException, LimitExceededException {
-        return pageNumber == 1 || !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
     }
 
     /**

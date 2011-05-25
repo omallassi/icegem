@@ -314,7 +314,6 @@ public class JavaProcessLauncher {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         while ((line = bufferedReader.readLine()) != null) {
-        	System.out.println(line);
             if (line.equals(PROCESS_STARTUP_COMPLETED)) {
                 System.out.println("The process (" + className + ") has been started successfully");
                 return;
