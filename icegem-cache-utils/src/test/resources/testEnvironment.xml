@@ -23,11 +23,11 @@
 
     <target name="start-agent" depends="copy-scripts, copy-agent-properties-file">
         <exec osfamily="windows" dir="${project.build.directory}"
-              executable="${project.build.directory}/start-agent.bat" failonerror="true"/>
-        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
+              executable="${project.build.directory}/start-agent.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/start-agent.sh"/>
         </exec>
-        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/start-agent.sh"/>
         </exec>
     </target>
@@ -72,11 +72,11 @@
 
     <target name="stop-locator" depends="copy-scripts, copy-locator-properties-file, copy-locator-license-file">
         <exec osfamily="windows" dir="${project.build.directory}"
-              executable="${project.build.directory}/stop-locator.bat" failonerror="true"/>
-        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
+              executable="${project.build.directory}/stop-locator.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/stop-locator.sh"/>
         </exec>
-        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/stop-locator.sh"/>
         </exec>
         <delete file="${locator.base.directory}/locator${locator.port}state.dat"/>
@@ -84,11 +84,11 @@
 
     <target name="stop-agent" depends="copy-scripts, copy-agent-properties-file">
         <exec osfamily="windows" dir="${project.build.directory}"
-              executable="${project.build.directory}/stop-agent.bat" failonerror="true"/>
-        <exec osfamily="mac" dir="${project.build.directory}" executable="bash" failonerror="true">
+              executable="${project.build.directory}/stop-agent.bat"/>
+        <exec osfamily="mac" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/stop-agent.sh"/>
         </exec>
-        <exec osfamily="unix" dir="${project.build.directory}" executable="bash" failonerror="true">
+        <exec osfamily="unix" dir="${project.build.directory}" executable="bash">
             <arg file="${project.build.directory}/stop-agent.sh"/>
         </exec>
     </target>
