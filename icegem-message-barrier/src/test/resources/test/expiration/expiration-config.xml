@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+
+     <!-- environment configuration: gemfire-->
+    <bean id="clientFactory" class="com.gemstone.gemfire.cache.client.ClientCacheFactory">
+        <constructor-arg>
+            <util:properties>
+                <prop key="cache-xml-file">test/expiration/expiration-adapter-test.xml</prop>
+            </util:properties>
+        </constructor-arg>
+    </bean>
+
+    <bean id="client" class="com.gemstone.gemfire.cache.client.ClientCache"
+                      factory-bean="clientFactory"
+                      factory-method="create"
+                      destroy-method="close"/>
+
+    <bean id="entityRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
+        <constructor-arg value="trades"/>
+    </bean>
+    <bean id="messageRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
+        <constructor-arg value="msgs"/>
+    </bean>
+    <bean id="messageSequenceRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
+        <constructor-arg value="msgs-sequence"/>
+    </bean>
+    <bean id="expiredMessageRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
+        <constructor-arg value="expired-msgs"/>
+    </bean>
+    <bean id="messageCheckRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
+        <constructor-arg value="msg-to-check"/>
+    </bean>
+    <!-- sample components -->
+
+    <bean id="adapter1" class="com.googlecode.icegem.message.barrier.core.RegionListeningBarrierBean">
+        <property name="entityRegion" ref="entityRegion"/>
+        <property name="messageRegion" ref="messageRegion"/>
+        <property name="messageSequenceRegion" ref="messageSequenceRegion"/>
+        <property name="expiredMessageRegion" ref="expiredMessageRegion"/>
+        <property name="messageCheckRegion" ref="messageCheckRegion"/>
+        <property name="collectorTime" value="10"/>
+        <property name="touchTime" value="100"/>
+    </bean>
+
+</beans>

@@ -15,12 +15,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BarrierExpiredMessageRegionListener extends CacheListenerAdapter implements Declarable{
 
     private static Logger logger = LoggerFactory.getLogger(BarrierExpiredMessageRegionListener.class);
-    private AtomicInteger expiredMsgCount = new AtomicInteger(0);
 
     @Override
     public void afterCreate(EntryEvent entryEvent) {
         logger.trace("create {} ", entryEvent.getNewValue());
-        expiredMsgCount.incrementAndGet();
     }
 
     @Override
@@ -33,10 +31,5 @@ public class BarrierExpiredMessageRegionListener extends CacheListenerAdapter im
         logger.trace("invalidate {} ", entryEvent.getOldValue());
     }
 
-    public int getExpiredMsgCount() {
-        return expiredMsgCount.get();
-    }
-
-    
     public void init(Properties properties) {}
 }

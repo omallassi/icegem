@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE client-cache PUBLIC
+    "-//GemStone Systems, Inc.//GemFire Declarative Caching 6.5//EN"
+    "http://www.gemstone.com/dtd/cache6_5.dtd">
+<client-cache>
+    <pool name="msg-buf-pool" subscription-enabled="true">
+        <locator host="localhost" port="10355"/>
+    </pool>
+    <region name="trades" refid="PROXY">
+        <region-attributes pool-name="msg-buf-pool">
+            <cache-listener>
+                <class-name>com.googlecode.icegem.message.barrier.core.plugins.BarrierEntityRegionListener</class-name>
+                <parameter name="messageSequenceRegionName">
+                    <string>msgs-sequence</string>
+                </parameter>
+                <parameter name="messageToCheckRegionName">
+                    <string>msg-to-check</string>
+                </parameter>
+            </cache-listener>
+        </region-attributes>
+    </region>
+    <region name="msgs" refid="PROXY">
+        <region-attributes pool-name="msg-buf-pool">
+            <cache-listener>
+                <class-name>com.googlecode.icegem.message.barrier.core.plugins.BarrierMessageRegionListener</class-name>
+            </cache-listener>
+        </region-attributes>
+    </region>
+    <region name="msgs-sequence" refid="LOCAL">
+        <region-attributes scope="global">
+        </region-attributes>
+    </region>
+    <region name="expired-msgs" refid="PROXY">
+        <region-attributes pool-name="msg-buf-pool" statistics-enabled="true">
+            <cache-listener>
+                <class-name>com.googlecode.icegem.message.barrier.core.plugins.BarrierExpiredMessageRegionListener</class-name>
+            </cache-listener>
+        </region-attributes>
+    </region>
+    <region name="msg-to-check" refid="LOCAL">
+        <region-attributes scope="global"/>
+    </region>
+</client-cache>
