@@ -38,7 +38,7 @@
         <constructor-arg value="expired-msgs"/>
     </bean>
     <bean id="messageCheckRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion">
-        <constructor-arg value="msgToCheck"/>
+        <constructor-arg value="msg-to-check"/>
     </bean>
     <!-- sample components -->
 
@@ -49,6 +49,7 @@
         <property name="expiredMessageRegion" ref="expiredMessageRegion"/>
         <property name="messageCheckRegion" ref="messageCheckRegion"/>
         <property name="barrierPolicy" ref="barrierPolicyImpl"/>
+        <property name="channel"  ref="toExternalSystem"/>
     </bean>
 
     <bean id="barrierPolicyImpl" class="example.model.BarrierPolicyImpl">
@@ -57,12 +58,12 @@
 
     <bean id="tradeGenerator" class="example.utils.TradeGenerator" depends-on="client">
         <property name="tradeRgn"  ref="entityRegion"/>
-        <property name="tradeCount" value="1000"/>
+        <property name="tradeCount" value="500"/>
     </bean>
 
     <bean id="messageGenerator" class="example.utils.MessageGenerator" depends-on="client">
-        <property name="MAX_MSG_COUNT" value="5000"/>
-        <property name="MAX_TRADE_ID" value="1000"/>
+        <property name="MAX_MSG_COUNT" value="2500"/>
+        <property name="MAX_TRADE_ID" value="500"/>
     </bean>
 
     <bean id="messageReceiver" class="example.utils.MessageReceiver"/>

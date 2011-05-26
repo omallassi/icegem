@@ -13,11 +13,11 @@
             <entry-idle-time>
                 <expiration-attributes timeout="600" action="invalidate"/>
             </entry-idle-time>
-            <cache-writer>
-                <class-name>example.ds.plugins.ExpiredMsgCacheWriter</class-name>
-            </cache-writer>
             <cache-listener>
                 <class-name>com.googlecode.icegem.message.barrier.core.plugins.ServerPeerMessageRegionListener</class-name>
+                <parameter name="expiredMessageRegionName">
+                    <string>expired-msgs</string>
+                </parameter>
             </cache-listener>
         </region-attributes>
     </region>
