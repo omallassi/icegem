@@ -15,7 +15,7 @@ public class Flow {
         Runnable run = (Runnable) context.getBean("tradeGenerator");
         new Thread(run).start();
 
-        TimeUnit.SECONDS.sleep(80);         //assume approximately program time execution
+        TimeUnit.SECONDS.sleep(60);         //assume approximately program time execution
 
         Region msgRgn = context.getBean("messageRegion", Region.class);
         Region msgSequenceRgn = context.getBean("messageSequenceRegion", Region.class);

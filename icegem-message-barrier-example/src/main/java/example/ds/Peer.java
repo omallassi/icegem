@@ -11,10 +11,11 @@ import java.util.concurrent.TimeUnit;
 public class Peer {
 
     public static void main(String[] args) throws Exception {
-        Cache cache = new CacheFactory().create();
+        Cache cache = new CacheFactory()
+                .create();
 
         while(Thread.currentThread().isAlive())
-            TimeUnit.MINUTES.sleep(1);
+            TimeUnit.SECONDS.sleep(1);
 
         cache.close();
     }

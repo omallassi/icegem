@@ -5,12 +5,17 @@
 <client-cache>
     <pool name="msg-buf-pool" subscription-enabled="true">
         <locator host="localhost" port="10355"/>
-        <!--<locator host="gemshunter-vm6.vm.griddynamics.net" port="12345"/>-->
     </pool>
     <region name="trades">
         <region-attributes pool-name="msg-buf-pool">
             <cache-listener>
                 <class-name>com.googlecode.icegem.message.barrier.core.plugins.BarrierEntityRegionListener</class-name>
+                <parameter name="messageSequenceRegionName">
+                    <string>msgs-sequence</string>
+                </parameter>
+                <parameter name="messageToCheckRegionName">
+                    <string>msg-to-check</string>
+                </parameter>
             </cache-listener>
         </region-attributes>
     </region>
@@ -28,14 +33,7 @@
     <region name="expired-msgs" refid="PROXY">
         <region-attributes pool-name="msg-buf-pool"/>
     </region>
-    <!--<region name="msg-to-del" refid="LOCAL">
-        &lt;!&ndash;<region-attributes>
-            <cache-listener>
-                <class-name>AdapterMsgToDelListener</class-name>
-            </cache-listener>
-        </region-attributes>&ndash;&gt;
-    </region>-->
-    <region name="msgToCheck" refid="LOCAL">
+    <region name="msg-to-check" refid="LOCAL">
         <region-attributes scope="global">
         </region-attributes>
     </region>
