@@ -5,7 +5,7 @@
     <parent>
         <artifactId>icegem-root</artifactId>
         <groupId>com.googlecode.icegem</groupId>
-        <version>0.7-SNAPSHOT</version>
+        <version>0.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,17 +15,125 @@
 
     <properties>
         <commons-cli.version>1.2</commons-cli.version>
-        <icegem.version>0.7-SNAPSHOT</icegem.version>
+        <icegem.version>0.8-SNAPSHOT</icegem.version>
         <commons-logging.version>1.1</commons-logging.version>
         <aopalliance.version>1.0</aopalliance.version>
         <spring-integration.version>2.0.3.RELEASE</spring-integration.version>
     </properties>
 
+    <issueManagement>
+        <system>Google Code</system>
+        <url>http://code.google.com/p/icegem/issues/list</url>
+    </issueManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>com.googlecode.icegem.cacheutils.Launcher</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>start-gemfire-test-environment</id>
+                        <phase>pre-integration-test</phase>
+
+                        <configuration>
+                            <target>
+                                <ant antfile="${project.build.testSourceDirectory}/../resources/testEnvironment.xml">
+                                    <target name="start-gemfire-test-environment"/>
+                                </ant>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>stop-gemfire-test-environment</id>
+                        <phase>post-integration-test</phase>
+                        <configuration>
+                            <target>
+                                <ant antfile="${project.build.testSourceDirectory}/../resources/testEnvironment.xml">
+                                    <target name="stop-gemfire-test-environment"/>
+                                </ant>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/integration/**</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>failsafe-integration-test</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>failsafe-verify-test</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>surefire-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <excludes>
+                                <exclude>**/integration/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>com.googlecode.icegem</groupId>
             <artifactId>icegem-core</artifactId>
-            <version>0.7-SNAPSHOT</version>
+            <version>0.8-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.gemstone.gemfire</groupId>
@@ -34,6 +142,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>

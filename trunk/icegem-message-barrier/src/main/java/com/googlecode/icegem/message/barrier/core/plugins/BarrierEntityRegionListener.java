@@ -10,64 +10,84 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 
 
 /**
  * User: akondratyev
  */
-public class BarrierEntityRegionListener extends CacheListenerAdapter implements Declarable{
+public class BarrierEntityRegionListener extends CacheListenerAdapter implements Declarable {
 
     private static Logger logger = LoggerFactory.getLogger(BarrierEntityRegionListener.class);
-    private Region<Object, List<Object>> msgSequenceRegion;
-    private Region msgToCheckRgn;
+    private Region<Object, List<Object>> messageSequenceRegion;
+    private Region messageToCheckRegion;
+    private String messageSequenceRegionName;
+    private String messageToCheckRegionName;
+    private Executor exec = Executors.newSingleThreadExecutor();
 
     @Override
     public void afterCreate(EntryEvent entryEvent) {
-       logger.debug("create {}", entryEvent.getNewValue());
+        logger.trace("create {}", entryEvent.getNewValue());
     }
 
-    //todo:unnecessary do it on server side
     @Override
     public void afterUpdate(EntryEvent entryEvent) {
-        Object entity = entryEvent.getNewValue();
         Object entityId = entryEvent.getKey();
         //logger.debug("update {}", entity);
+        messageSequenceRegion = entryEvent.getRegion().getRegionService().getRegion(messageSequenceRegionName);
+        messageToCheckRegion = entryEvent.getRegion().getRegionService().getRegion(messageToCheckRegionName);
 
-        msgSequenceRegion = entryEvent.getRegion().getRegionService().getRegion("msgs-sequence");
-        msgToCheckRgn = entryEvent.getRegion().getRegionService().getRegion("msgToCheck");
-
-        if (!msgSequenceRegion.containsKey(entityId)) {        //msgs from other adapter
+        if (!messageSequenceRegion.containsKey(entityId)) {        //msgs from another adapter
             logger.debug("msgSequenceRgn is empty");
             return;
         }
 
+        exec.execute(new CheckMessageTask(messageSequenceRegion, messageToCheckRegion, entityId));
 
-        List msgsSnapshot = msgSequenceRegion.get(entityId);
-        Object[] msgs = msgsSnapshot.toArray();
+    }
 
-        //logger.debug("msgs to check {}", msgs);
+    public static class CheckMessageTask implements Runnable {
+        private Region messageSequenceRegion;
+        private Region messageToCheckRegion;
+        private Object key;
 
-        for (Object msgId : msgs) {
-            Lock nextIdLock = msgToCheckRgn.getDistributedLock(RegionListeningBarrierBean.NEXT_ID);
-            try {
-                nextIdLock.lock();
-                if (msgToCheckRgn.containsValueForKey(RegionListeningBarrierBean.NEXT_ID))
-                    msgToCheckRgn.put(msgToCheckRgn.get(RegionListeningBarrierBean.NEXT_ID), msgId);
-                else {
-                    msgToCheckRgn.put(RegionListeningBarrierBean.NEXT_ID, 0L);
-                    msgToCheckRgn.put(0L, msgId);
+        public CheckMessageTask(Region messageSequenceRegion, Region messageToCheckRegion, Object key) {
+            this.messageSequenceRegion = messageSequenceRegion;
+            this.messageToCheckRegion = messageToCheckRegion;
+            this.key = key;
+        }
+
+        public void run() {
+            List msgsSnapshot = (List) messageSequenceRegion.get(key);
+            Object[] msgs = msgsSnapshot.toArray();
+
+            //logger.debug("msgs to check {}", msgs);
+
+            for (Object msgId : msgs) {
+                Lock nextIdLock = messageToCheckRegion.getDistributedLock(RegionListeningBarrierBean.NEXT_ID);
+                try {
+                    nextIdLock.lock();
+                    if (messageToCheckRegion.containsValueForKey(RegionListeningBarrierBean.NEXT_ID))
+                        messageToCheckRegion.put(messageToCheckRegion.get(RegionListeningBarrierBean.NEXT_ID), msgId);
+                    else {
+                        messageToCheckRegion.put(RegionListeningBarrierBean.NEXT_ID, 0L);
+                        messageToCheckRegion.put(0L, msgId);
+                    }
+                    long nextId = (Long) messageToCheckRegion.get(RegionListeningBarrierBean.NEXT_ID);
+                    nextId++;
+                    messageToCheckRegion.put(RegionListeningBarrierBean.NEXT_ID, nextId);
+                } finally {
+                    nextIdLock.unlock();
                 }
-                long nextId = (Long) msgToCheckRgn.get(RegionListeningBarrierBean.NEXT_ID);
-                nextId++;
-                msgToCheckRgn.put(RegionListeningBarrierBean.NEXT_ID, nextId);
-            }finally {
-                nextIdLock.unlock();
-            }
 
+            }
         }
     }
 
     public void init(Properties properties) {
+        messageSequenceRegionName = properties.getProperty("msg-sequence-region-name");
+        messageToCheckRegionName = properties.getProperty("msg-check-region-name");
     }
 }

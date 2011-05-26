@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * User: akondratyev
@@ -15,7 +17,8 @@ import java.util.Properties;
 public class ServerPeerMessageRegionListener extends CacheListenerAdapter implements Declarable {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerPeerMessageRegionListener.class);
-    private int totalDestroyed = 0;                             //todo: remove
+    private Executor exec = Executors.newSingleThreadExecutor();
+    private String expiredMessageRegionName;
 
     @Override
     public void afterCreate(EntryEvent entryEvent) {
@@ -24,11 +27,16 @@ public class ServerPeerMessageRegionListener extends CacheListenerAdapter implem
 
     @Override
     public void afterInvalidate(EntryEvent entryEvent) {
-        Region expiredMsg = entryEvent.getRegion().getRegionService().getRegion("expired-msgs");
-        Object msg = entryEvent.getOldValue();
-        Object msgId = entryEvent.getKey();
-        logger.debug("msg {} expired and stored in saving region", msgId);
-        expiredMsg.put(msgId, msg);
+        final Region expiredMsg = entryEvent.getRegion().getRegionService().getRegion(expiredMessageRegionName);
+        final Object msg = entryEvent.getOldValue();
+        final Object msgId = entryEvent.getKey();
+        exec.execute(new Runnable() {
+            public void run() {
+                logger.debug("msg {} expired and stored in saving region", msgId);
+                expiredMsg.put(msgId, msg);
+            }
+        });
+
     }
 
     @Override
@@ -38,14 +46,12 @@ public class ServerPeerMessageRegionListener extends CacheListenerAdapter implem
 
     @Override
     public void afterDestroy(EntryEvent entryEvent) {
-        totalDestroyed++;
-        if (totalDestroyed % 1000 == 0) {
-            logger.info("now destroyed msg count: {}", totalDestroyed);
-        }
         logger.debug("destroy {}", entryEvent.getKey());
     }
 
     public void init(Properties properties) {
-
+        if (properties.getProperty("expiredMessageRegionName") == null)
+            throw new RuntimeException("set property expiredMessageRegionName for " + this.getClass().getName());
+        expiredMessageRegionName = properties.getProperty("expiredMessageRegionName");
     }
 }

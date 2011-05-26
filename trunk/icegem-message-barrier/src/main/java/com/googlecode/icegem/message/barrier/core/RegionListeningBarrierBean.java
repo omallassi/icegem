@@ -7,6 +7,9 @@ import com.googlecode.icegem.message.barrier.model.BarrierPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.Message;
+import org.springframework.integration.MessageChannel;
+import org.springframework.integration.annotation.Publisher;
+import org.springframework.util.Assert;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -24,23 +27,29 @@ public class RegionListeningBarrierBean {
     private Region messageSequenceRegion;
     private Region expiredMessageRegion;
     private Region messageCheckRegion;
+    private MessageChannel channel;
+    private Thread internalTask;
     private Timer timer;
     private int collectorTime = 60;
     private int touchTime = 30;
-    private BarrierPolicy barrierPolicy;          //todo: interface for checking msg in external system
+    private BarrierPolicy barrierPolicy;
     public final static String NEXT_TO_POLL = "NEXT_TO_POLL";
     public final static String NEXT_ID = "NEXT_ID";
 
     public RegionListeningBarrierBean() {
         timer = new Timer();
+
     }
 
+    /**
+     * use putMessage(Message msg)
+     * */
     @Deprecated
     public void putMessage(Object id, Object msg, Object entityId) {
         InnerMessage internalMsg = new InnerMessage(msg);
         internalMsg.setMessageId(id);
         internalMsg.setEntityId(entityId);
-        logger.debug("put msg {}, {}", new Object[] {id, msg});
+        logger.debug("put msg {}, {}", new Object[]{id, msg});
         messageRegion.putIfAbsent(id, internalMsg);
     }
 
@@ -49,13 +58,14 @@ public class RegionListeningBarrierBean {
         String id = msg.getHeaders().getId().toString();
         internalMsg.setMessageId(id);
         internalMsg.setEntityId(msg.getHeaders().get("entityId"));
-        logger.debug("put msg {}, {}", new Object[] {id, msg});
+        logger.debug("put msg {}, {}", new Object[]{id, msg});
         messageRegion.putIfAbsent(id, internalMsg);
     }
 
     public int getCollectorTime() {
         return collectorTime;
     }
+
 
     public Object isPollable(Message msg) {
         logger.debug("start checking msg {}", msg.getPayload());
@@ -70,11 +80,17 @@ public class RegionListeningBarrierBean {
         if (messageRegion.containsKeyOnServer(msg.getHeaders().getId().toString())) {
             logger.debug("msg is removed from system");
             messageRegion.remove(msg.getHeaders().getId().toString());
-            delMsgFromSequence(msg.getHeaders().get("entityId"),msg.getHeaders().getId().toString());
+            delMsgFromSequence(msg.getHeaders().get("entityId"), msg.getHeaders().getId().toString());
         } else
             logger.debug("msg comes to system first time and is polled at once");
         logger.debug("polled msg {} ", msg);
         return msg;
+    }
+
+    @Publisher(channel = "toExternalSystem")
+    public void popMessage(Message msg) {
+        if (isPollable(msg) != null)
+            channel.send(msg);
     }
 
     public Object retryChecking() {
@@ -92,7 +108,7 @@ public class RegionListeningBarrierBean {
             previousValue++;
             messageCheckRegion.put(NEXT_TO_POLL, previousValue);
             logger.debug("resend msg to channel " + keyMsgToRetry);
-            return  ((InnerMessage) messageRegion.get(keyMsgToRetry)).getExternalMessage();
+            return ((InnerMessage) messageRegion.get(keyMsgToRetry)).getExternalMessage();
         } finally {
             nextToPoll.unlock();
         }
@@ -144,21 +160,38 @@ public class RegionListeningBarrierBean {
     public void setBarrierPolicy(BarrierPolicy barrierPolicy) {
         this.barrierPolicy = barrierPolicy;
     }
-
+    /**
+     * time for periodical collecting expired messages (in seconds)
+     * */
     public void setCollectorTime(int collectorTime) {
         this.collectorTime = collectorTime;
+        timer.schedule(new ExpiredMessageCollector(expiredMessageRegion, messageSequenceRegion, messageCheckRegion),
+                TimeUnit.MILLISECONDS.convert(collectorTime, TimeUnit.SECONDS),
+                TimeUnit.MILLISECONDS.convert(collectorTime, TimeUnit.SECONDS));
+    }
+
+    public void setChannel(MessageChannel channel) {
+        this.channel = channel;
     }
 
     public int getTouchTime() {
         return touchTime;
     }
-
+    /**
+     * time for "touching" messages (in seconds)
+     * */
     public void setTouchTime(int touchTime) {
         this.touchTime = touchTime;
+        timer.schedule(new TouchEntryTask(messageRegion, messageSequenceRegion),
+                TimeUnit.MILLISECONDS.convert(touchTime, TimeUnit.SECONDS),
+                TimeUnit.MILLISECONDS.convert(touchTime, TimeUnit.SECONDS));
     }
 
     public void close() {
-        timer.cancel();
+        if (internalTask != null)
+            internalTask.interrupt();
+        if (timer != null)
+            timer.cancel();
     }
 
     public void setEntityRegion(Region entityRegion) {
@@ -181,10 +214,14 @@ public class RegionListeningBarrierBean {
     public void setMessageCheckRegion(Region messageCheckRegion) {
         this.messageCheckRegion = messageCheckRegion;
         messageCheckRegion.put(NEXT_ID, 0L);
-        messageCheckRegion.put(NEXT_TO_POLL,0L);
+        messageCheckRegion.put(NEXT_TO_POLL, 0L);
+        internalTask = new Thread(new MessageReplyTask(messageCheckRegion));
+        internalTask.setDaemon(true);
+        internalTask.start();
     }
 
     //collect if some msg will expired
+    @Deprecated
     public void initExpiredMsgCollectors() {
         timer.schedule(new ExpiredMessageCollector(expiredMessageRegion, messageSequenceRegion, messageCheckRegion),
                 TimeUnit.MILLISECONDS.convert(collectorTime, TimeUnit.SECONDS),
@@ -194,6 +231,46 @@ public class RegionListeningBarrierBean {
                 TimeUnit.MILLISECONDS.convert(touchTime, TimeUnit.SECONDS));
         logger.trace("saving region (for expired messages) will be checked every {} sec", collectorTime);
         logger.trace("barrier bean will \'touch\' it's messages every {} sec", touchTime);
+    }
+
+    /**
+     *  gather messages (from messageToCheckRegion) to recheck for pop
+     * */
+    class MessageReplyTask implements Runnable {
+
+        private Region messageCheckRegion;
+
+        public MessageReplyTask(Region messageCheckRegion) {
+            Assert.notNull(messageCheckRegion);
+            this.messageCheckRegion = messageCheckRegion;
+        }
+
+        public void run() {
+
+            while (true) {
+                Lock nextToPoll = messageCheckRegion.getDistributedLock(NEXT_TO_POLL);
+                try {
+                    Object keyMsgToRetry;
+                    nextToPoll.lock();
+                    if (messageCheckRegion.containsValueForKey(messageCheckRegion.get(NEXT_TO_POLL))) {
+                        keyMsgToRetry = messageCheckRegion.get(messageCheckRegion.get(NEXT_TO_POLL));
+                        messageCheckRegion.remove(messageCheckRegion.get(NEXT_TO_POLL));
+                        long previousValue = (Long) messageCheckRegion.get(NEXT_TO_POLL);
+                        previousValue++;
+                        messageCheckRegion.put(NEXT_TO_POLL, previousValue);
+                        logger.debug("check msg once more " + keyMsgToRetry);
+                        popMessage((Message) ((InnerMessage)messageRegion.get(keyMsgToRetry)).getExternalMessage());
+                    }
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(5);
+                    } catch (InterruptedException e) {
+                        logger.error("exception while replaying messages", e);
+                    }
+                } finally {
+                    nextToPoll.unlock();
+                }
+            }
+        }
     }
 }
 
