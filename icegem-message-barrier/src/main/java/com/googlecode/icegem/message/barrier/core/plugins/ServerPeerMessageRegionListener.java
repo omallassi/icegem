@@ -32,7 +32,7 @@ public class ServerPeerMessageRegionListener extends CacheListenerAdapter implem
         final Object msgId = entryEvent.getKey();
         exec.execute(new Runnable() {
             public void run() {
-                logger.debug("msg {} expired and stored in saving region", msgId);
+                logger.trace("msg {} expired and stored in saving region", msgId);
                 expiredMsg.put(msgId, msg);
             }
         });
@@ -41,12 +41,12 @@ public class ServerPeerMessageRegionListener extends CacheListenerAdapter implem
 
     @Override
     public void afterUpdate(EntryEvent entryEvent) {
-        logger.debug("update {}", entryEvent.getNewValue());
+        logger.trace("update {}", entryEvent.getNewValue());
     }
 
     @Override
     public void afterDestroy(EntryEvent entryEvent) {
-        logger.debug("destroy {}", entryEvent.getKey());
+        logger.trace("destroy {}", entryEvent.getKey());
     }
 
     public void init(Properties properties) {

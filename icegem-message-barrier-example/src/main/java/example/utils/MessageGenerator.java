@@ -3,8 +3,13 @@ package example.utils;
 import example.model.TradeMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.integration.MessageChannel;
+import org.springframework.integration.annotation.Gateway;
+import org.springframework.integration.annotation.Publisher;
+import org.springframework.integration.message.GenericMessage;
 import org.springframework.integration.support.MessageBuilder;
 
+import java.lang.annotation.Annotation;
 import java.util.Random;
 
 /**
@@ -18,6 +23,7 @@ public class MessageGenerator {
     private int MAX_MSG_COUNT;
     private static Random rnd;
     private int msgCount = 0;
+    private MessageChannel channel;
 
     public MessageGenerator() {
         rnd = new Random();
@@ -31,15 +37,20 @@ public class MessageGenerator {
         this.MAX_MSG_COUNT = MAX_MSG_COUNT;
     }
 
-    public Object msg() {
-        if (msgCount++ >= MAX_MSG_COUNT)
-            return null;
-        if (msgCount % 1000 == 0)
-            logger.info("now generated msg: {}", msgCount);
-        TradeMsg msg = new TradeMsg();
-        long tradeId = rnd.nextInt(MAX_TRADE_ID);
-        msg.setTradeId(tradeId);
-        //logger.trace("sending msg to channel: " + msg);
-        return MessageBuilder.withPayload(msg).setHeader("entityId", tradeId).build();
+    public void setChannel(MessageChannel channel) {
+        this.channel = channel;
     }
+
+    @Publisher(channel = "fromTradeSystem")
+    public void generate() {
+        while(msgCount++ < MAX_MSG_COUNT) {
+            TradeMsg msg = new TradeMsg();
+            long tradeId = rnd.nextInt(MAX_TRADE_ID);
+            msg.setTradeId(tradeId);
+            logger.trace("gen msg");
+            channel.send(MessageBuilder.withPayload(msg).setHeader("entityId", tradeId).build());
+        }
+        logger.info("messages were generated: " + msgCount);
+    }
+
 }
