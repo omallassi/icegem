@@ -78,12 +78,12 @@ public class RegionListeningBarrierBean {
         }
         //delete msg
         if (messageRegion.containsKeyOnServer(msg.getHeaders().getId().toString())) {
-            logger.debug("msg is removed from system");
+            logger.debug("message is removed from system");
             messageRegion.remove(msg.getHeaders().getId().toString());
             delMsgFromSequence(msg.getHeaders().get("entityId"), msg.getHeaders().getId().toString());
         } else
-            logger.debug("msg comes to system first time and is polled at once");
-        logger.debug("polled msg {} ", msg);
+            logger.debug("message comes to system first time and is polled at once");
+        logger.debug("polled message {} ", msg);
         return msg;
     }
 
@@ -107,7 +107,7 @@ public class RegionListeningBarrierBean {
             long previousValue = (Long) messageCheckRegion.get(NEXT_TO_POLL);
             previousValue++;
             messageCheckRegion.put(NEXT_TO_POLL, previousValue);
-            logger.debug("resend msg to channel " + keyMsgToRetry);
+            logger.debug("resend message to channel " + keyMsgToRetry);
             return ((InnerMessage) messageRegion.get(keyMsgToRetry)).getExternalMessage();
         } finally {
             nextToPoll.unlock();
@@ -120,12 +120,12 @@ public class RegionListeningBarrierBean {
         try {
             lock.lock();
             if (!messageSequenceRegion.containsKey(key)) {               //msg come to the system first time and pop at once
-                logger.debug("{} doesn't present in msgSequenceRegion", key);
+                logger.debug("{} doesn't present in messageSequenceRegion", key);
                 return;
             }
             msgSequence = (List) messageSequenceRegion.get(key);
             msgSequence.remove(msgId);
-            logger.debug("{} remove from msgSequenceRegion", msgId);
+            logger.debug("{} remove from messageSequenceRegion", msgId);
             if (msgSequence.isEmpty())
                 messageSequenceRegion.destroy(key);
             else

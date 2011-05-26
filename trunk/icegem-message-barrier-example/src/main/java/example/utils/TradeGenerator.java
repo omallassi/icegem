@@ -51,7 +51,7 @@ public class TradeGenerator implements Runnable {
 
         //new Thread(new TradeMsgGenerator(msgRegion, msgCount)).start();
         pauseInSec(3);
-        System.out.println("start activating trades");
+        logger.info("start activating trades");
 
         //start changing states
         rnd = new Random();

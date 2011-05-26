@@ -11,7 +11,7 @@
                            http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
     <!-- environment configuration: gemfire-->
-    <bean id="client-factory" class="com.gemstone.gemfire.cache.client.ClientCacheFactory">
+    <bean id="clientFactory" class="com.gemstone.gemfire.cache.client.ClientCacheFactory">
         <constructor-arg>
             <util:properties>
                 <prop key="cache-xml-file">msg-buf-adapter.xml</prop>
@@ -21,23 +21,23 @@
     </bean>
 
     <bean id="client" class="com.gemstone.gemfire.cache.client.ClientCache"
-                      factory-bean="client-factory"
+                      factory-bean="clientFactory"
                       factory-method="create"
                       destroy-method="close"/>
 
-    <bean id="entityRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion">
+    <bean id="entityRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
         <constructor-arg value="trades"/>
     </bean>
-    <bean id="messageRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion">
+    <bean id="messageRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
         <constructor-arg value="msgs"/>
     </bean>
-    <bean id="messageSequenceRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion">
+    <bean id="messageSequenceRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
         <constructor-arg value="msgs-sequence"/>
     </bean>
-    <bean id="expiredMessageRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion">
+    <bean id="expiredMessageRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
         <constructor-arg value="expired-msgs"/>
     </bean>
-    <bean id="messageCheckRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion">
+    <bean id="messageCheckRegion" class="com.gemstone.gemfire.cache.Region" factory-bean="client" factory-method="getRegion" lazy-init="true">
         <constructor-arg value="msg-to-check"/>
     </bean>
     <!-- sample components -->
@@ -49,7 +49,9 @@
         <property name="expiredMessageRegion" ref="expiredMessageRegion"/>
         <property name="messageCheckRegion" ref="messageCheckRegion"/>
         <property name="barrierPolicy" ref="barrierPolicyImpl"/>
-        <property name="channel"  ref="toExternalSystem"/>
+        <property name="channel" ref="toExternalSystem"/>
+        <property name="touchTime" value="60"/>
+        <property name="collectorTime" value="120"/>
     </bean>
 
     <bean id="barrierPolicyImpl" class="example.model.BarrierPolicyImpl">
@@ -58,36 +60,21 @@
 
     <bean id="tradeGenerator" class="example.utils.TradeGenerator" depends-on="client">
         <property name="tradeRgn"  ref="entityRegion"/>
-        <property name="tradeCount" value="500"/>
+        <property name="tradeCount" value="10"/>
     </bean>
 
     <bean id="messageGenerator" class="example.utils.MessageGenerator" depends-on="client">
-        <property name="MAX_MSG_COUNT" value="2500"/>
-        <property name="MAX_TRADE_ID" value="500"/>
+        <property name="MAX_MSG_COUNT" value="50"/>
+        <property name="MAX_TRADE_ID" value="10"/>
+        <property name="channel" ref="fromTradeSystem"/>
     </bean>
 
     <bean id="messageReceiver" class="example.utils.MessageReceiver"/>
 
-    <!-- integration -->
-    <int:poller max-messages-per-poll="25" id="defaultPoller" default="true">
-        <int:interval-trigger interval="10"/>
-    </int:poller>
+    <int:publish-subscribe-channel id="fromTradeSystem"/>
 
-    <int:channel id="fromTradeSystem"/>  <!-- todo: maybe it's better to use subscribable channel -->
-    <int:channel id="toExternalSystem"/>
+    <int:publish-subscribe-channel id="toExternalSystem"/>
 
-
-    <int:inbound-channel-adapter ref="messageGenerator" method="msg" channel="fromTradeSystem">
-        <int:poller ref="defaultPoller"/>
-    </int:inbound-channel-adapter>
-
-    <int:inbound-channel-adapter channel="fromTradeSystem" ref="barrierBean" method="retryChecking">
-        <int:poller max-messages-per-poll="20">
-            <int:interval-trigger interval="10"/>
-        </int:poller>
-    </int:inbound-channel-adapter>
-
-    <int:outbound-channel-adapter ref="messageReceiver" method="receive" channel="toExternalSystem"/>
 
     <int:service-activator input-channel="fromTradeSystem"
                            output-channel="toExternalSystem"
