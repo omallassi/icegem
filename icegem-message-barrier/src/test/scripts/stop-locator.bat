@@ -1,1 +1,1 @@
-%GEMFIRE%/bin/gemfire stop-locator -port=10355 -dir=locator
+%GEMFIRE%/bin/gemfire stop-locator -port=${locator-port} -dir=locator
