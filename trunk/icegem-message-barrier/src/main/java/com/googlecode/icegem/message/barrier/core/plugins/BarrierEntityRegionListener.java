@@ -87,7 +87,10 @@ public class BarrierEntityRegionListener extends CacheListenerAdapter implements
     }
 
     public void init(Properties properties) {
-        messageSequenceRegionName = properties.getProperty("msg-sequence-region-name");
-        messageToCheckRegionName = properties.getProperty("msg-check-region-name");
+        if (properties.getProperty("messageSequenceRegionName") == null ||
+                properties.getProperty("messageToCheckRegionName") == null)
+            throw new RuntimeException("set params \'messageSequenceRegionName\' and \'messageToCheckRegionName\' for " + getClass().getName());
+        messageSequenceRegionName = properties.getProperty("messageSequenceRegionName");
+        messageToCheckRegionName = properties.getProperty("messageToCheckRegionName");
     }
 }
