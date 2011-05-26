@@ -33,6 +33,7 @@ public class ExpiredMessageCollectorFunction implements Function, Declarable {
         Region lockingRegion = currentRegion.getRegionService().getRegion("lock-expired-msgs");     //todo: replace with DistributedLockService
 
         if (currentRegion.isEmpty()) {
+            logger.trace("nothing to collect");
             context.getResultSender().lastResult(new HashMap());
             return;
         }
