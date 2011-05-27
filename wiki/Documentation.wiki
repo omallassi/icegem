@@ -128,12 +128,13 @@ To use  library without spring-icegem.jar
 
 = Build description=
 
-  # getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
-  # building artifacts: mvn install
+ # getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
+ # building artifacts: mvn install
         p.s. to build a single module: cd module_folder, mvn install
-  # testing: mvn test
+ # testing: mvn test
+ # integration testing: mvn verify
 versioning test disabled (different versions of a class cann't be registered at once). If you want to test them, first run SerializeForVersioning, then enable all tests in DeserializeForVersioning and run the last
-  # integration testing: mvn verify
+ 
 
 = Special cases (mixing auto and manual serialization) =
 
