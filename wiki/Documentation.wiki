@@ -133,7 +133,7 @@ To use  library without spring-icegem.jar
         p.s. to build a single module: cd module_folder, mvn install
   # testing: mvn test
 versioning test disabled (different versions of a class cann't be registered at once). If you want to test them, first run SerializeForVersioning, then enable all tests in DeserializeForVersioning and run the last
-
+  # integration testing: mvn verify
 
 = Special cases (mixing auto and manual serialization) =
 
