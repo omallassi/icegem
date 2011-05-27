@@ -8,7 +8,7 @@
         <version>0.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <name>Message barrier</name>
     <artifactId>icegem-message-barrier</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>

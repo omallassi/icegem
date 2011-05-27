@@ -65,7 +65,7 @@ public class TestExpiration {
     public void stop() throws IOException, InterruptedException {
         ctxt.getBean("client", ClientCache.class).close();
         javaProcessLauncher.stopByDestroyingProcess(cacheServer1);
-        //javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
+//        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
         System.out.println("stopped cache sever");
     }
 
