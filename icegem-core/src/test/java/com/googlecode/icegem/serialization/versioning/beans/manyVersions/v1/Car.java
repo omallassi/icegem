@@ -38,7 +38,7 @@ public class Car {
     public String toString() {
         return "Car{" +
                 "model='" + model + '\'' +
-                ", value='" + version + '\'' +
+                ", version='" + version + '\'' +
                 '}';
     }
 

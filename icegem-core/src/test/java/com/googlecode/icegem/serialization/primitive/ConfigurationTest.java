@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 
 public class ConfigurationTest extends TestParent {//todo: do it
 
-    @Test
+//    @Test
     public void test() {
     }
 }

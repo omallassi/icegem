@@ -63,7 +63,6 @@
         <!--<module>icegem-examples-client</module>
         <module>icegem-examples-server</module>-->
         <module>icegem-performance</module>
-        <module>icegem-spring</module>
         <module>icegem-cache-utils</module>
 	    <module>icegem-serializer-generator</module>
         <!--<module>icegem-message-barrier</module>-->
@@ -87,6 +86,16 @@
         <slf4j.api.version>1.6.1</slf4j.api.version>
         <slf4j.impl.version>1.6.1</slf4j.impl.version>
         <joda-time>1.6.2</joda-time>
+
+        <locator.port>10355</locator.port>
+        <gemfire.license.type>evaluation</gemfire.license.type>
+
+        <!--Uncomment this line and specify path to custom gemfire license file-->
+        <!--<gemfire.license.file>${env.GEMFIRE}/gemfireLicense.zip</gemfire.license.file>-->
+
+        <!--Using this property default embedded license will be used.-->
+        <!--But that license will not be enough for some integration tests-->
+        <gemfire.license.file>gemfireLicense.zip</gemfire.license.file>
     </properties>
 
     <dependencyManagement>

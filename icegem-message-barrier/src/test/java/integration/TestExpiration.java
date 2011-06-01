@@ -72,7 +72,7 @@ public class TestExpiration {
     private ApplicationContext ctxt;
     private RegionListeningBarrierBean adapter1;
     //private RegionListeningBarrierBean adapter2;
-    private JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(true, true);
+    private JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
     private static Process cacheServer1;
 
 }

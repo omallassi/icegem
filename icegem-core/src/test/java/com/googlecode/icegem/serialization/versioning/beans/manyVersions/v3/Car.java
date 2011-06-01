@@ -44,26 +44,27 @@ public class Car {
     }
 
     public boolean isSedan() {
-        return isSedan;
+        return sedan;
     }
 
     public void setSedan(boolean sedan) {
-        isSedan = sedan;
+        this.sedan = sedan;
     }
 
     @Override
     public String toString() {
         return "Car{" +
                 "model='" + model + '\'' +
-                ", value='" + version + '\'' +
+                ", version='" + version + '\'' +
                 ", seatCount=" + seatCount +
+                ", is sedan='" + sedan + '\'' +
                 '}';
     }
 
     private String model;
     private String version;
     @FieldVersion(since = 2)
-    private int seatCount = 4;          //default value
+    private int seatCount = 4;//default value
     @FieldVersion(since = 3)
-    private boolean isSedan = true;     //default value
+    private boolean sedan = true;//default value
 }

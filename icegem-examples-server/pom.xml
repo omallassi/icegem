@@ -23,13 +23,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.googlecode.icegem</groupId>
-			<artifactId>icegem-spring</artifactId>
-			<version>0.7-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 		</dependency>

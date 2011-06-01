@@ -20,20 +20,21 @@ import java.util.Arrays;
 
 /**
  * User: akondratyev
+ * @author Andrey Stepanov aka standy
  */
-public class DeserializeForVersioning {
-
-    @BeforeTest(enabled = false)
+public class XDeserializeForVersioningTest {
+    @BeforeTest
     public void before() throws InvalidClassException, CannotCompileException {
-        HierarchyRegistry.registerAll(DeserializeForVersioning.class.getClassLoader(),
+        HierarchyRegistry.registerAll(XDeserializeForVersioningTest.class.getClassLoader(),
                 Dog.class, Company.class, IllegalVersion.class, Son.class, Car.class, Person.class);
     }
 
-    @Test(enabled = false)
+    @Test
     public void deserializeSingleVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("dog.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("dog.versionTest"));
         in.readFully(buf);
+        in.close();
 
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
@@ -41,11 +42,12 @@ public class DeserializeForVersioning {
         assertThat(dog.getName()).isEqualTo("Rex");
     }
 
-    @Test(enabled = false)
+    @Test
     public void deserializePreviousVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("simpleCompany.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("simpleCompany.versionTest"));
         in.readFully(buf);
+        in.close();
 
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
@@ -54,21 +56,25 @@ public class DeserializeForVersioning {
         assertThat(c2.getName()).isNull();
     }
 
-    @Test(expectedExceptions = ClassCastException.class, enabled = false)
+    @Test(expectedExceptions = ClassCastException.class)
     public void deserializeNewVersionFromOldClass() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("restoreNewClassVersion.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("restoreNewClassVersion.versionTest"));
         in.readFully(buf);
+        in.close();
+
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(enabled = false)
+    @Test
     public void deserializeWithInheritance() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("son.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("son.versionTest"));
         in.readFully(buf);
+        in.close();
+
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
         Son son= DataSerializer.readObject(new DataInputStream(byteArray));
@@ -80,11 +86,13 @@ public class DeserializeForVersioning {
         assertThat(son.getBrothers()).isEqualTo(Arrays.asList(4L, 3L, 5L, 1L));
     }
 
-    @Test(enabled = false)
+    @Test
     public void deserializeCarVersionThree() throws IOException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("cars.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("cars.versionTest"));
         in.readFully(buf);
+        in.close();
+
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
         Car car = DataSerializer.readObject(new DataInputStream(byteArray));
         assertThat(car.getModel()).isEqualTo("golf");
@@ -93,11 +101,13 @@ public class DeserializeForVersioning {
         assertThat(car.isSedan()).isTrue();
     }
 
-    @Test(expectedExceptions = ClassCastException.class, enabled = false)
-    public void deserializeWiithNewClassModelAndOldBeanVersion() throws IOException, CannotCompileException, ClassNotFoundException {
+    @Test(expectedExceptions = ClassCastException.class)
+    public void deserializeWithNewClassModelAndOldBeanVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("person.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("person.versionTest"));
         in.readFully(buf);
+        in.close();
+
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
         DataSerializer.readObject(new DataInputStream(byteArray));
     }

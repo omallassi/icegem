@@ -13,11 +13,11 @@ import java.io.InvalidClassException;
 /**
  * User: akondratyev
  */
-public class Check3dPartyClasses extends TestParent{
+public class Check3dPartyClassesTest extends TestParent{
 
     @BeforeTest
     public void setUp() throws InvalidClassException, CannotCompileException {
-        HierarchyRegistry.registerAll(Check3dPartyClasses.class.getClassLoader(), JodaTime.class);
+        HierarchyRegistry.registerAll(getContextClassLoader(), JodaTime.class);
     }
 
     @Test

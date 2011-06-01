@@ -52,7 +52,7 @@
 
                         <configuration>
                             <target>
-                                <ant antfile="${project.build.testSourceDirectory}/../resources/testEnvironment.xml">
+                                <ant antfile="${project.build.directory}/testEnvironment.xml">
                                     <target name="start-gemfire-test-environment"/>
                                 </ant>
                             </target>
@@ -67,7 +67,7 @@
                         <phase>post-integration-test</phase>
                         <configuration>
                             <target>
-                                <ant antfile="${project.build.testSourceDirectory}/../resources/testEnvironment.xml">
+                                <ant antfile="${project.build.directory}/testEnvironment.xml">
                                     <target name="stop-gemfire-test-environment"/>
                                 </ant>
                             </target>
@@ -127,6 +127,36 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <resources>
+            <!--copy scripts with filtering-->
+            <resource>
+                <directory>${project.basedir}/../icegem-common-resources/test/scripts</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}</targetPath>
+            </resource>
+            <!--copy ant build file without filtering-->
+            <resource>
+                <directory>${project.basedir}/../icegem-common-resources/test</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>testEnvironment.xml</include>
+                </includes>
+                <targetPath>${project.build.directory}</targetPath>
+            </resource>
+            <!--copy default resources with filtering-->
+            <resource>
+                <directory>${project.build.sourceDirectory}/../resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <testResources>
+            <!--copy default test resources with filtering-->
+            <testResource>
+                <directory>${project.build.testSourceDirectory}/../resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
     </build>
 
     <dependencies>
