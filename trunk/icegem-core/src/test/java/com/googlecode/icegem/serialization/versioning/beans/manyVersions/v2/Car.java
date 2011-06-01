@@ -47,7 +47,7 @@ public class Car {
     public String toString() {
         return "Car{" +
                 "model='" + model + '\'' +
-                ", value='" + version + '\'' +
+                ", version='" + version + '\'' +
                 ", seatCount=" + seatCount +
                 '}';
     }
@@ -55,6 +55,6 @@ public class Car {
     private String model;
     private String version;
     @FieldVersion(since = 2)
-    private int seatCount;
+    private int seatCount = 2;
 }
 

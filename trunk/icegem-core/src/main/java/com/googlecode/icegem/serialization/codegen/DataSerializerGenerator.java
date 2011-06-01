@@ -169,7 +169,8 @@ public class DataSerializerGenerator {
     /**
      * TODO.
      * 
-     * @param serializerClsName
+     * @param clsName
+     * @param clsLoader
      * @return
      */
     private static boolean existsClass(String clsName, ClassLoader clsLoader) {

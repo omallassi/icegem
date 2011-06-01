@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.gemstone.gemfire.admin.*;
 import com.gemstone.gemfire.distributed.DistributedSystem;
+import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 
 /**
  * Connects to the distributed system and explore its' structure.
@@ -79,8 +80,13 @@ public class AdminService {
 
     private AdminDistributedSystem adminCreateAndConnect(String locator, boolean logToFile)
 			throws Exception {
+        PropertiesHelper propertiesHelper = new PropertiesHelper("/adminservice.properties");
 		Properties props = new Properties();
 		props.setProperty("mcast-port", "0");
+        props.setProperty("license-type",
+                propertiesHelper.getStringProperty("icegem.cacheutils.adminservice.gemfire.license.type"));
+        props.setProperty("license-file",
+                propertiesHelper.getStringProperty("icegem.cacheutils.adminservice.gemfire.license.file"));
         if (locator != null)
 		    props.setProperty("locators", locator);
        	if (logToFile) {

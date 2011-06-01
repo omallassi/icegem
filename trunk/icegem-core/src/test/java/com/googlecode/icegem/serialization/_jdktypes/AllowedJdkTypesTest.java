@@ -5,9 +5,7 @@ import com.googlecode.icegem.serialization.primitive.TestParent;
 
 import javassist.CannotCompileException;
 import org.fest.assertions.Assertions;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.InvalidClassException;
 import java.util.Calendar;
@@ -103,8 +101,8 @@ public class AllowedJdkTypesTest extends TestParent { //todo: what if field of t
                 new Object[]{nCopy('\uFFFF', 100000)},
         };
     }
-    // TODO: infinite loop. Fix bug
-//    @Test(dataProvider = "string")
+    
+    @Test(dataProvider = "string")
     public void testString(String string) {
         // create test bean
         _JdkTypesBean expected = new _JdkTypesBean();

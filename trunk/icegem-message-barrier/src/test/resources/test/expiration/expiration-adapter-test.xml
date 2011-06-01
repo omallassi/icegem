@@ -4,7 +4,7 @@
     "http://www.gemstone.com/dtd/cache6_5.dtd">
 <client-cache>
     <pool name="msg-buf-pool" subscription-enabled="true">
-        <locator host="localhost" port="10355"/>
+        <locator host="localhost" port="${locator.port}"/>
     </pool>
     <region name="trades" refid="PROXY">
         <region-attributes pool-name="msg-buf-pool">
