@@ -3,35 +3,56 @@ package com.googlecode.icegem.cacheutils;
 import com.googlecode.icegem.cacheutils.latencymeasurer.LatencyMeasurerManager;
 import com.googlecode.icegem.cacheutils.monitor.MonitoringTool;
 import com.googlecode.icegem.cacheutils.regioncomparator.ComparatorManager;
+import com.googlecode.icegem.cacheutils.signallistener.SignalWaiter;
 import com.googlecode.icegem.cacheutils.updater.UpdateManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Launcher {
 
 	private enum Command {
-		COMPARATOR("comparator"), LATENCY_MEASURE("latency-measure"), MONITOR(
-			"monitor"), UPDATER("updater");
+		COMPARATOR("comparator", new ComparatorManager()),
+        LATENCY_MEASURE("latency-measure", new LatencyMeasurerManager()),
+        MONITOR("monitor", new MonitoringTool()),
+        UPDATER("updater", new UpdateManager()),
+        WAITER("signal", new SignalWaiter());
 
 		private String name;
+        private Executable exec;
 
-		private Command(String name) {
+		private Command(String name, Executable exec) {
 			this.name = name;
+            this.exec = exec;
+
 		}
 
 		public String getName() {
 			return name;
 		}
 
-		public static Command get(String name) {
-			if ((name != null) && (name.trim().length() > 0)) {
-				for (Command command : values()) {
-					if (name.equals(command.getName())) {
-						return command;
-					}
-				}
-			}
+        public Executable getExec() {
+            return exec;
+        }
 
-			return null;
-		}
+        private static Map<String, Command> map = new HashMap<String, Command>();
+        static {
+            for (Command command: values())
+                map.put(command.getName(), command);
+        }
+        public static Command get(String name) {
+            return map.get(name);
+
+        }
+        public static boolean hasName(String name) {
+            return map.containsKey(name);
+        }
+
+        public static Executable getUtil(String name) {
+            if (hasName(name))
+                return get(name).getExec();
+            return null;
+        }
 
 	}
 
@@ -75,25 +96,13 @@ public class Launcher {
 			printHelp();
 			return;
 		}
-
 		String commandName = args[0];
-
 		String[] commandArgs = removeCommandFromArgs(args);
-
-		Command command = Command.get(commandName);
-
-		if (Command.COMPARATOR.equals(command)) {
-			ComparatorManager.main(commandArgs);
-		} else if (Command.LATENCY_MEASURE.equals(command)) {
-			LatencyMeasurerManager.main(commandArgs);
-		} else if (Command.MONITOR.equals(command)) {
-			MonitoringTool.main(commandArgs);
-		} else if (Command.UPDATER.equals(command)) {
-			UpdateManager.main(commandArgs);
-		} else {
+        Executable exec = Command.getUtil(commandName);
+        if (exec != null)
+            exec.run(commandArgs);
+		else
 			printHelp();
-			return;
-		}
 
 	}
 }

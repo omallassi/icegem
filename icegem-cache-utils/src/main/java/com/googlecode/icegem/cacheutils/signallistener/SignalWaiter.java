@@ -4,6 +4,7 @@ import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
+import com.googlecode.icegem.cacheutils.Executable;
 import org.apache.commons.cli.*;
 
 import java.util.concurrent.TimeUnit;
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * User: Artem Kondratyev, e-mail: kondratevae@gmail.com
  */
-public class SignalWaiter {
+public class SignalWaiter implements Executable {
 
     /**
      * @param regionToListen region that will contain key
@@ -37,10 +38,15 @@ public class SignalWaiter {
         return 1;
     }
 
-    public static void main(String[] args) throws InterruptedException, ParseException {
+    public static void main(String[] args)  {
         CommandLineParser cmdParser = new GnuParser();
         Options options = getAvailableOptions();
-        CommandLine cmd  = cmdParser.parse(options, args);
+        CommandLine cmd  = null;
+        try {
+            cmd = cmdParser.parse(options, args);
+        } catch (ParseException e) {
+            throw new RuntimeException("error parsing cmd args", e);
+        }
         if(!requiredOptionsExist(cmd))
             return;
 
@@ -72,7 +78,12 @@ public class SignalWaiter {
 
         String keyToListen = cmd.getOptionValue("key");
         //example
-        int result  = waitSignal(signalRegion, keyToListen, timeout, checkInterval);
+        int result  = 0;
+        try {
+            result = waitSignal(signalRegion, keyToListen, timeout, checkInterval);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("error waiting key", e);
+        }
         System.out.println("status is " + result);
 
         client.close();
@@ -96,4 +107,7 @@ public class SignalWaiter {
         return options;
     }
 
+    public void run(String[] args)  {
+        main(args);
+    }
 }

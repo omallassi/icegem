@@ -2,6 +2,7 @@ package com.googlecode.icegem.cacheutils.regioncomparator;
 
 import java.util.*;
 
+import com.googlecode.icegem.cacheutils.Executable;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -14,12 +15,14 @@ import org.slf4j.LoggerFactory;
 import com.gemstone.gemfire.cache.Region;
 import com.googlecode.icegem.cacheutils.common.PeerCacheService;
 
-public class ComparatorManager {
+public class ComparatorManager implements Executable{
     private static final Logger log = LoggerFactory.getLogger(ComparatorManager.class);
     private static String regionPathOption;
     private static String serversOption;
     private static List<String> scanPackagesOption;
     private static String locatorsOption;
+
+
 
     public static void main(String[] args) {
         parseCommandLineArguments(args);
@@ -120,5 +123,9 @@ public class ComparatorManager {
             Object[] different = (result[2][0] == null) ? new Object[]{} : (Object[]) result[2][0];
             System.out.println("  " + missing.length + "                      " + extra.length + "                 " + different.length + "      Node : " + result[3][0]);
         }
+    }
+
+    public void run(String[] args) {
+        main(args);
     }
 }
