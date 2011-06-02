@@ -52,6 +52,7 @@ public class RegionComparator {
         Object[] args = new Object[2];
         args[0] = region.getFullPath();
         args[1] = region.keySetOnServer().toArray();
+        FunctionService.registerFunction(new RegionCompareFunction());
         Execution execution = FunctionService.onServers(region.getCache())
                 .withArgs(args)
                 .withCollector(new DefaultResultCollector());
