@@ -543,6 +543,7 @@ This is the list of available utils:
   * latency-measure
   * monitor
   * updater
+  * signal waiter
 
 
 == Comparator ==
