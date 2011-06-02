@@ -50,6 +50,7 @@ public class MonitoringToolTest {
 	@Test
 	public void testMain() throws Exception {
 		MonitoringTool tool = new MonitoringTool();
+        tool.init();
 
 		CountingNodeEventHandler handler = new CountingNodeEventHandler();
 		tool.addNodeEventHandler(handler);

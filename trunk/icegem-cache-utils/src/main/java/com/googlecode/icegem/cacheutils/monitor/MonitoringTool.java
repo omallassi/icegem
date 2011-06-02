@@ -77,12 +77,12 @@ public class MonitoringTool implements Executable {
 	 * @throws Exception
 	 */
 	public MonitoringTool() {
-        init();
+
 	}
     /**
      * configuration
      * */
-    private void init() {
+    public void init() {
         log.info(Utils.currentDate() + "");
 		log.info(Utils.currentDate()
 			+ "  --------------------------------------------------");
