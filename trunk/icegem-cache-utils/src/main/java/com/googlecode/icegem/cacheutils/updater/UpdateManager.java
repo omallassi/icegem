@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.googlecode.icegem.cacheutils.Executable;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -19,7 +20,7 @@ import com.gemstone.gemfire.cache.Region;
 import com.googlecode.icegem.cacheutils.common.AdminService;
 import com.googlecode.icegem.cacheutils.common.PeerCacheService;
 
-public class UpdateManager {
+public class UpdateManager implements Executable {
 	private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
 	private static boolean withSubRegionsOption;
 	private static String regionsOption;
@@ -122,4 +123,8 @@ public class UpdateManager {
 				.addOption("h", "help", false, "Print usage information");
 		return gnuOptions;
 	}
+
+    public void run(String[] args) {
+        main(args);
+    }
 }

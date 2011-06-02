@@ -1,11 +1,13 @@
 package com.googlecode.icegem.cacheutils.monitor;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.mail.MessagingException;
 
+import com.googlecode.icegem.cacheutils.Executable;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -23,7 +25,7 @@ import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
  * Periodically checks the distributed system status and sends mail in case of
  * failure
  */
-public class MonitoringTool {
+public class MonitoringTool implements Executable {
 	private static final Logger log = Logger.getLogger(MonitoringTool.class);
 
 	private static boolean allOption;
@@ -34,7 +36,11 @@ public class MonitoringTool {
 	private PropertiesHelper propertiesHelper;
 	private Timer timer;
 
-	/**
+    public void run(String[] args) {
+        main(args);
+    }
+
+    /**
 	 * Periodically running task which checks the system status
 	 */
 	private class IsAliveTimerTask extends TimerTask {
@@ -66,25 +72,39 @@ public class MonitoringTool {
 	}
 
 	/**
-	 * Creates and configures the tool
+	 * Creates
 	 * 
 	 * @throws Exception
 	 */
-	public MonitoringTool() throws Exception {
-		log.info(Utils.currentDate() + "");
+	public MonitoringTool() {
+
+	}
+    /**
+     * configuration
+     * */
+    public void init() {
+        log.info(Utils.currentDate() + "");
 		log.info(Utils.currentDate()
 			+ "  --------------------------------------------------");
 		log.info(Utils.currentDate() + "  Monitoring tool started");
 		log.info(Utils.currentDate()
 			+ "  --------------------------------------------------");
 
-		propertiesHelper = new PropertiesHelper("/monitoring.properties");
+        try {
+            propertiesHelper = new PropertiesHelper("/monitoring.properties");
+        } catch (IOException e) {
+            throw new RuntimeException("error reading properties \'/monitoring.properties\' ", e);
+        }
 
-		nodesController = new NodesController(propertiesHelper, true);
-		nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
+        try {
+            nodesController = new NodesController(propertiesHelper, true);
+        } catch (Exception e) {
+            throw new RuntimeException("error creating NodesController", e);
+        }
+        nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
 
 		timer = new Timer();
-	}
+    }
 
 	/**
 	 * Starts the checking task
@@ -127,14 +147,19 @@ public class MonitoringTool {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		parseCommandLineArguments(args);
 
 		if (serverHostOption != null) {
-			boolean serverAlive = MonitoringTool.isServerAlive(
-				serverHostOption, serverPortOption);
+            boolean serverAlive = false;
+            try {
+                serverAlive = MonitoringTool.isServerAlive(
+                        serverHostOption, serverPortOption);
+            } catch (Exception e) {
+                throw new RuntimeException("error in checking server liveness", e);
+            }
 
-			int status;
+            int status;
 			if (serverAlive) {
 				status = 0;
 				
@@ -147,8 +172,14 @@ public class MonitoringTool {
 
 			System.exit(status);
 		} else if (allOption) {
-			MonitoringTool monitoringTool = new MonitoringTool();
-			monitoringTool.start();
+            MonitoringTool monitoringTool = null;
+            try {
+                monitoringTool = new MonitoringTool();
+                monitoringTool.init();
+            } catch (Exception e) {
+                throw new RuntimeException("error in creating monitoring tool object. ", e);
+            }
+            monitoringTool.start();
 		} else {
 			throw new IllegalStateException("Cannot define application mode");
 		}

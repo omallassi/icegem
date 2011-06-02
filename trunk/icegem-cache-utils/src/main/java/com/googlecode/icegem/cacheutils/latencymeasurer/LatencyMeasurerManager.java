@@ -1,5 +1,6 @@
 package com.googlecode.icegem.cacheutils.latencymeasurer;
 
+import com.googlecode.icegem.cacheutils.Executable;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.apache.commons.cli.*;
@@ -10,10 +11,9 @@ import com.googlecode.icegem.cacheutils.latencymeasurer.listeners.LatencyDynamic
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.Scanner;
-import java.io.IOException;
 
 
-public class LatencyMeasurerManager {
+public class LatencyMeasurerManager implements Executable{
 
     private static final Logger log = LoggerFactory.getLogger(LatencyMeasurerManager.class);
 
@@ -22,7 +22,7 @@ public class LatencyMeasurerManager {
     private static int measureFrequency;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         parseCommandLineArguments(args);
 
         ExecutorService threadExecutor = Executors.newFixedThreadPool(1);
@@ -110,5 +110,9 @@ public class LatencyMeasurerManager {
                 .addOption("f", "frequency", true, "Frequency of measurers in minutes")
                 .addOption("h", "help", false, "Print usage information");
         return gnuOptions;
+    }
+
+    public void run(String[] args)  {
+        main(args);
     }
 }
