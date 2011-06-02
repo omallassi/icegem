@@ -743,3 +743,23 @@ This will cause updater to update all regions in distributed system with locator
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar updater -r region1,region2 -c -l localhost[10355] -s localhost[40404]
 }}}
 This will cause updater to update regions region1 and region2 with all its' subregions in distributed system with locator `localhost[10355]` and cache server `localhost[40404]`
+
+== Signal Waiter ==
+
+Wait appearance of an object in a region
+
+=== Usage help ===
+
+{{{
+java -jar icegem-cache-utils-*-SNAPSHOT.jar signal
+-region regionName     where needed key will appear
+-locators              locator(s) list in format host[port],..
+-key                   key value, that will appear in signal region (java.lang.String)
+-timeout               how long utility will check region, in millis (default: 60sec)
+-checkInterval         in what period utility will check region, in millis (default: 1 sec)
+}}}
+Example:
+
+{{{
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar signal -region signalRegion -locators localhost[10334],localhost[10355] -key signalKey
+}}}
