@@ -133,7 +133,9 @@ To use  library without spring-icegem.jar
         p.s. to build a single module: cd module_folder, mvn install
  # testing: mvn test
  # integration testing: mvn verify
-versioning test disabled (different versions of a class cann't be registered at once). If you want to test them, first run SerializeForVersioning, then enable all tests in DeserializeForVersioning and run the last
+
+== License ==
+Some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file.
  
 
 = Special cases (mixing auto and manual serialization) =
