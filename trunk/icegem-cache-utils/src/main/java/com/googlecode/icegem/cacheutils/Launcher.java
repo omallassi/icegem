@@ -101,8 +101,10 @@ public class Launcher {
         Executable exec = Command.getUtil(commandName);
         if (exec != null)
             exec.run(commandArgs);
-		else
+		else {
+            System.err.println("command not found: " + commandName);
 			printHelp();
+        }
 
 	}
 }

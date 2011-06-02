@@ -122,6 +122,21 @@ public class ComparatorManager implements Executable{
             Object[] extra = (result[1][0] == null) ? new Object[]{} : (Object[]) result[1][0];
             Object[] different = (result[2][0] == null) ? new Object[]{} : (Object[]) result[2][0];
             System.out.println("  " + missing.length + "                      " + extra.length + "                 " + different.length + "      Node : " + result[3][0]);
+            if (extra.length > 0) {
+                System.out.println("---------------------");
+                System.out.println("extra:");
+                System.out.println(Arrays.toString(extra));
+            }
+            if (missing.length > 0) {
+                System.out.println("---------------------");
+                System.out.println("missing:");
+                System.out.println(Arrays.toString(missing));
+            }
+            if (different.length > 0) {
+                System.out.println("---------------------");
+                System.out.println("different:");
+                System.out.println(Arrays.toString(different));
+            }
         }
     }
 
