@@ -72,24 +72,20 @@ public class ComparatorManager implements Executable{
         CommandLineParser parser = new GnuParser();
         try {
             CommandLine line = parser.parse(options, commandLineArguments);
-            if (line.hasOption("path") && line.hasOption("servers") && line.hasOption("locators")) {
-                regionPathOption = line.getOptionValue("path");
-                serversOption = line.getOptionValue("servers");
-                locatorsOption = line.getOptionValue("locators");
-                if (line.hasOption("packages"))
-                    scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
-            } else if (line.hasOption("path") && line.hasOption("servers") && !line.hasOption("locators")) {
-                regionPathOption = line.getOptionValue("path");
-                serversOption = line.getOptionValue("servers");
-                if (line.hasOption("packages"))
-                    scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
-            } else if (line.hasOption("help")) {
-                printHelp(options);
-                System.exit(0);
-            } else {
+            if (!line.hasOption("path") || line.hasOption("help")||
+                    !(line.hasOption("locators") ||line.hasOption("servers"))) {
                 printHelp(options);
                 System.exit(0);
             }
+
+            if (line.hasOption("packages"))
+                    scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
+            regionPathOption = line.getOptionValue("path");
+            if (line.hasOption("locators"))
+                locatorsOption = line.getOptionValue("locators");
+            if (line.hasOption("servers"))
+                serversOption = line.getOptionValue("servers");
+
         }
         catch (ParseException exp) {
             System.err.println("Parsing options failed. " + exp.getMessage());
