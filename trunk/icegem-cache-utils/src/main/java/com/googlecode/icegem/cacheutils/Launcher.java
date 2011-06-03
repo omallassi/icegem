@@ -1,13 +1,14 @@
 package com.googlecode.icegem.cacheutils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.googlecode.icegem.cacheutils.latencymeasurer.LatencyMeasurerManager;
 import com.googlecode.icegem.cacheutils.monitor.MonitoringTool;
 import com.googlecode.icegem.cacheutils.regioncomparator.ComparatorManager;
+import com.googlecode.icegem.cacheutils.replication.ReplicationManager;
 import com.googlecode.icegem.cacheutils.signallistener.SignalWaiter;
 import com.googlecode.icegem.cacheutils.updater.UpdateManager;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class Launcher {
 
@@ -15,6 +16,7 @@ public class Launcher {
 		COMPARATOR("comparator", new ComparatorManager()),
         LATENCY_MEASURE("latency-measure", new LatencyMeasurerManager()),
         MONITOR("monitor", new MonitoringTool()),
+        REPLICATION("replication", new ReplicationManager()),
         UPDATER("updater", new UpdateManager()),
         WAITER("signal", new SignalWaiter());
 

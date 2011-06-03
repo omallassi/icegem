@@ -59,6 +59,9 @@
             <arg file="${project.build.directory}/stop-locator.sh"/>
         </exec>
         <delete file="${locator.base.directory}/locator${locator.port}state.dat"/>
+        <delete>
+            <fileset dir="${project.build.directory}/../" includes="locator*state.dat"/>
+        </delete>
     </target>
 
     <target name="stop-agent" depends="copy-agent-properties-file">

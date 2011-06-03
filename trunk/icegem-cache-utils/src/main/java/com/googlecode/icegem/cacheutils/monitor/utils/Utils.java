@@ -93,6 +93,10 @@ public class Utils {
 		}
 	}
 
+	public static void execute(Runnable runnable, long timeout) {
+		execute(new Thread(runnable), timeout);
+	}
+
 	/**
 	 * Formats date to string.
 	 * 
