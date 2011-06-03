@@ -35,7 +35,7 @@ public class UtilsTest {
 
 	@Test
 	public void testIsSocketAlive() throws IOException {
-		final int port = 55555;
+		final int port = 54321;
 
 		boolean socketAlive = Utils.isSocketAlive("127.0.0.1", port);
 		assertThat(socketAlive).isFalse();
