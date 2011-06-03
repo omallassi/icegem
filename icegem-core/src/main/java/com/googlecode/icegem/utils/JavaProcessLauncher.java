@@ -62,6 +62,47 @@ public class JavaProcessLauncher {
         process.waitFor();
         return process.exitValue();
     }
+    
+	public static Process runWithoutConfirmation(Class<?> clazz, String[] args)
+		throws IOException {
+
+		String java = System.getProperty("java.home") + File.separator + "bin"
+			+ File.separator + "java.exe";
+
+		String classpath = System.getProperty("java.class.path");
+
+		String mainClass = clazz.getName();
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(java);
+		sb.append(" -cp ").append(classpath);
+		sb.append(" ").append(mainClass);
+
+		for (String arg : args) {
+			sb.append(" ").append(arg);
+		}
+
+		return Runtime.getRuntime().exec(sb.toString());
+	}
+
+	public static Process runWithoutConfirmation(String command)
+		throws IOException {
+		return Runtime.getRuntime().exec(command);
+	}
+
+	public static void printProcessOutput(Process process) throws IOException {
+		String line;
+
+		BufferedReader input = new BufferedReader(new InputStreamReader(
+			process.getInputStream()));
+
+		while ((line = input.readLine()) != null) {
+			System.out.println(line);
+		}
+
+		input.close();
+	}
 
     /**
      * Runs process based on a specified class in a separate VM.
