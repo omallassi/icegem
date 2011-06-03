@@ -63,6 +63,14 @@ public class JavaProcessLauncher {
         return process.exitValue();
     }
     
+    /**
+     * Runs a process and returns the Process object
+     * 
+     * @param clazz - the class to run
+     * @param args - the list of arguments for the class
+     * @return - the Process object representing running process
+     * @throws IOException
+     */
 	public static Process runWithoutConfirmation(Class<?> clazz, String[] args)
 		throws IOException {
 
@@ -86,6 +94,13 @@ public class JavaProcessLauncher {
 		return Runtime.getRuntime().exec(sb.toString());
 	}
 
+	/**
+	 * Prints to output stream output from the specified Process object
+	 * 
+	 * @param process - the Process object
+	 * 
+	 * @throws IOException
+	 */
 	public static void printProcessOutput(Process process) throws IOException {
 		String line;
 

@@ -9,13 +9,35 @@ import java.util.Set;
 
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 
+/**
+ * Coordinates, configures and runs the set of guest nodes
+ */
 public class ReplicationProcessor {
 
+	/* Set of locators */
 	private Set<String> locatorsSet;
+
+	/* Timeout, milliseconds */
 	private long timeout;
+
+	/* Path to the license file */
 	private final String licenseFilePath;
+
+	/* Name of the technical region */
 	private final String regionName;
 
+	/**
+	 * Configures and creates the instance of replication processor
+	 * 
+	 * @param locatorsSet
+	 *            - the set of locators
+	 * @param timeout
+	 *            - the timeout, milliseconds
+	 * @param licenseFilePath
+	 *            - the path to the license file
+	 * @param regionName
+	 *            - the name of technical region
+	 */
 	public ReplicationProcessor(Set<String> locatorsSet, long timeout,
 		String licenseFilePath, String regionName) {
 		this.locatorsSet = locatorsSet;
@@ -24,6 +46,14 @@ public class ReplicationProcessor {
 		this.regionName = regionName;
 	}
 
+	/**
+	 * Create CSV list of remote locators excluding local locators from the set
+	 * of all the locators
+	 * 
+	 * @param localLocators
+	 *            - the local locators
+	 * @return - the CSV list of remote locators
+	 */
 	private String prepareRemoteLocators(String localLocators) {
 		Set<String> remoteLocatorsSet = new HashSet<String>(locatorsSet);
 		remoteLocatorsSet.remove(localLocators);
@@ -44,6 +74,15 @@ public class ReplicationProcessor {
 		return sb.toString();
 	}
 
+	/**
+	 * Creates, configures and runs the guest nodes and collects information
+	 * form them
+	 * 
+	 * @return - 0 in case of success, 1 otherwise
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public int process() throws IOException, InterruptedException {
 
 		List<Process> processesList = new ArrayList<Process>();
