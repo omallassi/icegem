@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * Container for relations for some guest node 
+ */
 public class RelationsController {
 
 	private String localDistributedSystem;

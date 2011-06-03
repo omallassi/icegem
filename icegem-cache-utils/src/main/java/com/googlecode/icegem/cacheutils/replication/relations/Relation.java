@@ -1,5 +1,8 @@
 package com.googlecode.icegem.cacheutils.replication.relations;
 
+/**
+ * Represents a relation between two guest nodes (or two clusters)
+ */
 public class Relation {
 
 	private String from;

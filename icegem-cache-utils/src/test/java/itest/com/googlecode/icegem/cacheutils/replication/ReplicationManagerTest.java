@@ -14,6 +14,11 @@ import com.googlecode.icegem.cacheutils.replication.ReplicationManager;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
 
+/**
+ * Starts three locators, three gateways. Each gateway is connected to separate
+ * locator. Start replication measurement tool and expects that it will return 0
+ * as exit code. This means that replication between all the clusters works.
+ */
 public class ReplicationManagerTest {
 	/** Field gatewayA */
 	private static Process gatewayA;

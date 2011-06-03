@@ -14,23 +14,55 @@ import org.apache.commons.cli.Options;
 
 import com.googlecode.icegem.cacheutils.Executable;
 
+/**
+ * The main class of the replication measurement tool. It parses command-line
+ * options, configures and creates the guest nodes, and collects their
+ * responses.
+ * 
+ * Responses with exit code 0 in case of all the relations established, 1
+ * otherwise.
+ */
 public class ReplicationManager implements Executable {
 
+	/* Name of timeout option */
 	private static final String TIMEOUT_OPTION = "timeout";
+
+	/* Name of locators option */
 	private static final String LOCATORS_OPTION = "locators";
+
+	/* Name of region option */
 	private static final String REGION_OPTION = "region";
+
+	/* Name of license file option */
 	private static final String LICENSE_FILE_OPTION = "license-file";
+
+	/* Name of help option */
 	private static final String HELP_OPTION = "help";
 
+	/* Default timeout is 1 minute */
 	private static final long DEFAULT_TIMEOUT = 60 * 1000;
+
+	/* Default license file is gemfireLicense.zip */
 	private static final String DEFAULT_LICENSE_FILE_PATH = "gemfireLicense.zip";
+
+	/* Default region name is "proxy" */
 	private static final String DEFAULT_REGION_NAME = "proxy";
 
+	/* List of clusters' locators to check */
 	private static Set<String> locatorsSet;
+
+	/* Waiting timeout */
 	private static long timeout = DEFAULT_TIMEOUT;
+
+	/* Path to the license file */
 	private static String licenseFilePath = DEFAULT_LICENSE_FILE_PATH;
+
+	/* Technical region name */
 	private static String regionName = DEFAULT_REGION_NAME;
 
+	/**
+	 * Runs the tool. All the tools run in this way.
+	 */
 	public void run(String[] args) {
 		try {
 			main(args);
@@ -39,6 +71,13 @@ public class ReplicationManager implements Executable {
 		}
 	}
 
+	/**
+	 * Entry point of the tool
+	 * 
+	 * @param args
+	 *            - the list of command-line arguments
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		try {
 			parseCommandLineArguments(args);
@@ -56,6 +95,12 @@ public class ReplicationManager implements Executable {
 		}
 	}
 
+	/**
+	 * Parses command-line arguments and sets the local variables
+	 * 
+	 * @param commandLineArguments
+	 *            - the list of command-line arguments
+	 */
 	private static void parseCommandLineArguments(String[] commandLineArguments) {
 		Options options = constructGnuOptions();
 
@@ -99,6 +144,15 @@ public class ReplicationManager implements Executable {
 		}
 	}
 
+	/**
+	 * Parses CSV locators string and return set of locators 
+	 * 
+	 * @param csvLocators - the CSV locators string 
+	 * @return - the set of locators
+	 * 
+	 * @throws PatternSyntaxException
+	 * @throws NumberFormatException
+	 */
 	private static Set<String> parseLocators(String csvLocators)
 		throws PatternSyntaxException, NumberFormatException {
 
@@ -108,6 +162,11 @@ public class ReplicationManager implements Executable {
 		return new HashSet<String>(locatorsList);
 	}
 
+	/**
+	 * Prints help if requested, or in case of any misconfiguration
+	 * 
+	 * @param options - the GNU options
+	 */
 	private static void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("replication", options);
@@ -115,6 +174,11 @@ public class ReplicationManager implements Executable {
 		System.exit(-1);
 	}
 
+	/**
+	 * Constructs the set of GNU options
+	 *  
+	 * @return - the constructed options
+	 */
 	private static Options constructGnuOptions() {
 		final Options gnuOptions = new Options();
 
