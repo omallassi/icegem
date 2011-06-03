@@ -24,7 +24,11 @@ public class RegionComparator {
         props.setProperty("locators", locators);
         props.setProperty("log-file", "comparator-member.log");
         DistributedSystem system = DistributedSystem.connect(props);
-        Cache cache = new CacheFactory().set("mcast-port", "0").set("locators", locators).create();
+        Cache cache = new CacheFactory()
+                            .set("mcast-port", "0")
+                            .set("locators", locators)
+                            .set("log-file", "comparator-member.log")
+                            .create();
 
         Object[] args = new Object[2];
         args[0] = regionPath;
