@@ -542,10 +542,10 @@ Cache utils consists of several utilities which can help with testing, deploying
 This is the list of available utils:
 
   * comparator
-  * latency-measure
   * monitor
   * updater
   * signal waiter
+  * replication
 
 
 == Comparator ==
@@ -765,4 +765,46 @@ Example:
 
 {{{
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar signal -region signalRegion -locators localhost[10334],localhost[10355] -key signalKey
+}}}
+
+== Replication ==
+
+Checks that replication works over the specified clusters. Also measures and prints latency for each replication direction.
+
+=== Usage help ===
+
+This is the application help for the command "replication":
+
+{{{
+D:\Temp\icegem-cache-utils-0.8-SNAPSHOT>java -jar icegem-cache-utils-0.8-SNAPSHOT.jar replication
+usage: replication
+ -h,--help                  Print usage information
+ -l,--locators <arg>        List of clusters' locators to check. Example:
+                            host1[port1],host2[port2]
+ -lf,--license-file <arg>   The path to non default license file
+ -r,--region <arg>          The name of region for this test. Default name
+                            is "proxy"
+ -t,--timeout <arg>         Timeout, seconds
+}}}
+
+Examples of usage:
+
+{{{
+java -jar icegem-cache-utils-0.8-SNAPSHOT.jar replication -l localhost[18081],localhost[18082],localhost[18083] -t 10000 -lf C:\bin\GemFire6512\gemfireLicense.zip
+}}}
+
+Replication tool will check replication for the clusters with locators `localhost[18081]`, `localhost[18082]` and `localhost[18083]`. In case of replication works in all directions, the tool will print time of replication and return exit code 0. 
+
+{{{
+Replicated to localhost[18081] from [localhost[18083], 956ms], [localhost[18082], 1242ms]
+Replicated to localhost[18083] from [localhost[18082], 722ms], [localhost[18081], 590ms]
+Replicated to localhost[18082] from [localhost[18083], 1054ms], [localhost[18081], 177ms]
+}}}
+
+In case of replication doesn't work it will automatically finish in 10 seconds and return exit code 1.
+
+{{{
+Replicated to localhost[18081] from [localhost[18083], 468ms], [localhost[18082], 751ms]
+Connection process is not finished for localhost[18083]
+Replicated to localhost[18082] from [localhost[18083], 556ms], [localhost[18081], 684ms]
 }}}
