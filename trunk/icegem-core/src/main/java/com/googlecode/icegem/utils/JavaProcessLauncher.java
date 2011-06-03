@@ -67,7 +67,7 @@ public class JavaProcessLauncher {
 		throws IOException {
 
 		String java = System.getProperty("java.home") + File.separator + "bin"
-			+ File.separator + "java.exe";
+			+ File.separator + "java";
 
 		String classpath = System.getProperty("java.class.path");
 
@@ -84,11 +84,6 @@ public class JavaProcessLauncher {
 		}
 
 		return Runtime.getRuntime().exec(sb.toString());
-	}
-
-	public static Process runWithoutConfirmation(String command)
-		throws IOException {
-		return Runtime.getRuntime().exec(command);
 	}
 
 	public static void printProcessOutput(Process process) throws IOException {

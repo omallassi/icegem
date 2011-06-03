@@ -91,11 +91,11 @@
         <gemfire.license.type>evaluation</gemfire.license.type>
 
         <!--Uncomment this line and specify path to custom gemfire license file-->
-        <!--<gemfire.license.file>${env.GEMFIRE}/gemfireLicense.zip</gemfire.license.file>-->
+        <gemfire.license.file>${env.GEMFIRE}/gemfireLicense.zip</gemfire.license.file>
 
         <!--Using this property default embedded license will be used.-->
         <!--But that license will not be enough for some integration tests-->
-        <gemfire.license.file>gemfireLicense.zip</gemfire.license.file>
+        <!-- <gemfire.license.file>gemfireLicense.zip</gemfire.license.file> -->
     </properties>
 
     <dependencyManagement>
