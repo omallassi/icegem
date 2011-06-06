@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
@@ -31,13 +29,13 @@ public class CheckReplicationToolTest {
 	/** Field javaProcessLauncher */
 	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 
-	@BeforeMethod
+	@BeforeClass
 	public void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 		startGateways();
 	}
 
-	@AfterMethod
+	@AfterClass
 	public void tearDown() throws IOException, InterruptedException {
 		stopGateways();
 	}
@@ -104,7 +102,7 @@ public class CheckReplicationToolTest {
 
 		int exitCode = process.waitFor();
 
-		assertThat(exitCode).isEqualTo(-1);
+		assertThat(exitCode).isEqualTo(1);
 
 	}
 
