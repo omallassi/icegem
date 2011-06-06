@@ -9,13 +9,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.googlecode.icegem.cacheutils.monitor.MonitoringTool;
+import com.googlecode.icegem.cacheutils.monitor.MonitorTool;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEvent;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
 
-public class MonitoringToolTest {
+public class MonitorToolTest {
 	/** Field cacheServer1  */
     private static Process cacheServer1;
 	/** Field cacheServer2 */
@@ -49,7 +49,7 @@ public class MonitoringToolTest {
 
 	@Test
 	public void testMain() throws Exception {
-		MonitoringTool tool = new MonitoringTool();
+		MonitorTool tool = new MonitorTool();
         tool.init();
 
 		CountingNodeEventHandler handler = new CountingNodeEventHandler();
@@ -66,21 +66,21 @@ public class MonitoringToolTest {
 
 	@Test
 	public void testIsServerAlivePositive() throws Exception {
-		boolean serverAlive = MonitoringTool.isServerAlive("localhost", 40404);
+		boolean serverAlive = MonitorTool.isServerAlive("localhost", 40404);
 		assertThat(serverAlive).isTrue();
 	}
 
 	@Test
 	public void testIsServerAliveNegative() throws Exception {
-		boolean serverAlive = MonitoringTool.isServerAlive("localhost", 50505);
+		boolean serverAlive = MonitorTool.isServerAlive("localhost", 50505);
 		assertThat(serverAlive).isFalse();
 	}
 
 	private void startCacheServers() throws IOException, InterruptedException {
 		cacheServer1 = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "monitoringToolServerProperties40404.properties");
+			ServerTemplate.class, "monitorToolServerProperties40404.properties");
 		cacheServer2 = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "monitoringToolServerProperties40405.properties");
+			ServerTemplate.class, "monitorToolServerProperties40405.properties");
 	}
 
 	private void stopCacheServers() throws IOException, InterruptedException {

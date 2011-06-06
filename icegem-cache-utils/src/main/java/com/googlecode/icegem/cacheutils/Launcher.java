@@ -3,29 +3,26 @@ package com.googlecode.icegem.cacheutils;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.googlecode.icegem.cacheutils.latencymeasurer.LatencyMeasurerManager;
-import com.googlecode.icegem.cacheutils.monitor.MonitoringTool;
-import com.googlecode.icegem.cacheutils.regioncomparator.ComparatorManager;
-import com.googlecode.icegem.cacheutils.replication.ReplicationManager;
-import com.googlecode.icegem.cacheutils.signallistener.SignalWaiter;
-import com.googlecode.icegem.cacheutils.updater.UpdateManager;
+import com.googlecode.icegem.cacheutils.monitor.MonitorTool;
+import com.googlecode.icegem.cacheutils.regioncomparator.CompareTool;
+import com.googlecode.icegem.cacheutils.replication.CheckReplicationTool;
+import com.googlecode.icegem.cacheutils.signallistener.WaitforTool;
+import com.googlecode.icegem.cacheutils.updater.UpdateTool;
 
 public class Launcher {
 
 	private enum Command {
-		COMPARATOR("comparator", new ComparatorManager()),
-        LATENCY_MEASURE("latency-measure", new LatencyMeasurerManager()),
-        MONITOR("monitor", new MonitoringTool()),
-        REPLICATION("replication", new ReplicationManager()),
-        UPDATER("updater", new UpdateManager()),
-        WAITER("signal", new SignalWaiter());
+		COMPARE("compare", new CompareTool()), MONITOR("monitor",
+			new MonitorTool()), CHECK_REPLICATION("check-replication",
+			new CheckReplicationTool()), UPDATE("update", new UpdateTool()), WAITFOR(
+			"waitfor", new WaitforTool());
 
 		private String name;
-        private Executable exec;
+		private Executable exec;
 
 		private Command(String name, Executable exec) {
 			this.name = name;
-            this.exec = exec;
+			this.exec = exec;
 
 		}
 
@@ -33,28 +30,30 @@ public class Launcher {
 			return name;
 		}
 
-        public Executable getExec() {
-            return exec;
-        }
+		public Executable getExec() {
+			return exec;
+		}
 
-        private static Map<String, Command> map = new HashMap<String, Command>();
-        static {
-            for (Command command: values())
-                map.put(command.getName(), command);
-        }
-        public static Command get(String name) {
-            return map.get(name);
+		private static Map<String, Command> map = new HashMap<String, Command>();
+		static {
+			for (Command command : values())
+				map.put(command.getName(), command);
+		}
 
-        }
-        public static boolean hasName(String name) {
-            return map.containsKey(name);
-        }
+		public static Command get(String name) {
+			return map.get(name);
 
-        public static Executable getUtil(String name) {
-            if (hasName(name))
-                return get(name).getExec();
-            return null;
-        }
+		}
+
+		public static boolean hasName(String name) {
+			return map.containsKey(name);
+		}
+
+		public static Executable getUtil(String name) {
+			if (hasName(name))
+				return get(name).getExec();
+			return null;
+		}
 
 	}
 
@@ -100,13 +99,13 @@ public class Launcher {
 		}
 		String commandName = args[0];
 		String[] commandArgs = removeCommandFromArgs(args);
-        Executable exec = Command.getUtil(commandName);
-        if (exec != null)
-            exec.run(commandArgs);
-		else {
-            System.err.println("command not found: " + commandName);
+		Executable tool = Command.getUtil(commandName);
+		if (tool != null) {
+			tool.execute(commandArgs);
+		} else {
+			System.err.println("command not found: " + commandName);
 			printHelp();
-        }
+		}
 
 	}
 }
