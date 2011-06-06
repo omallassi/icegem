@@ -44,6 +44,9 @@ public class CheckReplicationTool extends Tool {
 	/* Default timeout is 1 minute */
 	private static final long DEFAULT_TIMEOUT = 60 * 1000;
 
+	/* Additional timeout */
+	private static final long DELTA_TIMEOUT = 10 * 1000; 
+
 	/* Default license file is gemfireLicense.zip */
 	private static final String DEFAULT_LICENSE_FILE_PATH = "gemfireLicense.zip";
 
@@ -55,7 +58,7 @@ public class CheckReplicationTool extends Tool {
 
 	/* Waiting timeout */
 	private static long timeout = DEFAULT_TIMEOUT;
-
+	
 	/* Path to the license file */
 	private static String licenseFilePath = DEFAULT_LICENSE_FILE_PATH;
 
@@ -105,7 +108,7 @@ public class CheckReplicationTool extends Tool {
 			ProcessorTask task = new ProcessorTask(locatorsSet, timeout,
 				licenseFilePath, regionName);
 
-			Utils.execute(task, timeout);
+			Utils.execute(task, timeout + DELTA_TIMEOUT);
 
 			System.exit(task.getExitCode());
 		} catch (Throwable t) {
