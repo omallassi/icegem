@@ -1,5 +1,6 @@
 package com.googlecode.icegem.cacheutils.replication;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
 import com.googlecode.icegem.cacheutils.Tool;
+import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 /**
  * The main class of the replication measurement tool. It parses command-line
@@ -60,6 +62,39 @@ public class CheckReplicationTool extends Tool {
 	/* Technical region name */
 	private static String regionName = DEFAULT_REGION_NAME;
 
+	private class ProcessorTask implements Runnable {
+
+		private int exitCode;
+		private final Set<String> locatorsSet;
+		private final long timeout;
+		private final String licenseFilePath;
+		private final String regionName;
+
+		public ProcessorTask(Set<String> locatorsSet, long timeout,
+			String licenseFilePath, String regionName) {
+			this.locatorsSet = locatorsSet;
+			this.timeout = timeout;
+			this.licenseFilePath = licenseFilePath;
+			this.regionName = regionName;
+		}
+
+		public void run() {
+			ReplicationProcessor processor = new ReplicationProcessor(
+				locatorsSet, timeout, licenseFilePath, regionName);
+
+			exitCode = 1;
+			try {
+				exitCode = processor.process();
+			} catch (Throwable t) {
+			}
+
+		}
+
+		public int getExitCode() {
+			return exitCode;
+		}
+	}
+
 	/**
 	 * Runs the tool. All the tools run in this way.
 	 */
@@ -67,12 +102,12 @@ public class CheckReplicationTool extends Tool {
 		try {
 			parseCommandLineArguments(args);
 
-			ReplicationProcessor processor = new ReplicationProcessor(
-				locatorsSet, timeout, licenseFilePath, regionName);
+			ProcessorTask task = new ProcessorTask(locatorsSet, timeout,
+				licenseFilePath, regionName);
 
-			int mainExitCode = processor.process();
+			Utils.execute(task, timeout);
 
-			System.exit(mainExitCode);
+			System.exit(task.getExitCode());
 		} catch (Throwable t) {
 			System.err.println(t.getMessage());
 			t.printStackTrace();
@@ -172,7 +207,7 @@ public class CheckReplicationTool extends Tool {
 		gnuOptions
 			.addOption("l", LOCATORS_OPTION, true,
 				"List of clusters' locators to check. Example: host1[port1],host2[port2]")
-			.addOption("t", TIMEOUT_OPTION, true, "Timeout, seconds")
+			.addOption("t", TIMEOUT_OPTION, true, "Timeout, ms")
 			.addOption("lf", LICENSE_FILE_OPTION, true,
 				"The path to non default license file")
 			.addOption(
