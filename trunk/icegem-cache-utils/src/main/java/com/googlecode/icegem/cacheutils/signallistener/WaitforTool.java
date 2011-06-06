@@ -85,7 +85,7 @@ public class WaitforTool extends Tool {
 		if (!cmd.hasOption("region") || !cmd.hasOption("locators")
 			|| !cmd.hasOption("key")) {
 			printHelp(options);
-			System.exit(-1);
+			System.exit(1);
 		}
 
 		locators = cmd.getOptionValue("locators");

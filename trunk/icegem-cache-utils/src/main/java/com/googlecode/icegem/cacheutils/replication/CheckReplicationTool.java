@@ -45,7 +45,7 @@ public class CheckReplicationTool extends Tool {
 	private static final long DEFAULT_TIMEOUT = 60 * 1000;
 
 	/* Additional timeout */
-	private static final long DELTA_TIMEOUT = 10 * 1000; 
+	private static final long DELTA_TIMEOUT = 5 * 1000; 
 
 	/* Default license file is gemfireLicense.zip */
 	private static final String DEFAULT_LICENSE_FILE_PATH = "gemfireLicense.zip";
@@ -196,7 +196,7 @@ public class CheckReplicationTool extends Tool {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("check-replication", options);
 
-		System.exit(-1);
+		System.exit(1);
 	}
 
 	/**

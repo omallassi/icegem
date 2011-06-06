@@ -184,7 +184,7 @@ public class MonitorTool extends Tool {
 
 		if (commandLineArguments.length < 1) {
 			printHelp(options);
-			System.exit(-1);
+			System.exit(1);
 		}
 
 		CommandLineParser parser = new GnuParser();
@@ -211,14 +211,14 @@ public class MonitorTool extends Tool {
 				allOption = allOptionTemp;
 			} else {
 				printHelp(options);
-				System.exit(-1);
+				System.exit(1);
 			}
 
 		} catch (Throwable t) {
 			System.err
 				.println("Parsing of options failed. Please check that you use correct option or specify a server in format host[port].");
 			printHelp(options);
-			System.exit(-1);
+			System.exit(1);
 		}
 	}
 
