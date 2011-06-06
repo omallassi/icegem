@@ -7,7 +7,6 @@ import java.util.TimerTask;
 
 import javax.mail.MessagingException;
 
-import com.googlecode.icegem.cacheutils.Executable;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -15,6 +14,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 
+import com.googlecode.icegem.cacheutils.Tool;
 import com.googlecode.icegem.cacheutils.monitor.controller.NodesController;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.cacheutils.monitor.utils.EmailService;
@@ -25,8 +25,8 @@ import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
  * Periodically checks the distributed system status and sends mail in case of
  * failure
  */
-public class MonitoringTool implements Executable {
-	private static final Logger log = Logger.getLogger(MonitoringTool.class);
+public class MonitorTool extends Tool {
+	private static final Logger log = Logger.getLogger(MonitorTool.class);
 
 	private static boolean allOption;
 	private static String serverHostOption;
@@ -36,11 +36,7 @@ public class MonitoringTool implements Executable {
 	private PropertiesHelper propertiesHelper;
 	private Timer timer;
 
-    public void run(String[] args) {
-        main(args);
-    }
-
-    /**
+	/**
 	 * Periodically running task which checks the system status
 	 */
 	private class IsAliveTimerTask extends TimerTask {
@@ -76,35 +72,37 @@ public class MonitoringTool implements Executable {
 	 * 
 	 * @throws Exception
 	 */
-	public MonitoringTool() {
+	public MonitorTool() {
 
 	}
-    /**
-     * configuration
-     * */
-    public void init() {
-        log.info(Utils.currentDate() + "");
+
+	/**
+	 * configuration
+	 * */
+	public void init() {
+		log.info(Utils.currentDate() + "");
 		log.info(Utils.currentDate()
 			+ "  --------------------------------------------------");
 		log.info(Utils.currentDate() + "  Monitoring tool started");
 		log.info(Utils.currentDate()
 			+ "  --------------------------------------------------");
 
-        try {
-            propertiesHelper = new PropertiesHelper("/monitoring.properties");
-        } catch (IOException e) {
-            throw new RuntimeException("error reading properties \'/monitoring.properties\' ", e);
-        }
+		try {
+			propertiesHelper = new PropertiesHelper("/monitoring.properties");
+		} catch (IOException e) {
+			throw new RuntimeException(
+				"error reading properties \'/monitoring.properties\' ", e);
+		}
 
-        try {
-            nodesController = new NodesController(propertiesHelper, true);
-        } catch (Exception e) {
-            throw new RuntimeException("error creating NodesController", e);
-        }
-        nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
+		try {
+			nodesController = new NodesController(propertiesHelper, true);
+		} catch (Exception e) {
+			throw new RuntimeException("error creating NodesController", e);
+		}
+		nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
 
 		timer = new Timer();
-    }
+	}
 
 	/**
 	 * Starts the checking task
@@ -141,51 +139,47 @@ public class MonitoringTool implements Executable {
 		nodesController.addNodeEventHandler(handler);
 	}
 
-	/**
-	 * Starts the monitoring tool
-	 * 
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(String[] args) {
+	public void execute(String[] args) {
 		parseCommandLineArguments(args);
 
 		if (serverHostOption != null) {
-            boolean serverAlive = false;
-            try {
-                serverAlive = MonitoringTool.isServerAlive(
-                        serverHostOption, serverPortOption);
-            } catch (Exception e) {
-                throw new RuntimeException("error in checking server liveness", e);
-            }
+			boolean serverAlive = false;
+			try {
+				serverAlive = MonitorTool.isServerAlive(serverHostOption,
+					serverPortOption);
+			} catch (Exception e) {
+				throw new RuntimeException("error in checking server liveness",
+					e);
+			}
 
-            int status;
+			int status;
 			if (serverAlive) {
 				status = 0;
-				
+
 				System.out.println("alive");
 			} else {
 				status = 1;
-				
+
 				System.out.println("down");
 			}
 
 			System.exit(status);
 		} else if (allOption) {
-            MonitoringTool monitoringTool = null;
-            try {
-                monitoringTool = new MonitoringTool();
-                monitoringTool.init();
-            } catch (Exception e) {
-                throw new RuntimeException("error in creating monitoring tool object. ", e);
-            }
-            monitoringTool.start();
+			MonitorTool monitoringTool = null;
+			try {
+				monitoringTool = new MonitorTool();
+				monitoringTool.init();
+			} catch (Exception e) {
+				throw new RuntimeException(
+					"error in creating monitoring tool object. ", e);
+			}
+			monitoringTool.start();
 		} else {
 			throw new IllegalStateException("Cannot define application mode");
 		}
 	}
 
-	private static void parseCommandLineArguments(String[] commandLineArguments) {
+	protected void parseCommandLineArguments(String[] commandLineArguments) {
 		Options options = constructGnuOptions();
 
 		if (commandLineArguments.length < 1) {
@@ -201,15 +195,17 @@ public class MonitoringTool implements Executable {
 				printHelp(options);
 				System.exit(0);
 			}
-			
+
 			boolean allOptionTemp = line.hasOption("all");
 			String serverOptionTemp = line.getOptionValue("server");
 
 			if (serverOptionTemp != null) {
 				int indexOfPortStart = serverOptionTemp.indexOf('[');
 				int indexOfPortEnd = serverOptionTemp.indexOf(']');
-				serverHostOption = serverOptionTemp.substring(0, indexOfPortStart);
-				String portString = serverOptionTemp.substring(indexOfPortStart + 1, indexOfPortEnd);
+				serverHostOption = serverOptionTemp.substring(0,
+					indexOfPortStart);
+				String portString = serverOptionTemp.substring(
+					indexOfPortStart + 1, indexOfPortEnd);
 				serverPortOption = Integer.parseInt(portString);
 			} else if (allOptionTemp) {
 				allOption = allOptionTemp;
@@ -219,18 +215,19 @@ public class MonitoringTool implements Executable {
 			}
 
 		} catch (Throwable t) {
-			System.err.println("Parsing of options failed. Please check that you use correct option or specify a server in format host[port].");
+			System.err
+				.println("Parsing of options failed. Please check that you use correct option or specify a server in format host[port].");
 			printHelp(options);
 			System.exit(-1);
 		}
 	}
 
-	private static void printHelp(final Options options) {
+	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("monitor", options);
 	}
 
-	private static Options constructGnuOptions() {
+	protected Options constructGnuOptions() {
 		final Options gnuOptions = new Options();
 
 		gnuOptions

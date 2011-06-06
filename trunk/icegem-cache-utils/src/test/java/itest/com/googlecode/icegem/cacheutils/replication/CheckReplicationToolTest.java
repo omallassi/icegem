@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
-import com.googlecode.icegem.cacheutils.replication.ReplicationManager;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
 
@@ -19,7 +18,7 @@ import com.googlecode.icegem.utils.ServerTemplate;
  * locator. Start replication measurement tool and expects that it will return 0
  * as exit code. This means that replication between all the clusters works.
  */
-public class ReplicationManagerTest {
+public class CheckReplicationToolTest {
 	/** Field gatewayA */
 	private static Process gatewayA;
 	/** Field gatewayB */
@@ -45,10 +44,10 @@ public class ReplicationManagerTest {
 	public void testMain() throws Exception {
 
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
-			"/replicationManagerGatewayA.properties");
+			"/checkReplicationToolGatewayA.properties");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			ReplicationManager.class, new String[] { "-l",
+			CheckReplicationToolRunner.class, new String[] { "-l",
 				"localhost[18081],localhost[18082],localhost[18083]", "-lf",
 				propertiesHelper.getStringProperty("license-file"), "-t",
 				"30000" });
@@ -61,11 +60,11 @@ public class ReplicationManagerTest {
 
 	private void startGateways() throws IOException, InterruptedException {
 		gatewayA = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "replicationManagerGatewayA.properties");
+			ServerTemplate.class, "checkReplicationToolGatewayA.properties");
 		gatewayB = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "replicationManagerGatewayB.properties");
+			ServerTemplate.class, "checkReplicationToolGatewayB.properties");
 		gatewayC = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "replicationManagerGatewayC.properties");
+			ServerTemplate.class, "checkReplicationToolGatewayC.properties");
 	}
 
 	private void stopGateways() throws IOException, InterruptedException {

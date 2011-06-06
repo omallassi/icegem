@@ -12,7 +12,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
-import com.googlecode.icegem.cacheutils.Executable;
+import com.googlecode.icegem.cacheutils.Tool;
 
 /**
  * The main class of the replication measurement tool. It parses command-line
@@ -22,7 +22,7 @@ import com.googlecode.icegem.cacheutils.Executable;
  * Responses with exit code 0 in case of all the relations established, 1
  * otherwise.
  */
-public class ReplicationManager implements Executable {
+public class CheckReplicationTool extends Tool {
 
 	/* Name of timeout option */
 	private static final String TIMEOUT_OPTION = "timeout";
@@ -63,22 +63,7 @@ public class ReplicationManager implements Executable {
 	/**
 	 * Runs the tool. All the tools run in this way.
 	 */
-	public void run(String[] args) {
-		try {
-			main(args);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Entry point of the tool
-	 * 
-	 * @param args
-	 *            - the list of command-line arguments
-	 * @throws Exception
-	 */
-	public static void main(String[] args) throws Exception {
+	public void execute(String[] args) {
 		try {
 			parseCommandLineArguments(args);
 
@@ -101,7 +86,7 @@ public class ReplicationManager implements Executable {
 	 * @param commandLineArguments
 	 *            - the list of command-line arguments
 	 */
-	private static void parseCommandLineArguments(String[] commandLineArguments) {
+	protected void parseCommandLineArguments(String[] commandLineArguments) {
 		Options options = constructGnuOptions();
 
 		if (commandLineArguments.length < 1) {
@@ -145,9 +130,10 @@ public class ReplicationManager implements Executable {
 	}
 
 	/**
-	 * Parses CSV locators string and return set of locators 
+	 * Parses CSV locators string and return set of locators
 	 * 
-	 * @param csvLocators - the CSV locators string 
+	 * @param csvLocators
+	 *            - the CSV locators string
 	 * @return - the set of locators
 	 * 
 	 * @throws PatternSyntaxException
@@ -165,21 +151,22 @@ public class ReplicationManager implements Executable {
 	/**
 	 * Prints help if requested, or in case of any misconfiguration
 	 * 
-	 * @param options - the GNU options
+	 * @param options
+	 *            - the GNU options
 	 */
-	private static void printHelp(final Options options) {
+	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("replication", options);
+		formatter.printHelp("check-replication", options);
 
 		System.exit(-1);
 	}
 
 	/**
 	 * Constructs the set of GNU options
-	 *  
+	 * 
 	 * @return - the constructed options
 	 */
-	private static Options constructGnuOptions() {
+	protected Options constructGnuOptions() {
 		final Options gnuOptions = new Options();
 
 		gnuOptions
