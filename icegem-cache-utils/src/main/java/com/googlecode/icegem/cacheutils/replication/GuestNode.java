@@ -206,7 +206,7 @@ public class GuestNode {
 			String localLocators = args[0];
 			String remoteLocators = args[1];
 			long timeout = Long.parseLong(args[2]);
-			String licenseFile = args[3];
+			String licenseFile = (args[3] == "null" ? null : args[3]);
 			String licenseType = args[4];
 			String regionName = args[5];
 
