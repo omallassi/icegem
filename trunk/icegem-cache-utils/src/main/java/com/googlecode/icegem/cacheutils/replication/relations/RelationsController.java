@@ -2,22 +2,32 @@ package com.googlecode.icegem.cacheutils.replication.relations;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 /**
- * Container for relations for some guest node 
+ * Container for relations for some guest node
  */
 public class RelationsController {
 
-	private String localDistributedSystem;
+	private Cluster localCluster;
 	private Set<Relation> relationsSet = new HashSet<Relation>();
 
-	public RelationsController(String localDistributedSystem,
-		Set<String> remoteDistributedSystemsSet) {
-		this.localDistributedSystem = localDistributedSystem;
+	public RelationsController(String localClusterName,
+		Properties clustersProperties) {
 
-		for (String remoteDistributedSystem : remoteDistributedSystemsSet) {
-			add(new Relation(remoteDistributedSystem, localDistributedSystem));
+		this.localCluster = new Cluster(localClusterName,
+			clustersProperties.getProperty(localClusterName));
+
+		for (Object keyObject : clustersProperties.keySet()) {
+			if (localCluster.getName().equals((String) keyObject)) {
+				continue;
+			}
+
+			Cluster remoteCluster = new Cluster((String) keyObject,
+				(String) clustersProperties.get(keyObject));
+
+			add(new Relation(remoteCluster, localCluster));
 		}
 	}
 
@@ -29,8 +39,8 @@ public class RelationsController {
 		Relation result = null;
 
 		for (Relation relation : relationsSet) {
-			if (from.equals(relation.getFrom())
-				&& localDistributedSystem.equals(relation.getTo())) {
+			if (from.equals(relation.getFrom().getName())
+				&& localCluster.equals(relation.getTo())) {
 				result = relation;
 				break;
 			}
@@ -58,8 +68,7 @@ public class RelationsController {
 
 		if (isConnected()) {
 
-			sb.append("Replicated to ").append(localDistributedSystem)
-				.append(" from ");
+			sb.append("Replicated to ").append(localCluster).append(" from ");
 
 			Iterator<Relation> it = relationsSet.iterator();
 			while (it.hasNext()) {
@@ -74,7 +83,7 @@ public class RelationsController {
 			}
 		} else {
 			sb.append("Connection process is not finished for ").append(
-				localDistributedSystem);
+				localCluster);
 		}
 
 		return sb.toString();

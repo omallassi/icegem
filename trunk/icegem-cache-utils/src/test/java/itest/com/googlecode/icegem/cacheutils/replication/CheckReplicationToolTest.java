@@ -49,14 +49,42 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class, new String[] { "check-replication", "-l",
-				"localhost[18081],localhost[18082],localhost[18083]", "-lf",
+			Launcher.class,
+			new String[] { "check-replication", "-c",
+				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
+				"-c", "clusterC=localhost[18083]", "-lf",
 				propertiesHelper.getStringProperty("license-file"), "-lt",
-				"evaluation", "-t", "10000" });
+				propertiesHelper.getStringProperty("license-type"), "-t",
+				"30000" });
+
+		JavaProcessLauncher.printProcessOutput(process);
+		JavaProcessLauncher.printProcessError(process);
 
 		int exitCode = process.waitFor();
 
+		assertThat(exitCode).isEqualTo(0);
+
+	}
+
+	public void testMainPositiveWithWrongLocators() throws Exception {
+		System.out.println("testMainPositiveWithWrongLocators");
+
+		PropertiesHelper propertiesHelper = new PropertiesHelper(
+			"/checkReplicationToolGatewayA.properties");
+
+		Process process = JavaProcessLauncher.runWithoutConfirmation(
+			Launcher.class, new String[] { "check-replication", "-c",
+				"clusterA=localhost[18081],localhost[18084]",
+				"-c", "clusterB=localhost[18082],localhost[18086]", "-c",
+				"clusterC=localhost[18083],localhost[18087]", "-lf",
+				propertiesHelper.getStringProperty("license-file"), "-lt",
+				propertiesHelper.getStringProperty("license-type"), "-t",
+				"30000" });
+
 		JavaProcessLauncher.printProcessOutput(process);
+		JavaProcessLauncher.printProcessError(process);
+
+		int exitCode = process.waitFor();
 
 		assertThat(exitCode).isEqualTo(0);
 
@@ -70,14 +98,18 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class, new String[] { "check-replication", "-l",
-				"localhost[18081],localhost[18082],localhost[18084]", "-lf",
+			Launcher.class,
+			new String[] { "check-replication", "-c",
+				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
+				"-c", "clusterD=localhost[18084]", "-lf",
 				propertiesHelper.getStringProperty("license-file"), "-lt",
-				"evaluation", "-t", "10000" });
-
-		int exitCode = process.waitFor();
+				propertiesHelper.getStringProperty("license-type"), "-t",
+				"10000" });
 
 		JavaProcessLauncher.printProcessOutput(process);
+		JavaProcessLauncher.printProcessError(process);
+
+		int exitCode = process.waitFor();
 
 		assertThat(exitCode).isEqualTo(1);
 
@@ -88,13 +120,14 @@ public class CheckReplicationToolTest {
 		System.out.println("testMainNegativeDefaultLicense");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class, new String[] { "check-replication", "-l",
-				"localhost[18081],localhost[18082],localhost[18083]", "-t",
-				"10000" });
-
-		int exitCode = process.waitFor();
+			Launcher.class, new String[] { "check-replication", "-c",
+				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
+				"-c", "clusterC=localhost[18083]", "-t", "10000" });
 
 		JavaProcessLauncher.printProcessOutput(process);
+		JavaProcessLauncher.printProcessError(process);
+
+		int exitCode = process.waitFor();
 
 		assertThat(exitCode).isEqualTo(1);
 
@@ -107,9 +140,10 @@ public class CheckReplicationToolTest {
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
 			Launcher.class, new String[] { "check-replication" });
 
-		int exitCode = process.waitFor();
-
 		JavaProcessLauncher.printProcessOutput(process);
+		JavaProcessLauncher.printProcessError(process);
+
+		int exitCode = process.waitFor();
 
 		assertThat(exitCode).isEqualTo(1);
 
@@ -123,14 +157,18 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class, new String[] { "check-replication", "-l",
-				"localhost[18081],localhost[18082],localhost[18083]", "-lf",
+			Launcher.class,
+			new String[] { "check-replication", "-c",
+				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
+				"-c", "clusterC=localhost[18083]", "-lf",
 				propertiesHelper.getStringProperty("license-file"), "-lt",
-				"evaluation", "-t", "10000", "-r", "wrong" });
-
-		int exitCode = process.waitFor();
+				propertiesHelper.getStringProperty("license-type"), "-t",
+				"10000", "-r", "wrong" });
 
 		JavaProcessLauncher.printProcessOutput(process);
+		JavaProcessLauncher.printProcessError(process);
+
+		int exitCode = process.waitFor();
 
 		assertThat(exitCode).isEqualTo(1);
 
