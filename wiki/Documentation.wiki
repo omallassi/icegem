@@ -380,8 +380,8 @@ Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
 
 ==Restrictions== 
 
- # A query string for paginated query can be arbitrarily complex but must return keys of entries that obtained during the query;
- # For partitioned regions a query string must meet the requirements described in a GemFire documentation for querying partitioned regions.  
+ # A query string for paginated query can be arbitrarily complex but entry key must be part of projection list.
+ # For partitioned regions a query string must meet the requirements described in a GemFire documentation for querying partitioned regions. 
 
 ==API==
 
@@ -413,8 +413,12 @@ public int getTotalNumberOfEntries(){...};
  * `getTotalNumberOfPages()` - returns a total number of query pages;
  * `getTotalNumberOfEntries()` - returns a total number of query entries.
 
-==Ordering of results==
-Query results will be ordered by entry keys automatically, if a key object implements `java.lang.Comparable` interface.
+==Ordering of results for partitioned regions==
+A paginated query supports order by functionality on partitioned regions.
+
+*Restrictions*
+ # The fields specified in the order by clause must be part of the projection list.
+ # Query string with order by clause must contain `distinct` word.
 
 ==Limiting of results==
 Paginated query result can be limited. By default this limit is 1000 entries. If query results exceeds this limit, `javax.naming.LimitExceededException` will be thrown. 
@@ -447,6 +451,18 @@ String queryString = "SELECT e.key FROM /person.entrySet e WHERE e.value.socialN
 int pageSize = 30;
 PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", queryString, new Object[]{534}, pageSize);
 List<Person> pageEntries = query.page(1);
+}}}
+
+Get first page of persons from the region `/person` ordered by socialNumber:
+{{{
+...
+ClientCache cache = clientCacheFactory.create();
+String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
+int pageSize = 10;
+PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", queryString, pageSize);
+if (querty.hasNext()) {
+    List<Person> pageEntries = query.next();
+}
 }}}
 
 = Smart expiration =
