@@ -453,13 +453,14 @@ PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", query
 List<Person> pageEntries = query.page(1);
 }}}
 
-Get first page of persons from the region `/person` ordered by social number:
+Get first page of persons from the region `/person` ordered by social number with total query limit 400:
 {{{
 ...
 ClientCache cache = clientCacheFactory.create();
 String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
 int pageSize = 10;
-PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", queryString, pageSize);
+int queryLimit = 400;
+PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, queryLimit, "person", queryString, pageSize);
 if (querty.hasNext()) {
     List<Person> pageEntries = query.next();
 }
