@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
-
 import com.gemstone.gemfire.cache.Cache;
 import com.gemstone.gemfire.cache.CacheFactory;
 import com.gemstone.gemfire.cache.EntryEvent;
@@ -14,7 +12,6 @@ import com.gemstone.gemfire.cache.RegionFactory;
 import com.gemstone.gemfire.cache.RegionShortcut;
 import com.gemstone.gemfire.cache.Scope;
 import com.gemstone.gemfire.cache.util.CacheListenerAdapter;
-import com.googlecode.icegem.cacheutils.monitor.MonitorTool;
 import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 import com.googlecode.icegem.cacheutils.replication.relations.RelationsController;
 
@@ -29,7 +26,7 @@ import com.googlecode.icegem.cacheutils.replication.relations.RelationsControlle
  * 
  */
 public class GuestNode {
-	private static final Logger log = Logger.getLogger(MonitorTool.class);
+	// private static final Logger log = Logger.getLogger(GuestNode.class);
 
 	/* Local locators */
 	private String locators;
@@ -49,6 +46,8 @@ public class GuestNode {
 	/* The name of technical region */
 	private String regionName;
 
+	private final String licenseType;
+
 	/**
 	 * Creates the instance of guest node
 	 * 
@@ -60,11 +59,13 @@ public class GuestNode {
 	 *            - the path to license file
 	 * @param regionName
 	 *            - the name of the technical region
+	 * @param regionName2
 	 */
 	private GuestNode(String localLocators, String remoteLocators,
-		String licenseFile, String regionName) {
+		String licenseFile, String licenseType, String regionName) {
 		this.locators = localLocators;
 		this.licenseFile = licenseFile;
+		this.licenseType = licenseType;
 		this.regionName = regionName;
 
 		this.relationsController = new RelationsController(localLocators,
@@ -78,8 +79,14 @@ public class GuestNode {
 	 * locator as a key and current time as a value
 	 */
 	private void init() {
-		cache = new CacheFactory().set("license-file", licenseFile)
-			.set("mcast-port", "0").set("log-level", "none")
+		CacheFactory cacheFactory = new CacheFactory();
+
+		if ((licenseFile != null) && (licenseType != null)) {
+			cacheFactory.set("license-file", licenseFile).set("license-type",
+				licenseType);
+		}
+
+		cache = cacheFactory.set("mcast-port", "0").set("log-level", "none")
 			.set("locators", locators).create();
 
 		region = cache.getRegion(regionName);
@@ -101,6 +108,11 @@ public class GuestNode {
 					long sentAt = event.getNewValue();
 					String fromLocators = event.getKey();
 
+					/*
+					 * log.info("afterCreate event: fromLocators = " +
+					 * fromLocators + ", localLocators = " + locators);
+					 */
+
 					if (!locators.equals(fromLocators)) {
 						long duration = receivedAt - sentAt;
 						relationsController.get(fromLocators).setDuration(
@@ -120,8 +132,9 @@ public class GuestNode {
 
 		public void run() {
 			while (!relationsController.isConnected()) {
+				// log.info(relationsController);
 				try {
-					TimeUnit.MILLISECONDS.sleep(100);
+					TimeUnit.MILLISECONDS.sleep(1000);
 				} catch (InterruptedException e) {
 				}
 			}
@@ -175,12 +188,17 @@ public class GuestNode {
 	 */
 	public static void main(String[] args) {
 		try {
-			System.out.println("Start");
-			if (args.length != 5) {
-				System.err
+			// System.out.println("Start");
+			if (args.length != 6) {
+				/*
+				 * System.err
+				 * .println("GuestNode#main: misconfiguration, specified " +
+				 * args.length + " parameters: " + Arrays.asList(args));
+				 * log.warn("GuestNode#main: misconfiguration, specified " +
+				 * args.length + " parameters: " + Arrays.asList(args));
+				 */
+				System.out
 					.println("GuestNode#main: misconfiguration, specified "
-						+ args.length + " parameters: " + Arrays.asList(args));
-				log.warn("GuestNode#main: misconfiguration, specified "
 						+ args.length + " parameters: " + Arrays.asList(args));
 				System.exit(1);
 			}
@@ -189,41 +207,56 @@ public class GuestNode {
 			String remoteLocators = args[1];
 			long timeout = Long.parseLong(args[2]);
 			String licenseFile = args[3];
-			String regionName = args[4];
+			String licenseType = args[4];
+			String regionName = args[5];
 
-			System.err.println("Starting the guest node");
-			log.info("Starting the guest node");
+			/*
+			 * System.err.println("Starting the guest node");
+			 * log.info("Starting the guest node");
+			 */
 			GuestNode guestNode = new GuestNode(localLocators, remoteLocators,
-				licenseFile, regionName);
+				licenseFile, licenseType, regionName);
 
-			System.err.println("Waiting for the finish");
-			log.info("Waiting for the finish");
+			/*
+			 * System.err.println("Waiting for the finish");
+			 * log.info("Waiting for the finish");
+			 */
 			boolean connected = guestNode.waitFor(timeout);
 
-			System.err.println("Printing state");
-			log.info("Printing state");
+			/*
+			 * System.err.println("Printing state"); log.info("Printing state");
+			 */
 			guestNode.printState();
 
-			System.err.println("Closing");
-			log.info("Closing");
+			/*
+			 * System.err.println("Closing"); log.info("Closing");
+			 */
 			guestNode.close();
 
 			int exitCode = connected ? 0 : 1;
 
-			System.err.println("GuestNode#main: exiting with exitCode = "
-				+ exitCode);
-			
-			log.warn("GuestNode#main: exiting with exitCode = "
-				+ exitCode);
+			/*
+			 * System.err.println("GuestNode#main: exiting with exitCode = " +
+			 * exitCode);
+			 * 
+			 * log.warn("GuestNode#main: exiting with exitCode = " + exitCode);
+			 */
 
+			System.out.println("GuestNode#main: exiting with exitCode = "
+				+ exitCode);
 			System.exit(exitCode);
 		} catch (Throwable t) {
-			log.warn("GuestNode#main: Throwable catched with message = "
-					+ t.getMessage());
-			System.err
+			/*
+			 * log.warn("GuestNode#main: Throwable catched with message = " +
+			 * t.getMessage()); System.err
+			 * .println("GuestNode#main: Throwable catched with message = " +
+			 * t.getMessage());
+			 */
+			// t.printStackTrace(System.err);
+			System.out
 				.println("GuestNode#main: Throwable catched with message = "
 					+ t.getMessage());
-			t.printStackTrace(System.err);
+
 			System.exit(1);
 		}
 	}

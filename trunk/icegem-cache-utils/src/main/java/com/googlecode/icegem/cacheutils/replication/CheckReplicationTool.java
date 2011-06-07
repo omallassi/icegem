@@ -37,6 +37,8 @@ public class CheckReplicationTool extends Tool {
 	/* Name of license file option */
 	private static final String LICENSE_FILE_OPTION = "license-file";
 
+	private static final String LICENSE_TYPE_OPTION = "license-type";
+
 	/* Name of help option */
 	private static final String HELP_OPTION = "help";
 
@@ -47,7 +49,9 @@ public class CheckReplicationTool extends Tool {
 	private static final long DELTA_TIMEOUT = 10 * 1000; 
 
 	/* Default license file is gemfireLicense.zip */
-	private static final String DEFAULT_LICENSE_FILE_PATH = "gemfireLicense.zip";
+	private static final String DEFAULT_LICENSE_FILE_PATH = null;
+
+	private static final String DEFAULT_LICENSE_TYPE = "evaluation";
 
 	/* Default region name is "proxy" */
 	private static final String DEFAULT_REGION_NAME = "proxy";
@@ -61,6 +65,8 @@ public class CheckReplicationTool extends Tool {
 	/* Path to the license file */
 	private static String licenseFilePath = DEFAULT_LICENSE_FILE_PATH;
 
+	private static String licenseType = DEFAULT_LICENSE_TYPE;
+
 	/* Technical region name */
 	private static String regionName = DEFAULT_REGION_NAME;
 
@@ -71,18 +77,20 @@ public class CheckReplicationTool extends Tool {
 		private final long timeout;
 		private final String licenseFilePath;
 		private final String regionName;
+		private final String licenseType;
 
 		public ProcessorTask(Set<String> locatorsSet, long timeout,
-			String licenseFilePath, String regionName) {
+			String licenseFilePath, String licenseType, String regionName) {
 			this.locatorsSet = locatorsSet;
 			this.timeout = timeout;
 			this.licenseFilePath = licenseFilePath;
+			this.licenseType = licenseType;
 			this.regionName = regionName;
 		}
 
 		public void run() {
 			ReplicationProcessor processor = new ReplicationProcessor(
-				locatorsSet, timeout, licenseFilePath, regionName);
+				locatorsSet, timeout, licenseFilePath, licenseType, regionName);
 
 			exitCode = 1;
 			try {
@@ -105,19 +113,16 @@ public class CheckReplicationTool extends Tool {
 			parseCommandLineArguments(args);
 
 			ProcessorTask task = new ProcessorTask(locatorsSet, timeout,
-				licenseFilePath, regionName);
+				licenseFilePath, licenseType, regionName);
 
 			Utils.execute(task, timeout + DELTA_TIMEOUT);
 
 			int exitCode = task.getExitCode();
 
-			System.err.println("Exit after execution, exitCode = " + exitCode);
 			System.exit(exitCode);
 		} catch (Throwable t) {
-			System.err.println(t.getMessage());
 			t.printStackTrace();
 			
-			System.err.println("Throwable catched in CheckReplicationTool#execute, message = " + t.getMessage());
 			System.exit(1);
 		}
 	}
@@ -147,6 +152,10 @@ public class CheckReplicationTool extends Tool {
 				licenseFilePath = line.getOptionValue(LICENSE_FILE_OPTION);
 			}
 
+			if (line.hasOption(LICENSE_TYPE_OPTION)) {
+				licenseType = line.getOptionValue(LICENSE_TYPE_OPTION);
+			}
+
 			if (line.hasOption(REGION_OPTION)) {
 				regionName = line.getOptionValue(REGION_OPTION);
 			}
@@ -165,8 +174,6 @@ public class CheckReplicationTool extends Tool {
 			}
 
 		} catch (Throwable t) {
-			System.err
-				.println("Parsing of options failed. Please check that you use correct option or specify a server in format host[port].");
 			printHelp(options);
 		}
 	}
@@ -200,7 +207,6 @@ public class CheckReplicationTool extends Tool {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("check-replication", options);
 
-		System.err.println("Misconfiguration, printing help and exiting with exitCode = 1");
 		System.exit(1);
 	}
 
@@ -218,6 +224,8 @@ public class CheckReplicationTool extends Tool {
 			.addOption("t", TIMEOUT_OPTION, true, "Timeout, ms")
 			.addOption("lf", LICENSE_FILE_OPTION, true,
 				"The path to non default license file")
+			.addOption("lt", LICENSE_TYPE_OPTION, true,
+				"The type of license")
 			.addOption(
 				"r",
 				REGION_OPTION,

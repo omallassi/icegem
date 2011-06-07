@@ -26,6 +26,8 @@ public class ReplicationProcessor {
 	/* Name of the technical region */
 	private final String regionName;
 
+	private final String licenseType;
+
 	/**
 	 * Configures and creates the instance of replication processor
 	 * 
@@ -37,12 +39,14 @@ public class ReplicationProcessor {
 	 *            - the path to the license file
 	 * @param regionName
 	 *            - the name of technical region
+	 * @param regionName2
 	 */
 	public ReplicationProcessor(Set<String> locatorsSet, long timeout,
-		String licenseFilePath, String regionName) {
+		String licenseFilePath, String licenseType, String regionName) {
 		this.locatorsSet = locatorsSet;
 		this.timeout = timeout;
 		this.licenseFilePath = licenseFilePath;
+		this.licenseType = licenseType;
 		this.regionName = regionName;
 	}
 
@@ -90,9 +94,16 @@ public class ReplicationProcessor {
 			String localLocators = locator.toString();
 			String remoteLocators = prepareRemoteLocators(locator);
 
+			/*System.out.println("localLocators = " + localLocators
+				+ ", remoteLocators = " + remoteLocators + ", timeout = "
+				+ timeout + ", licenseFilePath = " + licenseFilePath
+				+ ", licenseType = " + licenseType + ", regionName = "
+				+ regionName);*/
+
 			Process process = JavaProcessLauncher.runWithoutConfirmation(
 				GuestNode.class, new String[] { localLocators, remoteLocators,
-					String.valueOf(timeout), licenseFilePath, regionName });
+					String.valueOf(timeout), licenseFilePath, licenseType,
+					regionName });
 
 			processesList.add(process);
 		}

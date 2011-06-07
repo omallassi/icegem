@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.googlecode.icegem.cacheutils.Launcher;
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
@@ -50,12 +49,14 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			CheckReplicationToolRunner.class, new String[] { "-l",
+			Launcher.class, new String[] { "check-replication", "-l",
 				"localhost[18081],localhost[18082],localhost[18083]", "-lf",
-				propertiesHelper.getStringProperty("license-file"), "-t",
-				"10000" });
+				propertiesHelper.getStringProperty("license-file"), "-lt",
+				"evaluation", "-t", "10000" });
 
 		int exitCode = process.waitFor();
+
+		JavaProcessLauncher.printProcessOutput(process);
 
 		assertThat(exitCode).isEqualTo(0);
 
@@ -69,12 +70,14 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			CheckReplicationToolRunner.class, new String[] { "-l",
+			Launcher.class, new String[] { "check-replication", "-l",
 				"localhost[18081],localhost[18082],localhost[18084]", "-lf",
-				propertiesHelper.getStringProperty("license-file"), "-t",
-				"10000" });
+				propertiesHelper.getStringProperty("license-file"), "-lt",
+				"evaluation", "-t", "10000" });
 
 		int exitCode = process.waitFor();
+
+		JavaProcessLauncher.printProcessOutput(process);
 
 		assertThat(exitCode).isEqualTo(1);
 
@@ -85,11 +88,13 @@ public class CheckReplicationToolTest {
 		System.out.println("testMainNegativeDefaultLicense");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			CheckReplicationToolRunner.class, new String[] { "-l",
-				"localhost[18081],localhost[18082],localhost[18084]", "-t",
+			Launcher.class, new String[] { "check-replication", "-l",
+				"localhost[18081],localhost[18082],localhost[18083]", "-t",
 				"10000" });
 
 		int exitCode = process.waitFor();
+
+		JavaProcessLauncher.printProcessOutput(process);
 
 		assertThat(exitCode).isEqualTo(1);
 
@@ -100,9 +105,11 @@ public class CheckReplicationToolTest {
 		System.out.println("testMainNegativeEmptyParameters");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			CheckReplicationToolRunner.class, new String[] {});
+			Launcher.class, new String[] { "check-replication" });
 
 		int exitCode = process.waitFor();
+
+		JavaProcessLauncher.printProcessOutput(process);
 
 		assertThat(exitCode).isEqualTo(1);
 
@@ -111,17 +118,19 @@ public class CheckReplicationToolTest {
 	@Test
 	public void testMainNegativeIncorrectRegion() throws Exception {
 		System.out.println("testMainNegativeIncorrectRegion");
-		
+
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
 		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			CheckReplicationToolRunner.class, new String[] { "-l",
+			Launcher.class, new String[] { "check-replication", "-l",
 				"localhost[18081],localhost[18082],localhost[18083]", "-lf",
-				propertiesHelper.getStringProperty("license-file"), "-t",
-				"10000", "-r", "wrong" });
+				propertiesHelper.getStringProperty("license-file"), "-lt",
+				"evaluation", "-t", "10000", "-r", "wrong" });
 
 		int exitCode = process.waitFor();
+
+		JavaProcessLauncher.printProcessOutput(process);
 
 		assertThat(exitCode).isEqualTo(1);
 
