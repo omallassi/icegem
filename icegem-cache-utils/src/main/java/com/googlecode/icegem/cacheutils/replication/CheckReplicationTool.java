@@ -1,15 +1,14 @@
 package com.googlecode.icegem.cacheutils.replication;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.PatternSyntaxException;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import com.googlecode.icegem.cacheutils.Tool;
@@ -29,7 +28,7 @@ public class CheckReplicationTool extends Tool {
 	private static final String TIMEOUT_OPTION = "timeout";
 
 	/* Name of locators option */
-	private static final String LOCATORS_OPTION = "locators";
+	private static final String CLUSTERS_OPTION = "clusters";
 
 	/* Name of region option */
 	private static final String REGION_OPTION = "region";
@@ -46,7 +45,7 @@ public class CheckReplicationTool extends Tool {
 	private static final long DEFAULT_TIMEOUT = 60 * 1000;
 
 	/* Additional timeout */
-	private static final long DELTA_TIMEOUT = 10 * 1000; 
+	private static final long DELTA_TIMEOUT = 10 * 1000;
 
 	/* Default license file is gemfireLicense.zip */
 	private static final String DEFAULT_LICENSE_FILE_PATH = null;
@@ -56,12 +55,13 @@ public class CheckReplicationTool extends Tool {
 	/* Default region name is "proxy" */
 	private static final String DEFAULT_REGION_NAME = "proxy";
 
-	/* List of clusters' locators to check */
-	private static Set<String> locatorsSet;
+	private static final boolean DEFAULT_DEBUG_ENABLED = false;
+
+	private static final String DEBUG_OPTION = "debug";
 
 	/* Waiting timeout */
 	private static long timeout = DEFAULT_TIMEOUT;
-	
+
 	/* Path to the license file */
 	private static String licenseFilePath = DEFAULT_LICENSE_FILE_PATH;
 
@@ -70,32 +70,42 @@ public class CheckReplicationTool extends Tool {
 	/* Technical region name */
 	private static String regionName = DEFAULT_REGION_NAME;
 
+	private Properties clustersProperties;
+
+	private boolean debugEnabled = DEFAULT_DEBUG_ENABLED;
+
 	private class ProcessorTask implements Runnable {
 
 		private int exitCode;
-		private final Set<String> locatorsSet;
+		private final Properties clustersProperties;
 		private final long timeout;
 		private final String licenseFilePath;
 		private final String regionName;
 		private final String licenseType;
+		private final boolean debugEnabled;
 
-		public ProcessorTask(Set<String> locatorsSet, long timeout,
-			String licenseFilePath, String licenseType, String regionName) {
-			this.locatorsSet = locatorsSet;
+		public ProcessorTask(Properties clustersProperties, long timeout,
+			String licenseFilePath, String licenseType, String regionName, boolean debugEnabled) {
+			this.clustersProperties = clustersProperties;
 			this.timeout = timeout;
 			this.licenseFilePath = licenseFilePath;
 			this.licenseType = licenseType;
 			this.regionName = regionName;
+			this.debugEnabled = debugEnabled;
 		}
 
 		public void run() {
 			ReplicationProcessor processor = new ReplicationProcessor(
-				locatorsSet, timeout, licenseFilePath, licenseType, regionName);
+				clustersProperties, timeout, licenseFilePath, licenseType,
+				regionName, debugEnabled);
 
 			exitCode = 1;
 			try {
 				exitCode = processor.process();
 			} catch (Throwable t) {
+				debug(
+					"CheckReplicationTool.ProcessorTask#run(): Throwable caught with message = "
+						+ t.getMessage(), t);
 			}
 
 		}
@@ -110,19 +120,38 @@ public class CheckReplicationTool extends Tool {
 	 */
 	public void execute(String[] args) {
 		try {
+			debug("CheckReplicationTool#execute(String[]): args = "
+				+ Arrays.asList(args));
+
 			parseCommandLineArguments(args);
 
-			ProcessorTask task = new ProcessorTask(locatorsSet, timeout,
-				licenseFilePath, licenseType, regionName);
+			debug("CheckReplicationTool#execute(String[]): Creating CheckReplicationTool.ProcessorTask with parameters: clustersProperties = "
+				+ clustersProperties
+				+ ", timeout = "
+				+ timeout
+				+ ", licenseFilePath = "
+				+ licenseFilePath
+				+ ", licenseType = "
+				+ licenseType + ", regionName = " + regionName);
+
+			ProcessorTask task = new ProcessorTask(clustersProperties, timeout,
+				licenseFilePath, licenseType, regionName, debugEnabled);
+
+			debug("CheckReplicationTool#execute(String[]): Starting CheckReplicationTool.ProcessorTask");
 
 			Utils.execute(task, timeout + DELTA_TIMEOUT);
 
 			int exitCode = task.getExitCode();
 
+			debug("CheckReplicationTool#execute(String[]): CheckReplicationTool.ProcessorTask finished with exitCode = "
+				+ exitCode);
+
 			System.exit(exitCode);
 		} catch (Throwable t) {
-			t.printStackTrace();
-			
+			debug(
+				"CheckReplicationTool#execute(String[]): Throwable caught with message = "
+					+ t.getMessage(), t);
+
 			System.exit(1);
 		}
 	}
@@ -148,6 +177,10 @@ public class CheckReplicationTool extends Tool {
 				printHelp(options);
 			}
 
+			if (line.hasOption(DEBUG_OPTION)) {
+				debugEnabled = true;
+			}
+			
 			if (line.hasOption(LICENSE_FILE_OPTION)) {
 				licenseFilePath = line.getOptionValue(LICENSE_FILE_OPTION);
 			}
@@ -165,10 +198,8 @@ public class CheckReplicationTool extends Tool {
 				timeout = Long.parseLong(timeoutString);
 			}
 
-			if (line.hasOption(LOCATORS_OPTION)) {
-				String locatorsCsv = line.getOptionValue(LOCATORS_OPTION);
-
-				locatorsSet = parseLocators(locatorsCsv);
+			if (line.hasOption(CLUSTERS_OPTION)) {
+				clustersProperties = line.getOptionProperties(CLUSTERS_OPTION);
 			} else {
 				printHelp(options);
 			}
@@ -176,25 +207,6 @@ public class CheckReplicationTool extends Tool {
 		} catch (Throwable t) {
 			printHelp(options);
 		}
-	}
-
-	/**
-	 * Parses CSV locators string and return set of locators
-	 * 
-	 * @param csvLocators
-	 *            - the CSV locators string
-	 * @return - the set of locators
-	 * 
-	 * @throws PatternSyntaxException
-	 * @throws NumberFormatException
-	 */
-	private static Set<String> parseLocators(String csvLocators)
-		throws PatternSyntaxException, NumberFormatException {
-
-		String[] locators = csvLocators.split(",");
-		List<String> locatorsList = Arrays.asList(locators);
-
-		return new HashSet<String>(locatorsList);
 	}
 
 	/**
@@ -219,22 +231,43 @@ public class CheckReplicationTool extends Tool {
 		final Options gnuOptions = new Options();
 
 		gnuOptions
-			.addOption("l", LOCATORS_OPTION, true,
-				"List of clusters' locators to check. Example: host1[port1],host2[port2]")
 			.addOption("t", TIMEOUT_OPTION, true, "Timeout, ms")
 			.addOption("lf", LICENSE_FILE_OPTION, true,
 				"The path to non default license file")
-			.addOption("lt", LICENSE_TYPE_OPTION, true,
-				"The type of license")
+			.addOption("lt", LICENSE_TYPE_OPTION, true, "The type of license")
 			.addOption(
 				"r",
 				REGION_OPTION,
 				true,
 				"The name of region for this test. Default name is \""
 					+ DEFAULT_REGION_NAME + "\"")
+			.addOption("d", DEBUG_OPTION, false, "Print debug information")
 			.addOption("h", HELP_OPTION, false, "Print usage information");
+
+		@SuppressWarnings("static-access")
+		Option locatorsOption = OptionBuilder
+			.hasArgs()
+			.withDescription(
+				"Clusters and its locators of GemFire system. Example: -c cluster1=host1[port1],host2[port2] -c cluster2=host3[port3]")
+			.withValueSeparator().withArgName("cluster=locators")
+			.withLongOpt(CLUSTERS_OPTION).create("c");
+
+		gnuOptions.addOption(locatorsOption);
 
 		return gnuOptions;
 	}
 
+	private void debug(String message) {
+		debug(message, null);
+	}
+
+	private void debug(String message, Throwable t) {
+		if (debugEnabled) {
+			System.err.println(message);
+			
+			if (t != null) {
+				t.printStackTrace(System.err);
+			}
+		}
+	}
 }

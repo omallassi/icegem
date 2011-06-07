@@ -5,11 +5,11 @@ package com.googlecode.icegem.cacheutils.replication.relations;
  */
 public class Relation {
 
-	private String from;
-	private String to;
+	private Cluster from;
+	private Cluster to;
 	private long duration = -1;
 
-	public Relation(String from, String to) {
+	public Relation(Cluster from, Cluster to) {
 		this.from = from;
 		this.to = to;
 	}
@@ -22,14 +22,14 @@ public class Relation {
 		this.duration = duration;
 	}
 
-	public String getFrom() {
+	public Cluster getFrom() {
 		return from;
 	}
 
-	public String getTo() {
+	public Cluster getTo() {
 		return to;
 	}
-	
+
 	public RelationState getState() {
 		return (duration == -1 ? RelationState.NEW : RelationState.CONNECTED);
 	}

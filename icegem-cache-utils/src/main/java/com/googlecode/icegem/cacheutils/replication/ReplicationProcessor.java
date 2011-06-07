@@ -2,11 +2,10 @@ package com.googlecode.icegem.cacheutils.replication;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Properties;
 
+import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 
 /**
@@ -15,7 +14,7 @@ import com.googlecode.icegem.utils.JavaProcessLauncher;
 public class ReplicationProcessor {
 
 	/* Set of locators */
-	private Set<String> locatorsSet;
+	private Properties clustersProperties;
 
 	/* Timeout, milliseconds */
 	private long timeout;
@@ -28,10 +27,12 @@ public class ReplicationProcessor {
 
 	private final String licenseType;
 
+	private final boolean debugEnabled;
+
 	/**
 	 * Configures and creates the instance of replication processor
 	 * 
-	 * @param locatorsSet
+	 * @param clustersProperties
 	 *            - the set of locators
 	 * @param timeout
 	 *            - the timeout, milliseconds
@@ -39,43 +40,17 @@ public class ReplicationProcessor {
 	 *            - the path to the license file
 	 * @param regionName
 	 *            - the name of technical region
+	 * @param debugEnabled 
 	 * @param regionName2
 	 */
-	public ReplicationProcessor(Set<String> locatorsSet, long timeout,
-		String licenseFilePath, String licenseType, String regionName) {
-		this.locatorsSet = locatorsSet;
+	public ReplicationProcessor(Properties clustersProperties, long timeout,
+		String licenseFilePath, String licenseType, String regionName, boolean debugEnabled) {
+		this.clustersProperties = clustersProperties;
 		this.timeout = timeout;
 		this.licenseFilePath = licenseFilePath;
 		this.licenseType = licenseType;
 		this.regionName = regionName;
-	}
-
-	/**
-	 * Create CSV list of remote locators excluding local locators from the set
-	 * of all the locators
-	 * 
-	 * @param localLocators
-	 *            - the local locators
-	 * @return - the CSV list of remote locators
-	 */
-	private String prepareRemoteLocators(String localLocators) {
-		Set<String> remoteLocatorsSet = new HashSet<String>(locatorsSet);
-		remoteLocatorsSet.remove(localLocators);
-
-		StringBuilder sb = new StringBuilder();
-
-		Iterator<String> it = remoteLocatorsSet.iterator();
-		while (it.hasNext()) {
-			String locator = it.next();
-
-			sb.append(locator.toString());
-
-			if (it.hasNext()) {
-				sb.append(",");
-			}
-		}
-
-		return sb.toString();
+		this.debugEnabled = debugEnabled;
 	}
 
 	/**
@@ -88,38 +63,68 @@ public class ReplicationProcessor {
 	 * @throws InterruptedException
 	 */
 	public int process() throws IOException, InterruptedException {
+		debug("ReplicationProcessor#process(): Processing start");
 
 		List<Process> processesList = new ArrayList<Process>();
-		for (String locator : locatorsSet) {
-			String localLocators = locator.toString();
-			String remoteLocators = prepareRemoteLocators(locator);
+		for (Object keyObject : clustersProperties.keySet()) {
+			String cluster = (String) keyObject;
+			String clustersPropertiesString = PropertiesHelper
+				.propertiesToString(clustersProperties);
 
-			/*System.out.println("localLocators = " + localLocators
-				+ ", remoteLocators = " + remoteLocators + ", timeout = "
-				+ timeout + ", licenseFilePath = " + licenseFilePath
-				+ ", licenseType = " + licenseType + ", regionName = "
-				+ regionName);*/
+			debug("ReplicationProcessor#process(): Starting GuestNode with parameters: cluster = "
+				+ cluster
+				+ ", clustersPropertiesString = "
+				+ clustersPropertiesString
+				+ ", timeout = "
+				+ timeout
+				+ ", licenseFilePath = "
+				+ licenseFilePath
+				+ ", licenseType = "
+				+ licenseType + ", regionName = " + regionName);
 
 			Process process = JavaProcessLauncher.runWithoutConfirmation(
-				GuestNode.class, new String[] { localLocators, remoteLocators,
-					String.valueOf(timeout), licenseFilePath, licenseType,
-					regionName });
+				GuestNode.class, new String[] { cluster,
+					clustersPropertiesString, String.valueOf(timeout),
+					licenseFilePath, licenseType, regionName, String.valueOf(debugEnabled) });
+
+			debug("ReplicationProcessor#process(): Adding GuestNode to processList");
 
 			processesList.add(process);
 		}
 
+		debug("ReplicationProcessor#process(): Adding JavaProcessLauncher#printProcessError(Process) to each process");
+		for (final Process process : processesList) {
+			JavaProcessLauncher.printProcessOutput(process);
+			JavaProcessLauncher.printProcessError(process);
+		}
+
+		debug("ReplicationProcessor#process(): Waiting for processes finish");
 		int mainExitCode = 0;
+		int processNumber = 0;
 		for (Process process : processesList) {
+			debug("ReplicationProcessor#process(): Waiting for process #"
+				+ processNumber);
+
 			int exitCode = process.waitFor();
 
 			if (exitCode != 0) {
 				mainExitCode = 1;
 			}
+			debug("ReplicationProcessor#process(): Process #" + processNumber
+				+ " finished with exitCode = " + exitCode);
 
-			JavaProcessLauncher.printProcessOutput(process);
+			processNumber++;
 		}
+
+		debug("ReplicationProcessor#process(): Processing finished with mainExitCode = "
+			+ mainExitCode);
 
 		return mainExitCode;
 	}
 
+	private void debug(String message) {
+		if (debugEnabled) {
+			System.err.println(message);
+		}
+	}
 }

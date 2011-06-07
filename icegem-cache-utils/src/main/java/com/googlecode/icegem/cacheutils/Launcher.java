@@ -85,27 +85,35 @@ public class Launcher {
 
 		String[] result = new String[args.length - 1];
 
-		for (int i = 1; i < args.length; i++) {
-			result[i - 1] = args[i];
+		if (result.length > 0) {
+			for (int i = 1; i < args.length; i++) {
+				result[i - 1] = args[i];
+			}
 		}
 
 		return result;
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length < 1) {
-			printHelp();
-			return;
-		}
-		String commandName = args[0];
-		String[] commandArgs = removeCommandFromArgs(args);
-		Executable tool = Command.getUtil(commandName);
-		if (tool != null) {
-			tool.execute(commandArgs);
-		} else {
-			System.err.println("command not found: " + commandName);
-			printHelp();
-		}
+		try {
+			if (args.length < 1) {
+				printHelp();
+				return;
+			}
 
+			String commandName = args[0];
+			String[] commandArgs = removeCommandFromArgs(args);
+			
+			Executable tool = Command.getUtil(commandName);
+			if (tool != null) {
+				tool.execute(commandArgs);
+			} else {
+				System.err.println("command not found: " + commandName);
+				printHelp();
+			}
+		} catch (Throwable t) {
+			t.printStackTrace(System.err);
+			System.exit(1);
+		}
 	}
 }
