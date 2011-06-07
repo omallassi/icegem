@@ -44,7 +44,7 @@ public class CheckReplicationTool extends Tool {
 	private static final long DEFAULT_TIMEOUT = 60 * 1000;
 
 	/* Additional timeout */
-	private static final long DELTA_TIMEOUT = 1 * 1000; 
+	private static final long DELTA_TIMEOUT = 10 * 1000; 
 
 	/* Default license file is gemfireLicense.zip */
 	private static final String DEFAULT_LICENSE_FILE_PATH = "gemfireLicense.zip";
@@ -109,10 +109,15 @@ public class CheckReplicationTool extends Tool {
 
 			Utils.execute(task, timeout + DELTA_TIMEOUT);
 
-			System.exit(task.getExitCode());
+			int exitCode = task.getExitCode();
+
+			System.err.println("Exit after execution, exitCode = " + exitCode);
+			System.exit(exitCode);
 		} catch (Throwable t) {
 			System.err.println(t.getMessage());
 			t.printStackTrace();
+			
+			System.err.println("Throwable catched in CheckReplicationTool#execute, message = " + t.getMessage());
 			System.exit(1);
 		}
 	}
@@ -195,6 +200,7 @@ public class CheckReplicationTool extends Tool {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("check-replication", options);
 
+		System.err.println("Misconfiguration, printing help and exiting with exitCode = 1");
 		System.exit(1);
 	}
 

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
 import com.gemstone.gemfire.cache.Cache;
 import com.gemstone.gemfire.cache.CacheFactory;
 import com.gemstone.gemfire.cache.EntryEvent;
@@ -12,6 +14,7 @@ import com.gemstone.gemfire.cache.RegionFactory;
 import com.gemstone.gemfire.cache.RegionShortcut;
 import com.gemstone.gemfire.cache.Scope;
 import com.gemstone.gemfire.cache.util.CacheListenerAdapter;
+import com.googlecode.icegem.cacheutils.monitor.MonitorTool;
 import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 import com.googlecode.icegem.cacheutils.replication.relations.RelationsController;
 
@@ -26,6 +29,7 @@ import com.googlecode.icegem.cacheutils.replication.relations.RelationsControlle
  * 
  */
 public class GuestNode {
+	private static final Logger log = Logger.getLogger(MonitorTool.class);
 
 	/* Local locators */
 	private String locators;
@@ -170,25 +174,57 @@ public class GuestNode {
 	 *            - the configuration arguments
 	 */
 	public static void main(String[] args) {
-		if (args.length != 5) {
+		try {
+			System.out.println("Start");
+			if (args.length != 5) {
+				System.err
+					.println("GuestNode#main: misconfiguration, specified "
+						+ args.length + " parameters: " + Arrays.asList(args));
+				log.warn("GuestNode#main: misconfiguration, specified "
+						+ args.length + " parameters: " + Arrays.asList(args));
+				System.exit(1);
+			}
+
+			String localLocators = args[0];
+			String remoteLocators = args[1];
+			long timeout = Long.parseLong(args[2]);
+			String licenseFile = args[3];
+			String regionName = args[4];
+
+			System.err.println("Starting the guest node");
+			log.info("Starting the guest node");
+			GuestNode guestNode = new GuestNode(localLocators, remoteLocators,
+				licenseFile, regionName);
+
+			System.err.println("Waiting for the finish");
+			log.info("Waiting for the finish");
+			boolean connected = guestNode.waitFor(timeout);
+
+			System.err.println("Printing state");
+			log.info("Printing state");
+			guestNode.printState();
+
+			System.err.println("Closing");
+			log.info("Closing");
+			guestNode.close();
+
+			int exitCode = connected ? 0 : 1;
+
+			System.err.println("GuestNode#main: exiting with exitCode = "
+				+ exitCode);
+			
+			log.warn("GuestNode#main: exiting with exitCode = "
+				+ exitCode);
+
+			System.exit(exitCode);
+		} catch (Throwable t) {
+			log.warn("GuestNode#main: Throwable catched with message = "
+					+ t.getMessage());
+			System.err
+				.println("GuestNode#main: Throwable catched with message = "
+					+ t.getMessage());
+			t.printStackTrace(System.err);
 			System.exit(1);
 		}
-
-		String localLocators = args[0];
-		String remoteLocators = args[1];
-		long timeout = Long.parseLong(args[2]);
-		String licenseFile = args[3];
-		String regionName = args[4];
-
-		GuestNode guestNode = new GuestNode(localLocators, remoteLocators,
-			licenseFile, regionName);
-
-		boolean connected = guestNode.waitFor(timeout);
-
-		guestNode.printState();
-
-		guestNode.close();
-
-		System.exit(connected ? 0 : 1);
 	}
 }
