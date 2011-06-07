@@ -453,7 +453,7 @@ PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "person", query
 List<Person> pageEntries = query.page(1);
 }}}
 
-Get first page of persons from the region `/person` ordered by socialNumber:
+Get first page of persons from the region `/person` ordered by social number:
 {{{
 ...
 ClientCache cache = clientCacheFactory.create();
