@@ -1,6 +1,5 @@
 package com.googlecode.icegem.cacheutils.replication;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +44,7 @@ public class CheckReplicationTool extends Tool {
 	private static final long DEFAULT_TIMEOUT = 60 * 1000;
 
 	/* Additional timeout */
-	private static final long DELTA_TIMEOUT = 5 * 1000; 
+	private static final long DELTA_TIMEOUT = 1 * 1000; 
 
 	/* Default license file is gemfireLicense.zip */
 	private static final String DEFAULT_LICENSE_FILE_PATH = "gemfireLicense.zip";
