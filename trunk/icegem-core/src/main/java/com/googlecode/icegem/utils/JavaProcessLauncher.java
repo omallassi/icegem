@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,111 +67,58 @@ public class JavaProcessLauncher {
 		this.redirectProcessErrorStreamToParentProcessStdOut = redirectProcessErrorStreamToParentProcessStdOut;
 	}
 
-	/**
-	 * Runs process based on a specified class in a separate VM. Waits while
+    /**
+     * Sets the redirectProcessErrorStreamToParentProcessStdOut of this JavaProcessLauncher object.
+     *
+     * @param redirectProcessErrorStreamToParentProcessStdOut boolean flag.
+     *
+     */
+    public void setRedirectProcessErrorStreamToParentProcessStdOut(boolean redirectProcessErrorStreamToParentProcessStdOut) {
+        this.redirectProcessErrorStreamToParentProcessStdOut = redirectProcessErrorStreamToParentProcessStdOut;
+    }
+
+    /**
+     * Sets the redirectProcessInputStreamToParentProcessStdOut of this JavaProcessLauncher object.
+     *
+     * @param redirectProcessInputStreamToParentProcessStdOut boolean flag.
+     *
+     */
+    public void setRedirectProcessInputStreamToParentProcessStdOut(boolean redirectProcessInputStreamToParentProcessStdOut) {
+        this.redirectProcessInputStreamToParentProcessStdOut = redirectProcessInputStreamToParentProcessStdOut;
+    }
+
+    /**
+     * Runs process with arguments based on a specified class in a separate VM. Waits while
 	 * process is working and returns exit code after process finished.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @return exit code of this process.
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 */
-	public int run(Class klass) throws IOException, InterruptedException {
-		Process process = startProcess(klass, false);
+     *
+     * @param klass of type Class
+     * @param javaArguments arguments for java
+     * @param processArguments arguments for process
+     * @return int
+     * @throws IOException when
+     * @throws InterruptedException when
+     */
+    public int runAndWaitProcessExitCode(Class klass, String[] javaArguments, String[] processArguments) throws IOException, InterruptedException {
+		Process process = startProcess(klass, javaArguments, processArguments, false);
 		process.waitFor();
 		return process.exitValue();
 	}
 
 	/**
-	 * Runs a process and returns the Process object
+	 * Runs a process and returns the Process object.
 	 * 
 	 * @param clazz
 	 *            - the class to run
-	 * @param args
-	 *            - the list of arguments for the class
-	 * @return - the Process object representing running process
+     *
+	 * @param javaArguments arguments for java
+     * @param processArguments arguments for process
+     * @return - the Process object representing running process
 	 * @throws IOException
+     * @throws InterruptedException
 	 */
-	public static Process runWithoutConfirmation(Class<?> clazz, String[] args)
-		throws IOException {
-
-		String java = System.getProperty("java.home") + File.separator + "bin"
-			+ File.separator + "java";
-
-		String classpath = System.getProperty("java.class.path");
-
-		String mainClass = clazz.getName();
-
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(java);
-		sb.append(" -cp ").append(classpath);
-		sb.append(" ").append(mainClass);
-
-		for (String arg : args) {
-			sb.append(" ").append(arg);
-		}
-
-		return Runtime.getRuntime().exec(sb.toString());
-	}
-
-	/**
-	 * Prints to output stream output from the specified Process object
-	 * 
-	 * @param process
-	 *            - the Process object
-	 * 
-	 * @throws IOException
-	 */
-	public static void printProcessOutput(Process process) throws IOException {
-		printProcessStream(process.getInputStream(), System.out);
-	}
-
-	public static void printProcessError(Process process) throws IOException {
-		printProcessStream(process.getErrorStream(), System.err);
-	}
-
-	private static void printProcessStream(final InputStream inputStream, final PrintStream printStream) {
-		new Thread(new Runnable() {
-
-			public void run() {
-				try {
-					String line;
-
-					BufferedReader input = new BufferedReader(
-						new InputStreamReader(inputStream));
-
-					while ((line = input.readLine()) != null) {
-						printStream.println(line);
-					}
-
-					input.close();
-				} catch (Throwable t) {
-					t.printStackTrace(System.err);
-				}
-			}
-		}).start();
-	}
-
-	/**
-	 * Runs process based on a specified class in a separate VM. To confirm that
-	 * process completes startup it should write a startup completed string into
-	 * it's standard output.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 */
-	public Process runWithConfirmation(Class klass) throws IOException,
-		InterruptedException {
-		return runWithConfirmation(klass, new String[0]);
+	public Process runWithoutConfirmation(Class<?> clazz, String[] javaArguments, String[] processArguments)
+            throws IOException, InterruptedException {
+        return startProcess(clazz, javaArguments, processArguments, false);
 	}
 
 	/**
@@ -182,17 +128,17 @@ public class JavaProcessLauncher {
 	 * 
 	 * @param klass
 	 *            of type Class
-	 * @param args
-	 *            start arguments
+	 * @param javaArguments arguments for java
+     * @param processArguments arguments for process
 	 * @return Process
 	 * @throws IOException
 	 *             when
 	 * @throws InterruptedException
 	 *             when
 	 */
-	public Process runWithConfirmation(Class klass, String[] args)
+	public Process runWithConfirmation(Class klass, String[] javaArguments, String[] processArguments)
 		throws IOException, InterruptedException {
-		Process process = startProcess(klass, args, true);
+		Process process = startProcess(klass, javaArguments, processArguments, true);
 		waitConfirmation(klass.getSimpleName(), process);
 		new StreamRedirector(process.getInputStream(), klass.getSimpleName()
 			+ PROCESS_STDOUT_STREAM_PREFIX,
@@ -200,58 +146,26 @@ public class JavaProcessLauncher {
 		return process;
 	}
 
-	/**
-	 * Runs peer/server process based on a specified class in a separate VM
-	 * using gemfire.properties file. To confirm that process completes startup
-	 * it should write a startup completed string into it's standard output.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @param pathToServerPropertiesFile
-	 *            of type String
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 */
-	public Process runServerWithConfirmation(Class klass,
-		String pathToServerPropertiesFile) throws IOException,
-		InterruptedException {
-		Process process = startServerProcess(klass, pathToServerPropertiesFile,
-			true);
-		waitConfirmation(klass.getSimpleName(), process);
-		new StreamRedirector(process.getInputStream(), klass.getSimpleName()
-			+ PROCESS_STDOUT_STREAM_PREFIX,
-			redirectProcessInputStreamToParentProcessStdOut).start();
-		return process;
-	}
-
-	/**
-	 * Runs process based on a specified class in a separate VM. Waits
+    /**
+     * Runs process with arguments based on a specified class in a separate VM. Waits
 	 * DEFAULT_PROCESS_STARTUP_TIME before returns the created process to a
 	 * caller.
-	 * 
-	 * This method can be used for those processes that should spend some time
-	 * before they complete startup.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 * @throws TimeoutException
-	 *             if process startup is not completed in time.
-	 */
-	public Process runWithStartupDelay(Class klass) throws IOException,
+     *
+     * @param klass of type Class
+     * @param javaArguments arguments for java
+     * @param processArguments arguments for process
+     * @return Process
+     * @throws IOException when
+     * @throws InterruptedException when
+     * @throws TimeoutException when
+     */
+    public Process runWithStartupDelay(Class klass, String[] javaArguments, String[] processArguments) throws IOException,
 		InterruptedException, TimeoutException {
-		return runWithStartupDelay(klass, DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME);
+		return runWithStartupDelay(klass, javaArguments, processArguments, DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME);
 	}
 
 	/**
-	 * Runs process based on a specified class in a separate VM. Waits
+	 * Runs process with arguments based on a specified class in a separate VM. Waits
 	 * processStartupTime before returns the created process to a caller.
 	 * 
 	 * @param klass
@@ -259,7 +173,9 @@ public class JavaProcessLauncher {
 	 * @param processStartupTime
 	 *            time in milliseconds that launcher spend on waiting process
 	 *            after it's start.
-	 * @return Process
+	 * @param javaArguments arguments for java
+     * @param processArguments arguments for process
+     * @return Process
 	 * @throws IOException
 	 *             when
 	 * @throws InterruptedException
@@ -267,67 +183,9 @@ public class JavaProcessLauncher {
 	 * @throws TimeoutException
 	 *             if process startup is not completed in time.
 	 */
-	public Process runWithStartupDelay(Class klass, long processStartupTime)
+	public Process runWithStartupDelay(Class klass, String[] javaArguments, String[] processArguments, long processStartupTime)
 		throws IOException, InterruptedException, TimeoutException {
-		Process process = startProcess(klass, false);
-		if (processStartupTime > 0) {
-			Thread.sleep(processStartupTime);
-		}
-		return process;
-	}
-
-	/**
-	 * Runs peer/server process based on a specified class in a separate VM
-	 * using gemfire.properties file. Waits DEFAULT_PROCESS_STARTUP_TIME before
-	 * returns the created process to a caller.
-	 * 
-	 * This method can be used for those processes that should spend some time
-	 * before they complete startup.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @param pathToServerPropertiesFile
-	 *            of type String
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 * @throws TimeoutException
-	 *             if process startup is not completed in time.
-	 */
-	public Process runServerWithStartupDelay(Class klass,
-		String pathToServerPropertiesFile) throws IOException,
-		InterruptedException, TimeoutException {
-		return runServerWithStartupDelay(klass,
-			DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME, pathToServerPropertiesFile);
-	}
-
-	/**
-	 * Runs peer/server process based on a specified class in a separate VM
-	 * using gemfire.properties file. Waits processStartupTime before returns
-	 * the created process to a caller.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @param processStartupTime
-	 *            time in milliseconds that launcher spend on waiting process
-	 *            after it's start.
-	 * @param pathToServerPropertiesFile
-	 *            of type String
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 * @throws TimeoutException
-	 *             if process startup is not completed in time.
-	 */
-	public Process runServerWithStartupDelay(Class klass,
-		long processStartupTime, String pathToServerPropertiesFile)
-		throws IOException, InterruptedException, TimeoutException {
-		Process process = startServerProcess(klass, pathToServerPropertiesFile,
-			false);
+		Process process = runWithConfirmation(klass, javaArguments, processArguments);
 		if (processStartupTime > 0) {
 			Thread.sleep(processStartupTime);
 		}
@@ -366,110 +224,83 @@ public class JavaProcessLauncher {
 		process.destroy();
 	}
 
-	/**
-	 * Starts process based on specified class. This process inherits a
-	 * classpath from parent VM that starts it.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @param withConfirmation
-	 *            of type boolean
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 */
-	private Process startProcess(Class klass, boolean withConfirmation)
-		throws IOException, InterruptedException {
-		return startProcess(klass, null, withConfirmation);
+    /**
+     * Starts process based on specified class using command line arguments.
+     * This process inherits a classpath from parent VM that starts it.
+     *
+     * @param klass of type Class
+     * @param javaArguments of type String[]
+     * @param processArguments of type String[]
+     * @param withConfirmation of type boolean
+     * @return Process
+     * @throws IOException when
+     * @throws InterruptedException when
+     */
+    private Process startProcess(Class klass, String[] javaArguments, String[] processArguments, boolean withConfirmation) throws IOException, InterruptedException {
+        List<String> arguments = createCommandLineForProcess(klass, javaArguments, processArguments);
+        Process process = new ProcessBuilder(arguments).start();
+        redirectProcessStreams(klass, process, !withConfirmation);
+        return process;
+    }
+
+    /**
+     * Redirects process standard output and error streams into parent process standard output.
+     *
+     * @param klass of type Class
+     * @param process of type Process
+     * @param redirectProcessStdOut of type boolean
+     */
+    private void redirectProcessStreams(Class klass, Process process, boolean redirectProcessStdOut) {
+        new StreamRedirector(process.getErrorStream(), klass.getSimpleName()
+                + PROCESS_ERROR_STREAM_PREFIX,
+                redirectProcessErrorStreamToParentProcessStdOut).start();
+        if (redirectProcessStdOut) {
+            new StreamRedirector(process.getInputStream(),
+                    klass.getSimpleName() + PROCESS_STDOUT_STREAM_PREFIX,
+                    redirectProcessInputStreamToParentProcessStdOut).start();
+        }
+    }
+
+    /**
+     * Builds command line for starting java process based on specified arguments.
+     *
+     * @param klazz
+     * @param processArguments of type String[]
+     * @return List<String>
+     */
+    private List<String> createCommandLineForProcess(Class klazz, String[] processArguments) {
+		return createCommandLineForProcess(klazz, null, processArguments);
 	}
 
 	/**
-	 * Starts process based on specified class using command line arguments.
-	 * This process inherits a classpath from parent VM that starts it.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @param args
-	 *            of type String[]
-	 * @param withConfirmation
-	 *            of type boolean
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 */
-	private Process startProcess(Class klass, String[] args,
-		boolean withConfirmation) throws IOException, InterruptedException {
-		List<String> arguments = prepareArguments(klass, null);
-		arguments.add(klass.getCanonicalName());
-		Process process = new ProcessBuilder(prepareArguments(klass, args))
-			.start();
-		new StreamRedirector(process.getErrorStream(), klass.getSimpleName()
-			+ PROCESS_ERROR_STREAM_PREFIX,
-			redirectProcessErrorStreamToParentProcessStdOut).start();
-		if (!withConfirmation) {
-			new StreamRedirector(process.getInputStream(),
-				klass.getSimpleName() + PROCESS_STDOUT_STREAM_PREFIX,
-				redirectProcessInputStreamToParentProcessStdOut).start();
-		}
-		return process;
-	}
-
-	/**
-	 * Starts cache server process based on gemfire.properties file. This
-	 * process inherits a classpath from parent VM that starts it.
-	 * 
-	 * @param klass
-	 *            of type Class
-	 * @param pathToPropertiesFile
-	 *            path to gemfire.properties file
-	 * @param withConfirmation
-	 *            of type boolean
-	 * @return Process
-	 * @throws IOException
-	 *             when
-	 * @throws InterruptedException
-	 *             when
-	 */
-	private Process startServerProcess(Class klass,
-		String pathToPropertiesFile, boolean withConfirmation)
-		throws IOException, InterruptedException {
-		List<String> arguments = prepareArguments(klass, null);
-		if (pathToPropertiesFile != null && pathToPropertiesFile.length() != 0) {
-			arguments.add("-DgemfirePropertyFile=" + pathToPropertiesFile);
-		}
-		arguments.add(klass.getCanonicalName());
-		ProcessBuilder processBuilder = new ProcessBuilder(arguments);
-		Process process = processBuilder.start();
-
-		new StreamRedirector(process.getErrorStream(), klass.getSimpleName()
-			+ PROCESS_ERROR_STREAM_PREFIX,
-			redirectProcessErrorStreamToParentProcessStdOut).start();
-		if (!withConfirmation) {
-			new StreamRedirector(process.getInputStream(),
-				klass.getSimpleName() + PROCESS_STDOUT_STREAM_PREFIX,
-				redirectProcessInputStreamToParentProcessStdOut).start();
-		}
-		return process;
-	}
-
-	private List<String> prepareArguments(Class klass, String[] args) {
+     * Builds command line for starting java process based on specified arguments.
+     *
+     * @param klazz
+     * @param javaArguments of type String[]
+     * @param processArguments of type String[]
+     * @return List<String>
+     */
+    private List<String> createCommandLineForProcess(Class klazz, String[] javaArguments, String[] processArguments) {
 		String javaHome = System.getProperty("java.home");
 		String javaBin = javaHome + File.separator + "bin" + File.separator
 			+ "java";
 		String classpath = System.getProperty("java.class.path");
 
-		List<String> arguments = new ArrayList<String>();
-		arguments.add(javaBin);
-		arguments.add("-cp");
-		arguments.add(classpath);
-		if (args != null && args.length > 0) {
-			arguments.addAll(Arrays.asList(args));
+        List<String> argimentsList = new ArrayList<String>();
+		argimentsList.add(javaBin);
+		argimentsList.add("-cp");
+		argimentsList.add(classpath);
+
+        if (javaArguments != null && javaArguments.length > 0) {
+			argimentsList.addAll(Arrays.asList(javaArguments));
 		}
-		return arguments;
+
+        argimentsList.add(klazz.getCanonicalName());
+
+		if (processArguments != null && processArguments.length > 0) {
+			argimentsList.addAll(Arrays.asList(processArguments));
+		}
+		return argimentsList;
 	}
 
 	/**
@@ -507,7 +338,7 @@ public class JavaProcessLauncher {
 			+ "has been already finished without startup complete confirmation");
 	}
 
-	/**
+    /**
 	 * Redirects process stream into parent standard output.
 	 * 
 	 * @author Andrey Stepanov aka standy

@@ -77,10 +77,10 @@ public class MonitorToolTest {
 	}
 
 	private void startCacheServers() throws IOException, InterruptedException {
-		cacheServer1 = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "monitorToolServerProperties40404.properties");
-		cacheServer2 = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "monitorToolServerProperties40405.properties");
+		cacheServer1 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=monitorToolServerProperties40404.properties"}, null);
+		cacheServer2 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=monitorToolServerProperties40405.properties"}, null);
 	}
 
 	private void stopCacheServers() throws IOException, InterruptedException {

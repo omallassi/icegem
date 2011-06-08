@@ -47,8 +47,8 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
-		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class,
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, null,
 			new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterC=localhost[18083]", "-lf",
@@ -56,13 +56,7 @@ public class CheckReplicationToolTest {
 				propertiesHelper.getStringProperty("license-type"), "-t",
 				"30000" });
 
-		JavaProcessLauncher.printProcessOutput(process);
-		JavaProcessLauncher.printProcessError(process);
-
-		int exitCode = process.waitFor();
-
 		assertThat(exitCode).isEqualTo(0);
-
 	}
 
 	public void testMainPositiveWithWrongLocators() throws Exception {
@@ -71,8 +65,8 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
-		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class, new String[] { "check-replication", "-c",
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, null, new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081],localhost[18084]",
 				"-c", "clusterB=localhost[18082],localhost[18086]", "-c",
 				"clusterC=localhost[18083],localhost[18087]", "-lf",
@@ -80,13 +74,7 @@ public class CheckReplicationToolTest {
 				propertiesHelper.getStringProperty("license-type"), "-t",
 				"30000" });
 
-		JavaProcessLauncher.printProcessOutput(process);
-		JavaProcessLauncher.printProcessError(process);
-
-		int exitCode = process.waitFor();
-
 		assertThat(exitCode).isEqualTo(0);
-
 	}
 
 	@Test
@@ -96,8 +84,8 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
-		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class,
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, null,
 			new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterD=localhost[18084]", "-lf",
@@ -105,47 +93,29 @@ public class CheckReplicationToolTest {
 				propertiesHelper.getStringProperty("license-type"), "-t",
 				"10000" });
 
-		JavaProcessLauncher.printProcessOutput(process);
-		JavaProcessLauncher.printProcessError(process);
-
-		int exitCode = process.waitFor();
-
 		assertThat(exitCode).isEqualTo(1);
-
 	}
 
 	@Test
 	public void testMainNegativeDefaultLicense() throws Exception {
 		System.out.println("testMainNegativeDefaultLicense");
 
-		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class, new String[] { "check-replication", "-c",
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, null, new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterC=localhost[18083]", "-t", "10000" });
 
-		JavaProcessLauncher.printProcessOutput(process);
-		JavaProcessLauncher.printProcessError(process);
-
-		int exitCode = process.waitFor();
-
 		assertThat(exitCode).isEqualTo(1);
-
 	}
 
 	@Test
 	public void testMainNegativeEmptyParameters() throws Exception {
 		System.out.println("testMainNegativeEmptyParameters");
 
-		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class, new String[] { "check-replication" });
-
-		JavaProcessLauncher.printProcessOutput(process);
-		JavaProcessLauncher.printProcessError(process);
-
-		int exitCode = process.waitFor();
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, null, new String[] { "check-replication" });
 
 		assertThat(exitCode).isEqualTo(1);
-
 	}
 
 	@Test
@@ -155,8 +125,8 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
-		Process process = JavaProcessLauncher.runWithoutConfirmation(
-			Launcher.class,
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, null,
 			new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterC=localhost[18083]", "-lf",
@@ -164,22 +134,16 @@ public class CheckReplicationToolTest {
 				propertiesHelper.getStringProperty("license-type"), "-t",
 				"10000", "-r", "wrong" });
 
-		JavaProcessLauncher.printProcessOutput(process);
-		JavaProcessLauncher.printProcessError(process);
-
-		int exitCode = process.waitFor();
-
 		assertThat(exitCode).isEqualTo(1);
-
 	}
 
 	private void startGateways() throws IOException, InterruptedException {
-		gatewayA = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "checkReplicationToolGatewayA.properties");
-		gatewayB = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "checkReplicationToolGatewayB.properties");
-		gatewayC = javaProcessLauncher.runServerWithConfirmation(
-			ServerTemplate.class, "checkReplicationToolGatewayC.properties");
+		gatewayA = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=checkReplicationToolGatewayA.properties"}, null);
+		gatewayB = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=checkReplicationToolGatewayB.properties"}, null);
+		gatewayC = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=checkReplicationToolGatewayC.properties"}, null);
 	}
 
 	private void stopGateways() throws IOException, InterruptedException {

@@ -56,7 +56,8 @@ public class TestExpiration {
 
     @Before
     public void init() throws InterruptedException, IOException {
-        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "test/expiration/expirationTest.properties");
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=test/expiration/expirationTest.properties"}, null);
         ctxt = new ClassPathXmlApplicationContext("test/expiration/expiration-config.xml");
         adapter1 = ctxt.getBean("adapter1", RegionListeningBarrierBean.class);
     }

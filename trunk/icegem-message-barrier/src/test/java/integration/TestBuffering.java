@@ -45,7 +45,8 @@ public class TestBuffering {
 
     @Before
     public void init() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "test/pollingmessage/polling.properties");
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=test/pollingmessage/polling.properties"}, null);
         ctxt = new ClassPathXmlApplicationContext("test/pollingmessage/polling-msg-test.xml");
         adapter1 = ctxt.getBean("adapter1", RegionListeningBarrierBean.class);
     }
