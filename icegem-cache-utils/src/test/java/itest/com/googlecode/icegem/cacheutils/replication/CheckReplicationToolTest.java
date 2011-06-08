@@ -27,6 +27,13 @@ public class CheckReplicationToolTest {
 	/** Field gatewayC */
 	private static Process gatewayC;
 
+	/** Field cacheServerA */
+	private static Process cacheServerA;
+	/** Field cacheServerB */
+	private static Process cacheServerB;
+	/** Field cacheServerC */
+	private static Process cacheServerC;
+
 	/** Field javaProcessLauncher */
 	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 
@@ -41,6 +48,7 @@ public class CheckReplicationToolTest {
 		stopGateways();
 	}
 
+	@Test
 	public void testMainPositive() throws Exception {
 		System.out.println("testMainPositive");
 
@@ -48,7 +56,8 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class, null,
+			Launcher.class,
+			null,
 			new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterC=localhost[18083]", "-lf",
@@ -59,6 +68,7 @@ public class CheckReplicationToolTest {
 		assertThat(exitCode).isEqualTo(0);
 	}
 
+	@Test
 	public void testMainPositiveWithWrongLocators() throws Exception {
 		System.out.println("testMainPositiveWithWrongLocators");
 
@@ -67,8 +77,8 @@ public class CheckReplicationToolTest {
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, null, new String[] { "check-replication", "-c",
-				"clusterA=localhost[18081],localhost[18084]",
-				"-c", "clusterB=localhost[18082],localhost[18086]", "-c",
+				"clusterA=localhost[18081],localhost[18084]", "-c",
+				"clusterB=localhost[18082],localhost[18086]", "-c",
 				"clusterC=localhost[18083],localhost[18087]", "-lf",
 				propertiesHelper.getStringProperty("license-file"), "-lt",
 				propertiesHelper.getStringProperty("license-type"), "-t",
@@ -85,7 +95,8 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class, null,
+			Launcher.class,
+			null,
 			new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterD=localhost[18084]", "-lf",
@@ -126,7 +137,8 @@ public class CheckReplicationToolTest {
 			"/checkReplicationToolGatewayA.properties");
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class, null,
+			Launcher.class,
+			null,
 			new String[] { "check-replication", "-c",
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterC=localhost[18083]", "-lf",
@@ -138,15 +150,44 @@ public class CheckReplicationToolTest {
 	}
 
 	private void startGateways() throws IOException, InterruptedException {
-		gatewayA = javaProcessLauncher.runWithConfirmation(
-                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=checkReplicationToolGatewayA.properties"}, null);
-		gatewayB = javaProcessLauncher.runWithConfirmation(
-                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=checkReplicationToolGatewayB.properties"}, null);
-		gatewayC = javaProcessLauncher.runWithConfirmation(
-                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=checkReplicationToolGatewayC.properties"}, null);
+		gatewayA = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=checkReplicationToolGatewayA.properties" },
+				null);
+		gatewayB = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=checkReplicationToolGatewayB.properties" },
+				null);
+		gatewayC = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=checkReplicationToolGatewayC.properties" },
+				null);
+
+		cacheServerA = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=checkReplicationToolCacheServerA.properties" },
+				null);
+		cacheServerB = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=checkReplicationToolCacheServerB.properties" },
+				null);
+		cacheServerC = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=checkReplicationToolCacheServerC.properties" },
+				null);
 	}
 
 	private void stopGateways() throws IOException, InterruptedException {
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServerA);
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServerB);
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServerC);
+
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(gatewayA);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(gatewayB);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(gatewayC);
