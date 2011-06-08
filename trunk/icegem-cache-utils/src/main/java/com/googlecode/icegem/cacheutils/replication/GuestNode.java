@@ -1,19 +1,16 @@
 package com.googlecode.icegem.cacheutils.replication;
 
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import com.gemstone.gemfire.cache.Cache;
-import com.gemstone.gemfire.cache.CacheFactory;
-import com.gemstone.gemfire.cache.EntryEvent;
 import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.RegionFactory;
-import com.gemstone.gemfire.cache.RegionShortcut;
-import com.gemstone.gemfire.cache.Scope;
-import com.gemstone.gemfire.cache.util.CacheListenerAdapter;
+import com.gemstone.gemfire.cache.client.ClientCache;
+import com.gemstone.gemfire.cache.client.ClientCacheFactory;
+import com.gemstone.gemfire.cache.client.ClientRegionFactory;
+import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
-import com.googlecode.icegem.cacheutils.replication.relations.RelationsController;
 
 /**
  * The cache server which is used for replication test. Connects to the cluster
@@ -26,19 +23,22 @@ import com.googlecode.icegem.cacheutils.replication.relations.RelationsControlle
  * 
  */
 public class GuestNode {
-	private static final int CONNECTION_CHECK_PERIOD = 50;
+	private static final int CHECK_PERIOD = 50;
+
+	private static final String KEY_PREFIX = "check-replication-";
+
+	private static final String KEY_POSTFIX_STARTED_AT = "-startedAt";
+	private static final String KEY_POSTFIX_SENT_AT = "-sentAt";
+	private static final String KEY_POSTFIX_DURATION = "-duration";
 
 	/* Local cluster */
-	private String cluster;
+	private String localClusterName;
 
 	/* Cache instance */
-	private Cache cache;
+	private ClientCache clientCache;
 
 	/* Technical region instance */
 	private Region<String, Long> region;
-
-	/* Relations controller */
-	private RelationsController relationsController;
 
 	/* Path to the license file */
 	private String licenseFile;
@@ -74,16 +74,13 @@ public class GuestNode {
 			+ ", licenseType = "
 			+ licenseType + ", regionName = " + regionName);
 
-		this.cluster = cluster;
+		this.localClusterName = cluster;
 		this.clustersProperties = clustersProperties;
 		this.licenseFile = licenseFile;
 		this.licenseType = licenseType;
 		this.regionName = regionName;
 
 		debug("GuestNode#GuestNode(String, Properties, String, String, String): Creating RelationsController");
-
-		this.relationsController = new RelationsController(cluster,
-			clustersProperties);
 
 		init();
 	}
@@ -93,62 +90,176 @@ public class GuestNode {
 	 * locator as a key and current time as a value
 	 */
 	private void init() {
-		debug("GuestNode#init(): Creating Cache");
+		try {
+			debug("GuestNode#init(): Creating Cache");
 
-		CacheFactory cacheFactory = new CacheFactory();
+			ClientCacheFactory clientCacheFactory = new ClientCacheFactory();
 
-		if ((licenseFile != null) && (licenseType != null)) {
-			cacheFactory.set("license-file", licenseFile).set("license-type",
-				licenseType);
-		}
+			if ((licenseFile != null) && (licenseType != null)) {
+				clientCacheFactory.set("license-file", licenseFile).set(
+					"license-type", licenseType);
+			}
 
-		cache = cacheFactory.set("mcast-port", "0").set("log-level", "none")
-			.set("locators", clustersProperties.getProperty(cluster)).create();
+			clientCacheFactory.set("log-level", "none")
+				.setPoolSubscriptionEnabled(true);
 
-		region = cache.getRegion(regionName);
+			String locators = clustersProperties.getProperty(localClusterName);
+			String[] locatorsArray = locators.split(",");
+			for (String locator : locatorsArray) {
+				String locatorHost = locator.substring(0, locator.indexOf("["));
 
-		debug("GuestNode#init(): Get region with name = " + regionName
-			+ ": region = " + region);
+				String locatorPortString = locator.substring(
+					locator.indexOf("[") + 1, locator.indexOf("]"));
+				int locatorPort = Integer.parseInt(locatorPortString);
 
-		if (region == null) {
-			RegionFactory<String, Long> regionFactory = cache
-				.createRegionFactory(RegionShortcut.REPLICATE);
-			regionFactory.setEnableGateway(true)
-				.setScope(Scope.DISTRIBUTED_ACK);
+				debug("GuestNode#init(): Adding locator to pool: locatorHost = "
+					+ locatorHost + ", locatorPort = " + locatorPort);
 
-			region = regionFactory.create(regionName);
+				clientCacheFactory.addPoolLocator(locatorHost, locatorPort);
+			}
 
+			clientCache = clientCacheFactory.create();
+
+			ClientRegionFactory<String, Long> clientRegionFactory = clientCache
+				.createClientRegionFactory(ClientRegionShortcut.PROXY);
+
+			region = clientCache.getRegion(regionName);
+
+			debug("GuestNode#init(): Get region with name = " + regionName
+				+ ": region = " + region);
+
+			if (region == null) {
+				region = clientRegionFactory.create(regionName);
+			}
 			debug("GuestNode#init(): Create region with name = " + regionName
 				+ ": region = " + region);
+
+			region.registerInterest("ALL_KEYS", false, true);
+
+		} catch (Throwable t) {
+			debug(
+				"GuestNode#init(): Throwable caught with message = "
+					+ t.getMessage(), t);
+
+		}
+	}
+
+	private void waitForStarted() {
+		debug("GuestNode#waitForStarted(): Waiting for other clusters started");
+
+		while (true) {
+			boolean othersStarted = true;
+
+			for (Object key : clustersProperties.keySet()) {
+				String clusterName = (String) key;
+
+				Long startedAt = region.get(KEY_PREFIX + clusterName
+					+ KEY_POSTFIX_STARTED_AT);
+
+				if (startedAt == null) {
+					othersStarted = false;
+					break;
+				}
+			}
+
+			if (othersStarted) {
+				break;
+			}
+
+			try {
+				TimeUnit.MILLISECONDS.sleep(CHECK_PERIOD);
+			} catch (InterruptedException e) {
+			}
 		}
 
-		debug("GuestNode#init(): Add CacheListener to region with name = "
-			+ regionName);
+		debug("GuestNode#waitForStarted(): Other clusters started");
+	}
 
-		region.getAttributesMutator().addCacheListener(
-			new CacheListenerAdapter<String, Long>() {
-				@Override
-				public void afterCreate(EntryEvent<String, Long> event) {
-					long receivedAt = System.currentTimeMillis();
-					long sentAt = event.getNewValue();
-					String fromCluster = event.getKey();
+	private void waitForSent() {
+		debug("GuestNode#waitForSent(): Waiting for other clusters sent");
 
-					debug("GuestNode afterCreate event: fromCluster = "
-						+ fromCluster + ", toCluster = " + cluster);
+		while (true) {
+			boolean othersSent = true;
 
-					if (!cluster.equals(fromCluster)) {
-						long duration = receivedAt - sentAt;
-						relationsController.get(fromCluster).setDuration(
-							duration);
+			for (Object key : clustersProperties.keySet()) {
+				String clusterName = (String) key;
 
-						debug("GuestNode afterCreate event: New duration added: "
-							+ relationsController.get(fromCluster)
-								.getDuration());
+				if (localClusterName.equals(clusterName)) {
+					continue;
+				}
+
+				Long sentAt = region.get(KEY_PREFIX + clusterName
+					+ KEY_POSTFIX_SENT_AT);
+				long receivedAt = System.currentTimeMillis();
+
+				if (sentAt == null) {
+					if (othersSent) {
+						othersSent = false;
+					}
+				} else {
+					Long duration = region.get(KEY_PREFIX + clusterName + "-"
+						+ localClusterName + KEY_POSTFIX_DURATION);
+					if (duration == null) {
+						duration = receivedAt - sentAt;
+
+						region
+							.put(KEY_PREFIX + clusterName + "-"
+								+ localClusterName + KEY_POSTFIX_DURATION,
+								duration);
 					}
 				}
-			});
+			}
 
-		region.put(cluster, System.currentTimeMillis());
+			if (othersSent) {
+				break;
+			}
+
+			try {
+				TimeUnit.MILLISECONDS.sleep(CHECK_PERIOD);
+			} catch (InterruptedException e) {
+			}
+		}
+
+		debug("GuestNode#waitForSent(): Other clusters sent");
+	}
+
+	private void waitForConnected() {
+		debug("GuestNode#waitForConnected(): Waiting for all the clusters connected");
+
+		while (true) {
+			boolean connected = true;
+
+			for (Object fromKey : clustersProperties.keySet()) {
+				String fromClusterName = (String) fromKey;
+
+				for (Object toKey : clustersProperties.keySet()) {
+					String toClusterName = (String) toKey;
+
+					if (fromClusterName.equals(toClusterName)) {
+						continue;
+					}
+
+					Long duration = region.get(KEY_PREFIX + fromClusterName
+						+ "-" + toClusterName + KEY_POSTFIX_DURATION);
+
+					if (duration == null) {
+						connected = false;
+						break;
+					}
+				}
+			}
+
+			if (connected) {
+				break;
+			}
+
+			try {
+				TimeUnit.MILLISECONDS.sleep(CHECK_PERIOD);
+			} catch (InterruptedException e) {
+			}
+		}
+
+		debug("GuestNode#waitForConnected(): All the clusters connected");
 	}
 
 	/**
@@ -158,13 +269,23 @@ public class GuestNode {
 		private boolean connected = false;
 
 		public void run() {
-			while (!relationsController.isConnected()) {
-				try {
-					TimeUnit.MILLISECONDS.sleep(CONNECTION_CHECK_PERIOD);
-				} catch (InterruptedException e) {
-				}
+			try {
+				region.put(KEY_PREFIX + localClusterName
+					+ KEY_POSTFIX_STARTED_AT, System.currentTimeMillis());
+
+				waitForStarted();
+
+				region.put(KEY_PREFIX + localClusterName + KEY_POSTFIX_SENT_AT,
+					System.currentTimeMillis());
+
+				waitForSent();
+
+				waitForConnected();
+
+				connected = true;
+			} catch (Throwable t) {
+				connected = false;
 			}
-			connected = true;
 		}
 
 		public boolean isConnected() {
@@ -202,16 +323,51 @@ public class GuestNode {
 	public void close() {
 		debug("GuestNode#close(): Closing the cache");
 
-		cache.close();
+		clientCache.close();
 
-		debug("GuestNode#close(): Cache closed = " + cache.isClosed());
+		debug("GuestNode#close(): Cache closed = " + clientCache.isClosed());
 	}
 
 	/**
 	 * Prints the current state of connections
+	 * 
+	 * @param connected
 	 */
-	public void printState() {
-		System.out.println(relationsController);
+	public void printState(boolean connected) {
+		StringBuilder sb = new StringBuilder();
+
+		if (connected) {
+
+			sb.append("Replicated to ").append(localClusterName)
+				.append(" from ");
+
+			Iterator<Object> it = clustersProperties.keySet().iterator();
+			while (it.hasNext()) {
+				String clusterName = (String) it.next();
+
+				if (localClusterName.equals(clusterName)) {
+					continue;
+				}
+
+				Long duration = region.get(KEY_PREFIX + clusterName + "-"
+					+ localClusterName + KEY_POSTFIX_DURATION);
+
+				sb.append("[").append(clusterName).append(", ")
+					.append(duration).append("ms]");
+
+				if (it.hasNext()) {
+					sb.append(", ");
+				}
+			}
+
+		} else {
+
+			sb.append("Connection process is not finished for ").append(
+				localClusterName);
+
+		}
+
+		System.out.println(sb.toString());
 	}
 
 	/**
@@ -240,7 +396,7 @@ public class GuestNode {
 
 			boolean connected = guestNode.waitFor(timeout);
 
-			guestNode.printState();
+			guestNode.printState(connected);
 
 			guestNode.close();
 
@@ -253,8 +409,16 @@ public class GuestNode {
 	}
 
 	private void debug(String message) {
+		debug(message, null);
+	}
+
+	private void debug(String message, Throwable t) {
 		if (debugEnabled) {
 			System.err.println(message);
+
+			if (t != null) {
+				t.printStackTrace(System.err);
+			}
 		}
 	}
 }
