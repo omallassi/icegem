@@ -41,7 +41,6 @@ public class CheckReplicationToolTest {
 		stopGateways();
 	}
 
-	@Test
 	public void testMainPositive() throws Exception {
 		System.out.println("testMainPositive");
 
