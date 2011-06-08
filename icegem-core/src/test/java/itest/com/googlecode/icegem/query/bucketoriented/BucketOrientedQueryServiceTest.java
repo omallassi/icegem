@@ -170,8 +170,10 @@ public class BucketOrientedQueryServiceTest {
      * @throws InterruptedException when
      */
     private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "bucketOrientedServerProperties.properties");
-        cacheServer2 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "bucketOrientedServerProperties.properties");
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=bucketOrientedServerProperties.properties"}, null);
+        cacheServer2 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=bucketOrientedServerProperties.properties"}, null);
     }
 
     /**

@@ -286,8 +286,10 @@ public class ExpirationControllerTest implements Serializable {
 	}
 
 	private void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "expirationServerProperties.properties");
-        cacheServer2 = javaProcessLauncher.runServerWithConfirmation(ServerTemplate.class, "expirationServerProperties.properties");
+        cacheServer1 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=expirationServerProperties.properties"}, null);
+        cacheServer2 = javaProcessLauncher.runWithConfirmation(
+                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=expirationServerProperties.properties"}, null);
 	}
 
 	private void stopCacheServers() throws IOException, InterruptedException {

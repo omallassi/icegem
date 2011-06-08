@@ -55,8 +55,6 @@ public class GuestNode {
 	/**
 	 * Creates the instance of guest node
 	 * 
-	 * @param localLocators
-	 *            - the list of locators to which this guest node will connect
 	 * @param clustersProperties
 	 *            - the list of locators of remote clusters
 	 * @param licenseFile

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
@@ -28,6 +29,9 @@ public class ReplicationProcessor {
 	private final String licenseType;
 
 	private final boolean debugEnabled;
+    /** Field javaProcessLauncher  */
+    private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
+
 
 	/**
 	 * Configures and creates the instance of replication processor
@@ -38,10 +42,10 @@ public class ReplicationProcessor {
 	 *            - the timeout, milliseconds
 	 * @param licenseFilePath
 	 *            - the path to the license file
-	 * @param regionName
+	 * @param licenseType
+     * @param regionName
 	 *            - the name of technical region
 	 * @param debugEnabled 
-	 * @param regionName2
 	 */
 	public ReplicationProcessor(Properties clustersProperties, long timeout,
 		String licenseFilePath, String licenseType, String regionName, boolean debugEnabled) {
@@ -82,8 +86,8 @@ public class ReplicationProcessor {
 				+ ", licenseType = "
 				+ licenseType + ", regionName = " + regionName);
 
-			Process process = JavaProcessLauncher.runWithoutConfirmation(
-				GuestNode.class, new String[] { cluster,
+			Process process = javaProcessLauncher.runWithoutConfirmation(
+				GuestNode.class, null, new String[] { cluster,
 					clustersPropertiesString, String.valueOf(timeout),
 					licenseFilePath, licenseType, regionName, String.valueOf(debugEnabled) });
 
@@ -93,10 +97,10 @@ public class ReplicationProcessor {
 		}
 
 		debug("ReplicationProcessor#process(): Adding JavaProcessLauncher#printProcessError(Process) to each process");
-		for (final Process process : processesList) {
-			JavaProcessLauncher.printProcessOutput(process);
-			JavaProcessLauncher.printProcessError(process);
-		}
+//		for (final Process process : processesList) {
+//			JavaProcessLauncher.printProcessOutput(process);
+//			JavaProcessLauncher.printProcessError(process);
+//		}
 
 		debug("ReplicationProcessor#process(): Waiting for processes finish");
 		int mainExitCode = 0;
