@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeoutException;
 
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
@@ -29,9 +28,9 @@ public class ReplicationProcessor {
 	private final String licenseType;
 
 	private final boolean debugEnabled;
-    /** Field javaProcessLauncher  */
-    private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
-
+	/** Field javaProcessLauncher */
+	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(
+		true, true);
 
 	/**
 	 * Configures and creates the instance of replication processor
@@ -43,12 +42,13 @@ public class ReplicationProcessor {
 	 * @param licenseFilePath
 	 *            - the path to the license file
 	 * @param licenseType
-     * @param regionName
+	 * @param regionName
 	 *            - the name of technical region
-	 * @param debugEnabled 
+	 * @param debugEnabled
 	 */
 	public ReplicationProcessor(Properties clustersProperties, long timeout,
-		String licenseFilePath, String licenseType, String regionName, boolean debugEnabled) {
+		String licenseFilePath, String licenseType, String regionName,
+		boolean debugEnabled) {
 		this.clustersProperties = clustersProperties;
 		this.timeout = timeout;
 		this.licenseFilePath = licenseFilePath;
@@ -69,6 +69,8 @@ public class ReplicationProcessor {
 	public int process() throws IOException, InterruptedException {
 		debug("ReplicationProcessor#process(): Processing start");
 
+		long processingStartedAt = System.currentTimeMillis();
+
 		List<Process> processesList = new ArrayList<Process>();
 		for (Object keyObject : clustersProperties.keySet()) {
 			String cluster = (String) keyObject;
@@ -87,9 +89,12 @@ public class ReplicationProcessor {
 				+ licenseType + ", regionName = " + regionName);
 
 			Process process = javaProcessLauncher.runWithoutConfirmation(
-				GuestNode.class, null, new String[] { cluster,
-					clustersPropertiesString, String.valueOf(timeout),
-					licenseFilePath, licenseType, regionName, String.valueOf(debugEnabled) });
+				GuestNode.class,
+				null,
+				new String[] { cluster, clustersPropertiesString,
+					String.valueOf(timeout), licenseFilePath, licenseType,
+					regionName, String.valueOf(debugEnabled),
+					String.valueOf(processingStartedAt) });
 
 			debug("ReplicationProcessor#process(): Adding GuestNode to processList");
 
@@ -97,10 +102,6 @@ public class ReplicationProcessor {
 		}
 
 		debug("ReplicationProcessor#process(): Adding JavaProcessLauncher#printProcessError(Process) to each process");
-//		for (final Process process : processesList) {
-//			JavaProcessLauncher.printProcessOutput(process);
-//			JavaProcessLauncher.printProcessError(process);
-//		}
 
 		debug("ReplicationProcessor#process(): Waiting for processes finish");
 		int mainExitCode = 0;
