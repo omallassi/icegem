@@ -77,8 +77,8 @@ public class CheckReplicationToolTest {
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, null, new String[] { "check-replication", "-c",
-				"clusterA=localhost[18081],localhost[18084]", "-c",
-				"clusterB=localhost[18082],localhost[18086]", "-c",
+				"clusterA=localhost[18081],localhost[18084],localhost[18085]",
+				"-c", "clusterB=localhost[18082],localhost[18086]", "-c",
 				"clusterC=localhost[18083],localhost[18087]", "-lf",
 				propertiesHelper.getStringProperty("license-file"), "-lt",
 				propertiesHelper.getStringProperty("license-type"), "-t",

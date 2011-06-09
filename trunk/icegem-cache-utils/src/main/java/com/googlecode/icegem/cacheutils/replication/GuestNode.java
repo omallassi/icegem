@@ -1,6 +1,8 @@
 package com.googlecode.icegem.cacheutils.replication;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +31,7 @@ public class GuestNode {
 
 	private static final String KEY_POSTFIX_STARTED_AT = "-startedAt";
 	private static final String KEY_POSTFIX_SENT_AT = "-sentAt";
-	private static final String KEY_POSTFIX_DURATION = "-duration";
+	private static final String KEY_POSTFIX_DURATION = "-receivedAt";
 
 	/* Local cluster */
 	private String localClusterName;
@@ -52,6 +54,8 @@ public class GuestNode {
 
 	private static boolean debugEnabled;
 
+	private final long processingStartedAt;
+
 	/**
 	 * Creates the instance of guest node
 	 * 
@@ -61,9 +65,11 @@ public class GuestNode {
 	 *            - the path to license file
 	 * @param regionName
 	 *            - the name of the technical region
+	 * @param processingStartedAt
 	 */
 	private GuestNode(String cluster, Properties clustersProperties,
-		String licenseFile, String licenseType, String regionName) {
+		String licenseFile, String licenseType, String regionName,
+		long processingStartedAt) {
 
 		debug("GuestNode#GuestNode(String, Properties, String, String, String): Creating instance with parameters: cluster = "
 			+ cluster
@@ -79,10 +85,26 @@ public class GuestNode {
 		this.licenseFile = licenseFile;
 		this.licenseType = licenseType;
 		this.regionName = regionName;
+		this.processingStartedAt = processingStartedAt;
 
 		debug("GuestNode#GuestNode(String, Properties, String, String, String): Creating RelationsController");
 
 		init();
+	}
+
+	private String createStartedAtKey(String clusterName) {
+		return KEY_PREFIX + clusterName + KEY_POSTFIX_STARTED_AT;
+	}
+
+	private String createSentAtKey(String clusterName) {
+		return KEY_PREFIX + clusterName + KEY_POSTFIX_SENT_AT;
+	}
+
+	private String createReceivedAtKey(String fromClusterName,
+		String toClusterName) {
+
+		return KEY_PREFIX + fromClusterName + "-" + toClusterName
+			+ KEY_POSTFIX_DURATION;
 	}
 
 	/**
@@ -100,8 +122,7 @@ public class GuestNode {
 					"license-type", licenseType);
 			}
 
-			clientCacheFactory.set("log-level", "none")
-				.setPoolSubscriptionEnabled(true);
+			clientCacheFactory.set("log-level", "none");
 
 			String locators = clustersProperties.getProperty(localClusterName);
 			String[] locatorsArray = locators.split(",");
@@ -134,8 +155,6 @@ public class GuestNode {
 			debug("GuestNode#init(): Create region with name = " + regionName
 				+ ": region = " + region);
 
-			region.registerInterest("ALL_KEYS", false, true);
-
 		} catch (Throwable t) {
 			debug(
 				"GuestNode#init(): Throwable caught with message = "
@@ -153,12 +172,19 @@ public class GuestNode {
 			for (Object key : clustersProperties.keySet()) {
 				String clusterName = (String) key;
 
-				Long startedAt = region.get(KEY_PREFIX + clusterName
-					+ KEY_POSTFIX_STARTED_AT);
+				Long startedAt = region.get(createStartedAtKey(clusterName));
 
-				if (startedAt == null) {
+				debug("GuestNode#waitForStarted(): Checking startedAt: startedAt = "
+					+ startedAt
+					+ ", processingStartedAt = "
+					+ processingStartedAt);
+
+				if ((startedAt == null)
+					|| (startedAt.longValue() < processingStartedAt)) {
+
 					othersStarted = false;
 					break;
+
 				}
 			}
 
@@ -181,6 +207,7 @@ public class GuestNode {
 		while (true) {
 			boolean othersSent = true;
 
+			Map<String, Long> clusterNameToReceivedAtMap = new HashMap<String, Long>();
 			for (Object key : clustersProperties.keySet()) {
 				String clusterName = (String) key;
 
@@ -188,25 +215,35 @@ public class GuestNode {
 					continue;
 				}
 
-				Long sentAt = region.get(KEY_PREFIX + clusterName
-					+ KEY_POSTFIX_SENT_AT);
+				Long sentAt = region.get(createSentAtKey(clusterName));
 				long receivedAt = System.currentTimeMillis();
 
-				if (sentAt == null) {
+				if ((sentAt != null)
+					&& (sentAt.longValue() > processingStartedAt)) {
+
+					clusterNameToReceivedAtMap.put(clusterName, receivedAt);
+				}
+			}
+
+			for (Object key : clustersProperties.keySet()) {
+				String clusterName = (String) key;
+
+				if (localClusterName.equals(clusterName)) {
+					continue;
+				}
+
+				Long receivedAt = clusterNameToReceivedAtMap.get(clusterName);
+
+				if (receivedAt == null) {
+
 					if (othersSent) {
 						othersSent = false;
 					}
-				} else {
-					Long duration = region.get(KEY_PREFIX + clusterName + "-"
-						+ localClusterName + KEY_POSTFIX_DURATION);
-					if (duration == null) {
-						duration = receivedAt - sentAt;
 
-						region
-							.put(KEY_PREFIX + clusterName + "-"
-								+ localClusterName + KEY_POSTFIX_DURATION,
-								duration);
-					}
+				} else {
+					region.put(
+						createReceivedAtKey(clusterName, localClusterName),
+						receivedAt);
 				}
 			}
 
@@ -239,10 +276,10 @@ public class GuestNode {
 						continue;
 					}
 
-					Long duration = region.get(KEY_PREFIX + fromClusterName
-						+ "-" + toClusterName + KEY_POSTFIX_DURATION);
+					Long receivedAt = region.get(createReceivedAtKey(
+						fromClusterName, toClusterName));
 
-					if (duration == null) {
+					if (receivedAt == null) {
 						connected = false;
 						break;
 					}
@@ -270,12 +307,12 @@ public class GuestNode {
 
 		public void run() {
 			try {
-				region.put(KEY_PREFIX + localClusterName
-					+ KEY_POSTFIX_STARTED_AT, System.currentTimeMillis());
+				region.put(createStartedAtKey(localClusterName),
+					System.currentTimeMillis());
 
 				waitForStarted();
 
-				region.put(KEY_PREFIX + localClusterName + KEY_POSTFIX_SENT_AT,
+				region.put(createSentAtKey(localClusterName),
 					System.currentTimeMillis());
 
 				waitForSent();
@@ -349,8 +386,11 @@ public class GuestNode {
 					continue;
 				}
 
-				Long duration = region.get(KEY_PREFIX + clusterName + "-"
-					+ localClusterName + KEY_POSTFIX_DURATION);
+				Long sentAt = region.get(createSentAtKey(clusterName));
+				Long receivedAt = region.get(createReceivedAtKey(clusterName,
+					localClusterName));
+
+				long duration = receivedAt - sentAt;
 
 				sb.append("[").append(clusterName).append(", ")
 					.append(duration).append("ms]");
@@ -378,7 +418,7 @@ public class GuestNode {
 	 */
 	public static void main(String[] args) {
 		try {
-			if (args.length != 7) {
+			if (args.length != 8) {
 				System.exit(1);
 			}
 
@@ -390,9 +430,10 @@ public class GuestNode {
 			String licenseType = args[4];
 			String regionName = args[5];
 			debugEnabled = ("true".equals(args[6]) ? true : false);
+			long processingStartedAt = Long.parseLong(args[7]);
 
 			GuestNode guestNode = new GuestNode(cluster, clustersProperties,
-				licenseFile, licenseType, regionName);
+				licenseFile, licenseType, regionName, processingStartedAt);
 
 			boolean connected = guestNode.waitFor(timeout);
 
