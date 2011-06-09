@@ -50,11 +50,13 @@ public class GuestNode {
 	/* The name of technical region */
 	private String regionName;
 
-	private final Properties clustersProperties;
+	private Properties clustersProperties;
 
-	private static boolean debugEnabled;
+	private boolean debugEnabled;
 
-	private final long processingStartedAt;
+	private long processingStartedAt;
+
+	private boolean quiet;
 
 	/**
 	 * Creates the instance of guest node
@@ -69,7 +71,7 @@ public class GuestNode {
 	 */
 	private GuestNode(String cluster, Properties clustersProperties,
 		String licenseFile, String licenseType, String regionName,
-		long processingStartedAt) {
+		boolean debugEnabled, boolean quiet, long processingStartedAt) {
 
 		debug("GuestNode#GuestNode(String, Properties, String, String, String): Creating instance with parameters: cluster = "
 			+ cluster
@@ -85,6 +87,8 @@ public class GuestNode {
 		this.licenseFile = licenseFile;
 		this.licenseType = licenseType;
 		this.regionName = regionName;
+		this.debugEnabled = debugEnabled;
+		this.quiet = quiet;
 		this.processingStartedAt = processingStartedAt;
 
 		debug("GuestNode#GuestNode(String, Properties, String, String, String): Creating RelationsController");
@@ -359,11 +363,17 @@ public class GuestNode {
 	 * Finalizes work with the guest node
 	 */
 	public void close() {
-		debug("GuestNode#close(): Closing the cache");
+		try {
+			debug("GuestNode#close(): Closing the cache");
 
-		clientCache.close();
+			clientCache.close();
 
-		debug("GuestNode#close(): Cache closed = " + clientCache.isClosed());
+			debug("GuestNode#close(): Cache closed = " + clientCache.isClosed());
+		} catch (Throwable t) {
+			debug(
+				"GuestNode#close(): Throwable caught with message = "
+					+ t.getMessage(), t);
+		}
 	}
 
 	/**
@@ -372,39 +382,42 @@ public class GuestNode {
 	 * @param connected
 	 */
 	public void printState(boolean connected) {
-		StringBuilder sb = new StringBuilder();
+		if (!quiet) {
 
-		if (connected) {
+			StringBuilder sb = new StringBuilder();
 
-			sb.append("Replicated to ").append(localClusterName)
-				.append(" from ");
+			if (connected) {
 
-			Iterator<Object> it = clustersProperties.keySet().iterator();
-			while (it.hasNext()) {
-				String clusterName = (String) it.next();
+				sb.append(localClusterName).append(" <= ");
 
-				if (localClusterName.equals(clusterName)) {
-					continue;
+				Iterator<Object> it = clustersProperties.keySet().iterator();
+				while (it.hasNext()) {
+					String clusterName = (String) it.next();
+
+					if (localClusterName.equals(clusterName)) {
+						continue;
+					}
+
+					Long sentAt = region.get(createSentAtKey(clusterName));
+					Long receivedAt = region.get(createReceivedAtKey(
+						clusterName, localClusterName));
+
+					long duration = receivedAt - sentAt;
+
+					sb.append("[").append(clusterName).append(", ")
+						.append(duration).append("ms]");
 				}
 
-				Long sentAt = region.get(createSentAtKey(clusterName));
-				Long receivedAt = region.get(createReceivedAtKey(clusterName,
-					localClusterName));
+			} else {
 
-				long duration = receivedAt - sentAt;
+				sb.append("Connection process is not finished for ").append(
+					localClusterName);
 
-				sb.append("[").append(clusterName).append(", ")
-					.append(duration).append("ms]");
 			}
 
-		} else {
-
-			sb.append("Connection process is not finished for ").append(
-				localClusterName);
+			System.out.println(sb.toString());
 
 		}
-
-		System.out.println(sb.toString());
 	}
 
 	/**
@@ -415,7 +428,7 @@ public class GuestNode {
 	 */
 	public static void main(String[] args) {
 		try {
-			if (args.length != 8) {
+			if (args.length != 9) {
 				System.exit(1);
 			}
 
@@ -426,11 +439,13 @@ public class GuestNode {
 			String licenseFile = (args[3] == "null" ? null : args[3]);
 			String licenseType = args[4];
 			String regionName = args[5];
-			debugEnabled = ("true".equals(args[6]) ? true : false);
-			long processingStartedAt = Long.parseLong(args[7]);
+			boolean debugEnabled = ("true".equals(args[6]) ? true : false);
+			boolean quiet = ("true".equals(args[7]) ? true : false);
+			long processingStartedAt = Long.parseLong(args[8]);
 
 			GuestNode guestNode = new GuestNode(cluster, clustersProperties,
-				licenseFile, licenseType, regionName, processingStartedAt);
+				licenseFile, licenseType, regionName, debugEnabled, quiet,
+				processingStartedAt);
 
 			boolean connected = guestNode.waitFor(timeout);
 
@@ -452,7 +467,10 @@ public class GuestNode {
 
 	private void debug(String message, Throwable t) {
 		if (debugEnabled) {
-			System.err.println(message);
+			long currentTime = System.currentTimeMillis();
+			long timeSinceProcessingStart = currentTime - processingStartedAt;
+			System.err.println(timeSinceProcessingStart + " ["
+				+ localClusterName + "] " + message);
 
 			if (t != null) {
 				t.printStackTrace(System.err);

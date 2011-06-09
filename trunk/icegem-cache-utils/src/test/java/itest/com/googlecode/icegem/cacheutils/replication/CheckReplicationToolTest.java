@@ -35,7 +35,8 @@ public class CheckReplicationToolTest {
 	private static Process cacheServerC;
 
 	/** Field javaProcessLauncher */
-	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
+	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(
+		false, false, false);
 
 	@BeforeClass
 	public void setUp() throws IOException, InterruptedException,

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,13 +43,16 @@ public class JavaProcessLauncher {
 	/** Field redirectProcessErrorStreamToParentProcessStdOut */
 	private boolean redirectProcessErrorStreamToParentProcessStdOut;
 
+	private boolean printType;
+
 	/**
 	 * Constructor JavaProcessLauncher creates a new JavaProcessLauncher
 	 * instance.
 	 */
 	public JavaProcessLauncher() {
-		this.redirectProcessInputStreamToParentProcessStdOut = false;
-		this.redirectProcessErrorStreamToParentProcessStdOut = true;
+
+		this(false, true, true);
+
 	}
 
 	/**
@@ -63,43 +67,70 @@ public class JavaProcessLauncher {
 	public JavaProcessLauncher(
 		boolean redirectProcessInputStreamToParentProcessStdOut,
 		boolean redirectProcessErrorStreamToParentProcessStdOut) {
+
+		this(redirectProcessInputStreamToParentProcessStdOut,
+			redirectProcessErrorStreamToParentProcessStdOut, true);
+
+	}
+
+	public JavaProcessLauncher(
+		boolean redirectProcessInputStreamToParentProcessStdOut,
+		boolean redirectProcessErrorStreamToParentProcessStdOut,
+		boolean printType) {
+
 		this.redirectProcessInputStreamToParentProcessStdOut = redirectProcessInputStreamToParentProcessStdOut;
+		this.redirectProcessErrorStreamToParentProcessStdOut = redirectProcessErrorStreamToParentProcessStdOut;
+		this.printType = printType;
+
+	}
+
+	/**
+	 * Sets the redirectProcessErrorStreamToParentProcessStdOut of this
+	 * JavaProcessLauncher object.
+	 * 
+	 * @param redirectProcessErrorStreamToParentProcessStdOut
+	 *            boolean flag.
+	 * 
+	 */
+	public void setRedirectProcessErrorStreamToParentProcessStdOut(
+		boolean redirectProcessErrorStreamToParentProcessStdOut) {
 		this.redirectProcessErrorStreamToParentProcessStdOut = redirectProcessErrorStreamToParentProcessStdOut;
 	}
 
-    /**
-     * Sets the redirectProcessErrorStreamToParentProcessStdOut of this JavaProcessLauncher object.
-     *
-     * @param redirectProcessErrorStreamToParentProcessStdOut boolean flag.
-     *
-     */
-    public void setRedirectProcessErrorStreamToParentProcessStdOut(boolean redirectProcessErrorStreamToParentProcessStdOut) {
-        this.redirectProcessErrorStreamToParentProcessStdOut = redirectProcessErrorStreamToParentProcessStdOut;
-    }
+	/**
+	 * Sets the redirectProcessInputStreamToParentProcessStdOut of this
+	 * JavaProcessLauncher object.
+	 * 
+	 * @param redirectProcessInputStreamToParentProcessStdOut
+	 *            boolean flag.
+	 * 
+	 */
+	public void setRedirectProcessInputStreamToParentProcessStdOut(
+		boolean redirectProcessInputStreamToParentProcessStdOut) {
+		this.redirectProcessInputStreamToParentProcessStdOut = redirectProcessInputStreamToParentProcessStdOut;
+	}
 
-    /**
-     * Sets the redirectProcessInputStreamToParentProcessStdOut of this JavaProcessLauncher object.
-     *
-     * @param redirectProcessInputStreamToParentProcessStdOut boolean flag.
-     *
-     */
-    public void setRedirectProcessInputStreamToParentProcessStdOut(boolean redirectProcessInputStreamToParentProcessStdOut) {
-        this.redirectProcessInputStreamToParentProcessStdOut = redirectProcessInputStreamToParentProcessStdOut;
-    }
-
-    /**
-     * Runs process with arguments based on a specified class in a separate VM. Waits while
-	 * process is working and returns exit code after process finished.
-     *
-     * @param klass of type Class
-     * @param javaArguments arguments for java
-     * @param processArguments arguments for process
-     * @return int
-     * @throws IOException when
-     * @throws InterruptedException when
-     */
-    public int runAndWaitProcessExitCode(Class klass, String[] javaArguments, String[] processArguments) throws IOException, InterruptedException {
-		Process process = startProcess(klass, javaArguments, processArguments, false);
+	/**
+	 * Runs process with arguments based on a specified class in a separate VM.
+	 * Waits while process is working and returns exit code after process
+	 * finished.
+	 * 
+	 * @param klass
+	 *            of type Class
+	 * @param javaArguments
+	 *            arguments for java
+	 * @param processArguments
+	 *            arguments for process
+	 * @return int
+	 * @throws IOException
+	 *             when
+	 * @throws InterruptedException
+	 *             when
+	 */
+	public int runAndWaitProcessExitCode(Class klass, String[] javaArguments,
+		String[] processArguments) throws IOException, InterruptedException {
+		Process process = startProcess(klass, javaArguments, processArguments,
+			false);
 		process.waitFor();
 		return process.exitValue();
 	}
@@ -109,16 +140,19 @@ public class JavaProcessLauncher {
 	 * 
 	 * @param clazz
 	 *            - the class to run
-     *
-	 * @param javaArguments arguments for java
-     * @param processArguments arguments for process
-     * @return - the Process object representing running process
+	 * 
+	 * @param javaArguments
+	 *            arguments for java
+	 * @param processArguments
+	 *            arguments for process
+	 * @return - the Process object representing running process
 	 * @throws IOException
-     * @throws InterruptedException
+	 * @throws InterruptedException
 	 */
-	public Process runWithoutConfirmation(Class<?> clazz, String[] javaArguments, String[] processArguments)
-            throws IOException, InterruptedException {
-        return startProcess(clazz, javaArguments, processArguments, false);
+	public Process runWithoutConfirmation(Class<?> clazz,
+		String[] javaArguments, String[] processArguments) throws IOException,
+		InterruptedException {
+		return startProcess(clazz, javaArguments, processArguments, false);
 	}
 
 	/**
@@ -128,17 +162,20 @@ public class JavaProcessLauncher {
 	 * 
 	 * @param klass
 	 *            of type Class
-	 * @param javaArguments arguments for java
-     * @param processArguments arguments for process
+	 * @param javaArguments
+	 *            arguments for java
+	 * @param processArguments
+	 *            arguments for process
 	 * @return Process
 	 * @throws IOException
 	 *             when
 	 * @throws InterruptedException
 	 *             when
 	 */
-	public Process runWithConfirmation(Class klass, String[] javaArguments, String[] processArguments)
-		throws IOException, InterruptedException {
-		Process process = startProcess(klass, javaArguments, processArguments, true);
+	public Process runWithConfirmation(Class klass, String[] javaArguments,
+		String[] processArguments) throws IOException, InterruptedException {
+		Process process = startProcess(klass, javaArguments, processArguments,
+			true);
 		waitConfirmation(klass.getSimpleName(), process);
 		new StreamRedirector(process.getInputStream(), klass.getSimpleName()
 			+ PROCESS_STDOUT_STREAM_PREFIX,
@@ -146,36 +183,46 @@ public class JavaProcessLauncher {
 		return process;
 	}
 
-    /**
-     * Runs process with arguments based on a specified class in a separate VM. Waits
-	 * DEFAULT_PROCESS_STARTUP_TIME before returns the created process to a
-	 * caller.
-     *
-     * @param klass of type Class
-     * @param javaArguments arguments for java
-     * @param processArguments arguments for process
-     * @return Process
-     * @throws IOException when
-     * @throws InterruptedException when
-     * @throws TimeoutException when
-     */
-    public Process runWithStartupDelay(Class klass, String[] javaArguments, String[] processArguments) throws IOException,
-		InterruptedException, TimeoutException {
-		return runWithStartupDelay(klass, javaArguments, processArguments, DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME);
+	/**
+	 * Runs process with arguments based on a specified class in a separate VM.
+	 * Waits DEFAULT_PROCESS_STARTUP_TIME before returns the created process to
+	 * a caller.
+	 * 
+	 * @param klass
+	 *            of type Class
+	 * @param javaArguments
+	 *            arguments for java
+	 * @param processArguments
+	 *            arguments for process
+	 * @return Process
+	 * @throws IOException
+	 *             when
+	 * @throws InterruptedException
+	 *             when
+	 * @throws TimeoutException
+	 *             when
+	 */
+	public Process runWithStartupDelay(Class klass, String[] javaArguments,
+		String[] processArguments) throws IOException, InterruptedException,
+		TimeoutException {
+		return runWithStartupDelay(klass, javaArguments, processArguments,
+			DEFAULT_PROCESS_STARTUP_SHUTDOWN_TIME);
 	}
 
 	/**
-	 * Runs process with arguments based on a specified class in a separate VM. Waits
-	 * processStartupTime before returns the created process to a caller.
+	 * Runs process with arguments based on a specified class in a separate VM.
+	 * Waits processStartupTime before returns the created process to a caller.
 	 * 
 	 * @param klass
 	 *            of type Class
 	 * @param processStartupTime
 	 *            time in milliseconds that launcher spend on waiting process
 	 *            after it's start.
-	 * @param javaArguments arguments for java
-     * @param processArguments arguments for process
-     * @return Process
+	 * @param javaArguments
+	 *            arguments for java
+	 * @param processArguments
+	 *            arguments for process
+	 * @return Process
 	 * @throws IOException
 	 *             when
 	 * @throws InterruptedException
@@ -183,9 +230,11 @@ public class JavaProcessLauncher {
 	 * @throws TimeoutException
 	 *             if process startup is not completed in time.
 	 */
-	public Process runWithStartupDelay(Class klass, String[] javaArguments, String[] processArguments, long processStartupTime)
-		throws IOException, InterruptedException, TimeoutException {
-		Process process = runWithConfirmation(klass, javaArguments, processArguments);
+	public Process runWithStartupDelay(Class klass, String[] javaArguments,
+		String[] processArguments, long processStartupTime) throws IOException,
+		InterruptedException, TimeoutException {
+		Process process = runWithConfirmation(klass, javaArguments,
+			processArguments);
 		if (processStartupTime > 0) {
 			Thread.sleep(processStartupTime);
 		}
@@ -224,78 +273,105 @@ public class JavaProcessLauncher {
 		process.destroy();
 	}
 
-    /**
-     * Starts process based on specified class using command line arguments.
-     * This process inherits a classpath from parent VM that starts it.
-     *
-     * @param klass of type Class
-     * @param javaArguments of type String[]
-     * @param processArguments of type String[]
-     * @param withConfirmation of type boolean
-     * @return Process
-     * @throws IOException when
-     * @throws InterruptedException when
-     */
-    private Process startProcess(Class klass, String[] javaArguments, String[] processArguments, boolean withConfirmation) throws IOException, InterruptedException {
-        List<String> arguments = createCommandLineForProcess(klass, javaArguments, processArguments);
-        Process process = new ProcessBuilder(arguments).start();
-        redirectProcessStreams(klass, process, !withConfirmation);
-        return process;
-    }
+	/**
+	 * Starts process based on specified class using command line arguments.
+	 * This process inherits a classpath from parent VM that starts it.
+	 * 
+	 * @param klass
+	 *            of type Class
+	 * @param javaArguments
+	 *            of type String[]
+	 * @param processArguments
+	 *            of type String[]
+	 * @param withConfirmation
+	 *            of type boolean
+	 * @return Process
+	 * @throws IOException
+	 *             when
+	 * @throws InterruptedException
+	 *             when
+	 */
+	private Process startProcess(Class klass, String[] javaArguments,
+		String[] processArguments, boolean withConfirmation)
+		throws IOException, InterruptedException {
+		List<String> arguments = createCommandLineForProcess(klass,
+			javaArguments, processArguments);
+		Process process = new ProcessBuilder(arguments).start();
+		redirectProcessStreams(klass, process, !withConfirmation);
+		return process;
+	}
 
-    /**
-     * Redirects process standard output and error streams into parent process standard output.
-     *
-     * @param klass of type Class
-     * @param process of type Process
-     * @param redirectProcessStdOut of type boolean
-     */
-    private void redirectProcessStreams(Class klass, Process process, boolean redirectProcessStdOut) {
-        new StreamRedirector(process.getErrorStream(), klass.getSimpleName()
-                + PROCESS_ERROR_STREAM_PREFIX,
-                redirectProcessErrorStreamToParentProcessStdOut).start();
-        if (redirectProcessStdOut) {
-            new StreamRedirector(process.getInputStream(),
-                    klass.getSimpleName() + PROCESS_STDOUT_STREAM_PREFIX,
-                    redirectProcessInputStreamToParentProcessStdOut).start();
-        }
-    }
+	/**
+	 * Redirects process standard output and error streams into parent process
+	 * standard output.
+	 * 
+	 * @param klass
+	 *            of type Class
+	 * @param process
+	 *            of type Process
+	 * @param redirectProcessStdOut
+	 *            of type boolean
+	 */
+	private void redirectProcessStreams(Class klass, Process process,
+		boolean redirectProcessStdOut) {
 
-    /**
-     * Builds command line for starting java process based on specified arguments.
-     *
-     * @param klazz
-     * @param processArguments of type String[]
-     * @return List<String>
-     */
-    private List<String> createCommandLineForProcess(Class klazz, String[] processArguments) {
+		String errorStreamType = (printType ? klass.getSimpleName()
+			+ PROCESS_ERROR_STREAM_PREFIX : "");
+		new StreamRedirector(process.getErrorStream(), errorStreamType,
+			redirectProcessErrorStreamToParentProcessStdOut, System.err)
+			.start();
+
+		if (redirectProcessStdOut) {
+			String outputStreamType = (printType ? klass.getSimpleName()
+				+ PROCESS_STDOUT_STREAM_PREFIX : "");
+			new StreamRedirector(process.getInputStream(), outputStreamType,
+				redirectProcessInputStreamToParentProcessStdOut, System.out)
+				.start();
+		}
+	}
+
+	/**
+	 * Builds command line for starting java process based on specified
+	 * arguments.
+	 * 
+	 * @param klazz
+	 * @param processArguments
+	 *            of type String[]
+	 * @return List<String>
+	 */
+	private List<String> createCommandLineForProcess(Class klazz,
+		String[] processArguments) {
 		return createCommandLineForProcess(klazz, null, processArguments);
 	}
 
 	/**
-     * Builds command line for starting java process based on specified arguments.
-     *
-     * @param klazz
-     * @param javaArguments of type String[]
-     * @param processArguments of type String[]
-     * @return List<String>
-     */
-    private List<String> createCommandLineForProcess(Class klazz, String[] javaArguments, String[] processArguments) {
+	 * Builds command line for starting java process based on specified
+	 * arguments.
+	 * 
+	 * @param klazz
+	 * @param javaArguments
+	 *            of type String[]
+	 * @param processArguments
+	 *            of type String[]
+	 * @return List<String>
+	 */
+	private List<String> createCommandLineForProcess(Class klazz,
+		String[] javaArguments, String[] processArguments) {
 		String javaHome = System.getProperty("java.home");
 		String javaBin = javaHome + File.separator + "bin" + File.separator
 			+ "java";
 		String classpath = System.getProperty("java.class.path");
 
-        List<String> argimentsList = new ArrayList<String>();
+		List<String> argimentsList = new ArrayList<String>();
 		argimentsList.add(javaBin);
 		argimentsList.add("-cp");
 		argimentsList.add(classpath);
 
-        if (javaArguments != null && javaArguments.length > 0) {
+		if (javaArguments != null && javaArguments.length > 0) {
 			argimentsList.addAll(Arrays.asList(javaArguments));
 		}
 
-        argimentsList.add(klazz.getCanonicalName());
+		argimentsList.add(klazz.getCanonicalName());
 
 		if (processArguments != null && processArguments.length > 0) {
 			argimentsList.addAll(Arrays.asList(processArguments));
@@ -338,7 +414,7 @@ public class JavaProcessLauncher {
 			+ "has been already finished without startup complete confirmation");
 	}
 
-    /**
+	/**
 	 * Redirects process stream into parent standard output.
 	 * 
 	 * @author Andrey Stepanov aka standy
@@ -353,6 +429,7 @@ public class JavaProcessLauncher {
 		 * be redirected to parent process standard output.
 		 */
 		private boolean redirectToParentProcessStdOut;
+		private final PrintStream printStream;
 
 		/**
 		 * Constructor StreamRedirector creates a new StreamRedirector instance.
@@ -363,9 +440,7 @@ public class JavaProcessLauncher {
 		 *            of type String
 		 */
 		public StreamRedirector(InputStream inputStream, String type) {
-			this.inputStream = inputStream;
-			this.type = type;
-			this.redirectToParentProcessStdOut = false;
+			this(inputStream, type, false);
 		}
 
 		/**
@@ -379,9 +454,15 @@ public class JavaProcessLauncher {
 		 */
 		public StreamRedirector(InputStream inputStream, String type,
 			boolean redirectToParentProcessStdOut) {
+			this(inputStream, type, redirectToParentProcessStdOut, System.out);
+		}
+
+		public StreamRedirector(InputStream inputStream, String type,
+			boolean redirectToParentProcessStdOut, PrintStream printStream) {
 			this.inputStream = inputStream;
 			this.type = type;
 			this.redirectToParentProcessStdOut = redirectToParentProcessStdOut;
+			this.printStream = printStream;
 		}
 
 		/**
@@ -395,7 +476,7 @@ public class JavaProcessLauncher {
 				String line;
 				while ((line = br.readLine()) != null) {
 					if (redirectToParentProcessStdOut) {
-						System.out.println(type + line);
+						printStream.println(type + line);
 					}
 				}
 				br.close();

@@ -30,7 +30,11 @@ public class ReplicationProcessor {
 	private final boolean debugEnabled;
 	/** Field javaProcessLauncher */
 	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(
-		true, true);
+		true, true, false);
+
+	private final boolean quiet;
+
+	private long processingStartedAt;
 
 	/**
 	 * Configures and creates the instance of replication processor
@@ -45,16 +49,21 @@ public class ReplicationProcessor {
 	 * @param regionName
 	 *            - the name of technical region
 	 * @param debugEnabled
+	 * @param quiet
 	 */
 	public ReplicationProcessor(Properties clustersProperties, long timeout,
 		String licenseFilePath, String licenseType, String regionName,
-		boolean debugEnabled) {
+		boolean debugEnabled, boolean quiet) {
+
+		processingStartedAt = System.currentTimeMillis();
+
 		this.clustersProperties = clustersProperties;
 		this.timeout = timeout;
 		this.licenseFilePath = licenseFilePath;
 		this.licenseType = licenseType;
 		this.regionName = regionName;
 		this.debugEnabled = debugEnabled;
+		this.quiet = quiet;
 	}
 
 	/**
@@ -68,8 +77,6 @@ public class ReplicationProcessor {
 	 */
 	public int process() throws IOException, InterruptedException {
 		debug("ReplicationProcessor#process(): Processing start");
-
-		long processingStartedAt = System.currentTimeMillis();
 
 		List<Process> processesList = new ArrayList<Process>();
 		for (Object keyObject : clustersProperties.keySet()) {
@@ -88,20 +95,20 @@ public class ReplicationProcessor {
 				+ ", licenseType = "
 				+ licenseType + ", regionName = " + regionName);
 
-			Process process = javaProcessLauncher.runWithoutConfirmation(
-				GuestNode.class,
-				null,
-				new String[] { cluster, clustersPropertiesString,
-					String.valueOf(timeout), licenseFilePath, licenseType,
-					regionName, String.valueOf(debugEnabled),
-					String.valueOf(processingStartedAt) });
+			Process process = javaProcessLauncher
+				.runWithoutConfirmation(
+					GuestNode.class,
+					null,
+					new String[] { cluster, clustersPropertiesString,
+						String.valueOf(timeout), licenseFilePath, licenseType,
+						regionName, String.valueOf(debugEnabled),
+						String.valueOf(quiet),
+						String.valueOf(processingStartedAt) });
 
 			debug("ReplicationProcessor#process(): Adding GuestNode to processList");
 
 			processesList.add(process);
 		}
-
-		debug("ReplicationProcessor#process(): Adding JavaProcessLauncher#printProcessError(Process) to each process");
 
 		debug("ReplicationProcessor#process(): Waiting for processes finish");
 		int mainExitCode = 0;
@@ -129,7 +136,11 @@ public class ReplicationProcessor {
 
 	private void debug(String message) {
 		if (debugEnabled) {
-			System.err.println(message);
+			long currentTime = System.currentTimeMillis();
+			long timeSinceProcessingStart = currentTime - processingStartedAt;
+			System.err.println(timeSinceProcessingStart
+				+ " [ReplicationProcessor] " + message);
 		}
 	}
+
 }
