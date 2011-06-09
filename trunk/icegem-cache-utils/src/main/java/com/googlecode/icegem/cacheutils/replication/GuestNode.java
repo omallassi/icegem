@@ -395,10 +395,6 @@ public class GuestNode {
 
 				sb.append("[").append(clusterName).append(", ")
 					.append(duration).append("ms]");
-
-				if (it.hasNext()) {
-					sb.append(", ");
-				}
 			}
 
 		} else {
