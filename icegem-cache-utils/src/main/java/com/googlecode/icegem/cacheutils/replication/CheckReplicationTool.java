@@ -57,7 +57,11 @@ public class CheckReplicationTool extends Tool {
 
 	private static final boolean DEFAULT_DEBUG_ENABLED = false;
 
+	private static final boolean DEFAULT_QUIET = false;
+
 	private static final String DEBUG_OPTION = "debug";
+
+	private static final String QUIET_OPTION = "quiet";
 
 	/* Waiting timeout */
 	private static long timeout = DEFAULT_TIMEOUT;
@@ -74,6 +78,8 @@ public class CheckReplicationTool extends Tool {
 
 	private boolean debugEnabled = DEFAULT_DEBUG_ENABLED;
 
+	private boolean quiet = DEFAULT_QUIET;
+
 	private class ProcessorTask implements Runnable {
 
 		private int exitCode;
@@ -83,21 +89,24 @@ public class CheckReplicationTool extends Tool {
 		private final String regionName;
 		private final String licenseType;
 		private final boolean debugEnabled;
+		private final boolean quiet;
 
 		public ProcessorTask(Properties clustersProperties, long timeout,
-			String licenseFilePath, String licenseType, String regionName, boolean debugEnabled) {
+			String licenseFilePath, String licenseType, String regionName,
+			boolean debugEnabled, boolean quiet) {
 			this.clustersProperties = clustersProperties;
 			this.timeout = timeout;
 			this.licenseFilePath = licenseFilePath;
 			this.licenseType = licenseType;
 			this.regionName = regionName;
 			this.debugEnabled = debugEnabled;
+			this.quiet = quiet;
 		}
 
 		public void run() {
 			ReplicationProcessor processor = new ReplicationProcessor(
 				clustersProperties, timeout, licenseFilePath, licenseType,
-				regionName, debugEnabled);
+				regionName, debugEnabled, quiet);
 
 			exitCode = 1;
 			try {
@@ -120,6 +129,8 @@ public class CheckReplicationTool extends Tool {
 	 */
 	public void execute(String[] args) {
 		try {
+			System.out.println("Connecting...");
+
 			debug("CheckReplicationTool#execute(String[]): args = "
 				+ Arrays.asList(args));
 
@@ -135,7 +146,7 @@ public class CheckReplicationTool extends Tool {
 				+ licenseType + ", regionName = " + regionName);
 
 			ProcessorTask task = new ProcessorTask(clustersProperties, timeout,
-				licenseFilePath, licenseType, regionName, debugEnabled);
+				licenseFilePath, licenseType, regionName, debugEnabled, quiet);
 
 			debug("CheckReplicationTool#execute(String[]): Starting CheckReplicationTool.ProcessorTask");
 
@@ -180,7 +191,11 @@ public class CheckReplicationTool extends Tool {
 			if (line.hasOption(DEBUG_OPTION)) {
 				debugEnabled = true;
 			}
-			
+
+			if (!debugEnabled && line.hasOption(QUIET_OPTION)) {
+				quiet = true;
+			}
+
 			if (line.hasOption(LICENSE_FILE_OPTION)) {
 				licenseFilePath = line.getOptionValue(LICENSE_FILE_OPTION);
 			}
@@ -242,6 +257,7 @@ public class CheckReplicationTool extends Tool {
 				"The name of region for this test. Default name is \""
 					+ DEFAULT_REGION_NAME + "\"")
 			.addOption("d", DEBUG_OPTION, false, "Print debug information")
+			.addOption("q", QUIET_OPTION, false, "Quiet output")
 			.addOption("h", HELP_OPTION, false, "Print usage information");
 
 		@SuppressWarnings("static-access")
@@ -263,8 +279,8 @@ public class CheckReplicationTool extends Tool {
 
 	private void debug(String message, Throwable t) {
 		if (debugEnabled) {
-			System.err.println(message);
-			
+			System.err.println("0 [CheckReplicationTool] " + message);
+
 			if (t != null) {
 				t.printStackTrace(System.err);
 			}
