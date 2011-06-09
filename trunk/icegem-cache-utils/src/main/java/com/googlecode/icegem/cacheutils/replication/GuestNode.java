@@ -122,7 +122,8 @@ public class GuestNode {
 					"license-type", licenseType);
 			}
 
-			clientCacheFactory.set("log-level", "none");
+			clientCacheFactory.set("log-level", "none")
+				.setPoolSubscriptionEnabled(true);
 
 			String locators = clustersProperties.getProperty(localClusterName);
 			String[] locatorsArray = locators.split(",");
@@ -154,6 +155,8 @@ public class GuestNode {
 			}
 			debug("GuestNode#init(): Create region with name = " + regionName
 				+ ": region = " + region);
+
+			region.registerInterestRegex(KEY_PREFIX + ".*", false, true);
 
 		} catch (Throwable t) {
 			debug(
