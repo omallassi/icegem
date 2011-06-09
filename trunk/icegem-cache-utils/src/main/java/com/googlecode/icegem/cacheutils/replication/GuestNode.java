@@ -156,8 +156,6 @@ public class GuestNode {
 			debug("GuestNode#init(): Create region with name = " + regionName
 				+ ": region = " + region);
 
-			region.registerInterestRegex(KEY_PREFIX + ".*", false, true);
-
 		} catch (Throwable t) {
 			debug(
 				"GuestNode#init(): Throwable caught with message = "
