@@ -5,8 +5,7 @@
 		<gateway id="gatewayC">
 			<gateway-endpoint id="gatewayA" host="localhost"
 				port="22222" />
-			<gateway-endpoint id="gatewayB" host="localhost"
-				port="33333" />
+			<!-- <gateway-endpoint id="gatewayB" host="localhost" port="33333" /> -->
 			<gateway-queue enable-persistence="true"
 				disk-store-name="cDiskStore" />
 		</gateway>
