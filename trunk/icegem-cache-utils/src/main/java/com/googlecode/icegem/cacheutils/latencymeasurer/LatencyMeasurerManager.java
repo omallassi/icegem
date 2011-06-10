@@ -112,7 +112,7 @@ public class LatencyMeasurerManager implements Executable{
         return gnuOptions;
     }
 
-    public void execute(String[] args)  {
+    public void execute(String[] args, boolean debugEnabled, boolean quiet)  {
         main(args);
     }
 }

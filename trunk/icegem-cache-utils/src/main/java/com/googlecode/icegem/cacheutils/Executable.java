@@ -6,6 +6,6 @@ package com.googlecode.icegem.cacheutils;
  */
 public interface Executable {
 	
-    void execute(String[] args);
+    void execute(String[] args, boolean debugEnabled, boolean quiet);
     
 }

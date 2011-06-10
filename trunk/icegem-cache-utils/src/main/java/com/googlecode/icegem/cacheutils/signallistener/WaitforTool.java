@@ -111,10 +111,10 @@ public class WaitforTool extends Tool {
 
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("waitfor", options);
+		formatter.printHelp("waitfor [options]", options);
 	}
 
-	public void execute(String[] args) {
+	public void execute(String[] args, boolean debugEnabled, boolean quiet) {
 		parseCommandLineArguments(args);
 		
 		ClientCacheFactory clientCacheFactory = new ClientCacheFactory();

@@ -1,7 +1,12 @@
 package com.googlecode.icegem.cacheutils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 
 import com.googlecode.icegem.cacheutils.monitor.MonitorTool;
 import com.googlecode.icegem.cacheutils.regioncomparator.CompareTool;
@@ -10,6 +15,16 @@ import com.googlecode.icegem.cacheutils.signallistener.WaitforTool;
 import com.googlecode.icegem.cacheutils.updater.UpdateTool;
 
 public class Launcher {
+
+	private static final String DEBUG_OPTION = "debug";
+	private static final String QUIET_OPTION = "quiet";
+	private static final String HELP_OPTION = "help";
+
+	private static final boolean DEFAULT_DEBUG_ENABLED = false;
+	private static final boolean DEFAULT_QUIET = false;
+
+	private static boolean debugEnabled = DEFAULT_DEBUG_ENABLED;
+	private static boolean quiet = DEFAULT_QUIET;
 
 	private enum Command {
 		COMPARE("compare", new CompareTool()), MONITOR("monitor",
@@ -34,34 +49,60 @@ public class Launcher {
 			return exec;
 		}
 
-		private static Map<String, Command> map = new HashMap<String, Command>();
-		static {
-			for (Command command : values())
-				map.put(command.getName(), command);
-		}
+		public static Executable getUtil(String commandName) {
+			Executable result = null;
 
-		public static Command get(String name) {
-			return map.get(name);
+			for (Command command : Command.values()) {
+				if (command.getName().equals(commandName.trim())) {
+					result = command.getExec();
+					break;
+				}
+			}
 
-		}
-
-		public static boolean hasName(String name) {
-			return map.containsKey(name);
-		}
-
-		public static Executable getUtil(String name) {
-			if (hasName(name))
-				return get(name).getExec();
-			return null;
+			return result;
 		}
 
 	}
 
 	private static void printHelp() {
+		Options options = constructGnuOptions();
+		printHelp(options);
+	}
 
+	private static void parseCommandLineArguments(String[] commandLineArguments) {
+		Options options = constructGnuOptions();
+
+		CommandLineParser parser = new GnuParser();
+		try {
+			CommandLine line = parser.parse(options, commandLineArguments);
+
+			if (line.hasOption(HELP_OPTION)) {
+				printHelp(options);
+			}
+
+			if (line.hasOption(DEBUG_OPTION)) {
+				debugEnabled = true;
+			}
+
+			if (!debugEnabled && line.hasOption(QUIET_OPTION)) {
+				quiet = true;
+			}
+
+		} catch (Throwable t) {
+			printHelp(options);
+		}
+	}
+
+	/**
+	 * Prints help if requested, or in case of any misconfiguration
+	 * 
+	 * @param options
+	 *            - the GNU options
+	 */
+	private static void printHelp(final Options options) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("Usage: java -jar icegem-cache-utils-<version>.jar <");
+		sb.append("java -jar icegem-cache-utils-<version>.jar [options] <");
 
 		Command[] commands = Command.values();
 		for (int i = 0; i < commands.length; i++) {
@@ -73,47 +114,115 @@ public class Launcher {
 
 		sb.append("> [command_specific_options]");
 
-		System.out.println(sb.toString());
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp(sb.toString(), options);
 
+		System.exit(1);
 	}
 
-	private static String[] removeCommandFromArgs(String[] args) {
-		if (args.length < 1) {
-			throw new IllegalArgumentException(
-				"Args cannot have the length less than 1");
-		}
+	/**
+	 * Constructs the set of GNU options
+	 * 
+	 * @return - the constructed options
+	 */
+	private static Options constructGnuOptions() {
+		final Options gnuOptions = new Options();
 
-		String[] result = new String[args.length - 1];
+		gnuOptions
+			.addOption("d", DEBUG_OPTION, false, "Print debug information")
+			.addOption(
+				"q",
+				QUIET_OPTION,
+				false,
+				"Quiet output. Doesn't work if --" + DEBUG_OPTION
+					+ " specified.")
+			.addOption("h", HELP_OPTION, false, "Print usage information");
 
-		if (result.length > 0) {
-			for (int i = 1; i < args.length; i++) {
-				result[i - 1] = args[i];
+		return gnuOptions;
+	}
+
+	private static int findCommandIndex(String[] args) {
+		int commandIndex = -1;
+
+		for (int i = 0; i < args.length; i++) {
+			for (Command command : Command.values()) {
+				if (command.getName().equals(args[i].trim())) {
+					commandIndex = i;
+					break;
+				}
 			}
 		}
 
-		return result;
+		return commandIndex;
+	}
+
+	private static String[] extractLauncherArgs(String[] args, int commandIndex) {
+		String[] launcherArgs = new String[commandIndex];
+
+		System.arraycopy(args, 0, launcherArgs, 0, commandIndex);
+
+		return launcherArgs;
+	}
+
+	private static String[] extractCommandArgs(String[] args, int commandIndex) {
+		String[] commandArgs = new String[args.length - commandIndex - 1];
+
+		System.arraycopy(args, commandIndex + 1, commandArgs, 0, args.length
+			- commandIndex - 1);
+
+		return commandArgs;
 	}
 
 	public static void main(String[] args) throws Exception {
 		try {
-			if (args.length < 1) {
+			int commandIndex = findCommandIndex(args);
+			
+			if (commandIndex < 0) {
 				printHelp();
-				return;
 			}
 
-			String commandName = args[0];
-			String[] commandArgs = removeCommandFromArgs(args);
-			
+			String[] launcherArgs = extractLauncherArgs(args, commandIndex);
+			String[] commandArgs = extractCommandArgs(args, commandIndex);
+
+			parseCommandLineArguments(launcherArgs);
+
+			debug("Launcher#main(): args = " + Arrays.asList(args));
+
+			debug("Launcher#main(): launcherArgs = "
+				+ Arrays.asList(launcherArgs));
+
+			debug("Launcher#main(): commandArgs = "
+				+ Arrays.asList(commandArgs));
+
+			String commandName = args[commandIndex];
+
 			Executable tool = Command.getUtil(commandName);
 			if (tool != null) {
-				tool.execute(commandArgs);
+				tool.execute(commandArgs, debugEnabled, quiet);
 			} else {
-				System.err.println("command not found: " + commandName);
+				debug("Launcher#main(): Command \"" + commandName
+					+ "\" not found");
 				printHelp();
 			}
 		} catch (Throwable t) {
-			t.printStackTrace(System.err);
+			debug(
+				"Launcher#main(): Throwable caught with message = "
+					+ t.getMessage(), t);
 			System.exit(1);
+		}
+	}
+
+	private static void debug(String message) {
+		debug(message, null);
+	}
+
+	private static void debug(String message, Throwable t) {
+		if (debugEnabled) {
+			System.err.println("0 [Launcher] " + message);
+
+			if (t != null) {
+				t.printStackTrace(System.err);
+			}
 		}
 	}
 }
