@@ -14,6 +14,9 @@ import com.googlecode.icegem.cacheutils.replication.CheckReplicationTool;
 import com.googlecode.icegem.cacheutils.signallistener.WaitforTool;
 import com.googlecode.icegem.cacheutils.updater.UpdateTool;
 
+/**
+ * Aggregates cache utilities and handles the common options
+ */
 public class Launcher {
 
 	private static final String DEBUG_OPTION = "debug";
@@ -26,6 +29,9 @@ public class Launcher {
 	private static boolean debugEnabled = DEFAULT_DEBUG_ENABLED;
 	private static boolean quiet = DEFAULT_QUIET;
 
+	/**
+	 * Represents the utility
+	 */
 	private enum Command {
 		COMPARE("compare", new CompareTool()), MONITOR("monitor",
 			new MonitorTool()), CHECK_REPLICATION("check-replication",
@@ -49,6 +55,13 @@ public class Launcher {
 			return exec;
 		}
 
+		/**
+		 * Gets tool by name
+		 * 
+		 * @param commandName
+		 *            - the name of command
+		 * @return - found tool or null if the utility is not found
+		 */
 		public static Executable getUtil(String commandName) {
 			Executable result = null;
 
@@ -64,11 +77,20 @@ public class Launcher {
 
 	}
 
+	/**
+	 * Prints help and exits
+	 */
 	private static void printHelp() {
 		Options options = constructGnuOptions();
 		printHelp(options);
 	}
 
+	/**
+	 * Parses command line arguments
+	 * 
+	 * @param commandLineArguments
+	 *            - the arguments
+	 */
 	private static void parseCommandLineArguments(String[] commandLineArguments) {
 		Options options = constructGnuOptions();
 
@@ -94,7 +116,7 @@ public class Launcher {
 	}
 
 	/**
-	 * Prints help if requested, or in case of any misconfiguration
+	 * Prints help if requested
 	 * 
 	 * @param options
 	 *            - the GNU options
@@ -141,6 +163,13 @@ public class Launcher {
 		return gnuOptions;
 	}
 
+	/**
+	 * Looks for the index of command in the specified array
+	 * 
+	 * @param args
+	 *            - the array of arguments
+	 * @return - index of command, or -1 if command not found in the array
+	 */
 	private static int findCommandIndex(String[] args) {
 		int commandIndex = -1;
 
@@ -156,6 +185,15 @@ public class Launcher {
 		return commandIndex;
 	}
 
+	/**
+	 * Extracts the launcher arguments from the all arguments array
+	 * 
+	 * @param args
+	 *            - the all arguments array
+	 * @param commandIndex
+	 *            - index of the command
+	 * @return - the launcher arguments
+	 */
 	private static String[] extractLauncherArgs(String[] args, int commandIndex) {
 		String[] launcherArgs = new String[commandIndex];
 
@@ -164,6 +202,15 @@ public class Launcher {
 		return launcherArgs;
 	}
 
+	/**
+	 * Extracts the command-specific arguments from the all arguments array
+	 * 
+	 * @param args
+	 *            - the all arguments array
+	 * @param commandIndex
+	 *            - index of the command
+	 * @return - the command-specific arguments
+	 */
 	private static String[] extractCommandArgs(String[] args, int commandIndex) {
 		String[] commandArgs = new String[args.length - commandIndex - 1];
 
@@ -173,10 +220,17 @@ public class Launcher {
 		return commandArgs;
 	}
 
-	public static void main(String[] args) throws Exception {
+	/**
+	 * The entry point of the application
+	 * 
+	 * @param args
+	 *            - all the arguments
+	 * @throws Exception
+	 */
+	public static void main(String[] args) {
 		try {
 			int commandIndex = findCommandIndex(args);
-			
+
 			if (commandIndex < 0) {
 				printHelp();
 			}
@@ -212,10 +266,24 @@ public class Launcher {
 		}
 	}
 
+	/**
+	 * Prints debug information if the debug is enabled
+	 * 
+	 * @param message
+	 *            - the debug message
+	 */
 	private static void debug(String message) {
 		debug(message, null);
 	}
 
+	/**
+	 * Prints debug information if the debug is enabled
+	 * 
+	 * @param message
+	 *            - the debug message
+	 * @param t
+	 *            - the instance of Throwable
+	 */
 	private static void debug(String message, Throwable t) {
 		if (debugEnabled) {
 			System.err.println("0 [Launcher] " + message);
