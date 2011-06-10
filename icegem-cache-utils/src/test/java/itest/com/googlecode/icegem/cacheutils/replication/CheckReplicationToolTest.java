@@ -64,10 +64,32 @@ public class CheckReplicationToolTest {
 			"-Dgemfire.log-level=none" };
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class, vmArguments, new String[] { "check-replication",
-				"-c", "clusterA=localhost[18081]", "-c",
+			Launcher.class, vmArguments, new String[] { "-d", "-q",
+				"check-replication", "-c", "clusterA=localhost[18081]", "-c",
 				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
 				"-t", "30000" });
+
+		assertThat(exitCode).isEqualTo(0);
+	}
+
+	@Test
+	public void testMainPositiveTwoClusters() throws Exception {
+		System.out.println("testMainPositiveTwoClusters");
+
+		PropertiesHelper propertiesHelper = new PropertiesHelper(
+			"/checkReplicationToolGatewayA.properties");
+
+		String[] vmArguments = new String[] {
+			"-Dgemfire.license-file="
+				+ propertiesHelper.getStringProperty("license-file"),
+			"-Dgemfire.license-type="
+				+ propertiesHelper.getStringProperty("license-type"),
+			"-Dgemfire.log-level=none" };
+
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, vmArguments, new String[] { "-d", "-q",
+				"check-replication", "-c", "clusterA=localhost[18081]", "-c",
+				"clusterB=localhost[18082]", "-t", "30000" });
 
 		assertThat(exitCode).isEqualTo(0);
 	}
@@ -120,8 +142,29 @@ public class CheckReplicationToolTest {
 	}
 
 	@Test
+	public void testMainNegativeSingleCluster() throws Exception {
+		System.out.println("testMainNegativeSingleCluster");
+
+		PropertiesHelper propertiesHelper = new PropertiesHelper(
+			"/checkReplicationToolGatewayA.properties");
+
+		String[] vmArguments = new String[] {
+			"-Dgemfire.license-file="
+				+ propertiesHelper.getStringProperty("license-file"),
+			"-Dgemfire.license-type="
+				+ propertiesHelper.getStringProperty("license-type"),
+			"-Dgemfire.log-level=none" };
+
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, vmArguments, new String[] { "check-replication",
+				"-c", "clusterA=localhost[18081]", "-t", "10000" });
+
+		assertThat(exitCode).isEqualTo(1);
+	}
+
+	@Test
 	public void testMainPositiveDefaultLicense() throws Exception {
-		System.out.println("testMainNegativeDefaultLicense");
+		System.out.println("testMainPositiveDefaultLicense");
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, null, new String[] { "check-replication", "-c",
@@ -160,6 +203,29 @@ public class CheckReplicationToolTest {
 				"-c", "clusterA=localhost[18081]", "-c",
 				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
 				"-t", "10000", "-r", "wrong" });
+
+		assertThat(exitCode).isEqualTo(1);
+	}
+
+	@Test
+	public void testMainNegativeHelpLauncherArgument() throws Exception {
+		System.out.println("testMainNegativeHelpLauncherArgument");
+
+		PropertiesHelper propertiesHelper = new PropertiesHelper(
+			"/checkReplicationToolGatewayA.properties");
+
+		String[] vmArguments = new String[] {
+			"-Dgemfire.license-file="
+				+ propertiesHelper.getStringProperty("license-file"),
+			"-Dgemfire.license-type="
+				+ propertiesHelper.getStringProperty("license-type"),
+			"-Dgemfire.log-level=none" };
+
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, vmArguments, new String[] { "-d", "-q", "-h",
+				"check-replication", "-c", "clusterA=localhost[18081]", "-c",
+				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
+				"-t", "30000" });
 
 		assertThat(exitCode).isEqualTo(1);
 	}

@@ -71,7 +71,7 @@ public class CompareTool extends Tool {
 
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("compare", options);
+		formatter.printHelp("compare [options]", options);
 	}
 
 	protected Options constructGnuOptions() {
@@ -133,7 +133,7 @@ public class CompareTool extends Tool {
 		}
 	}
 
-	public void execute(String[] args) {
+	public void execute(String[] args, boolean debugEnabled, boolean quiet) {
 		parseCommandLineArguments(args);
 		List compareResult = null;
 		log.info("Connecting to system regions...");

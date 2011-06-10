@@ -139,7 +139,7 @@ public class MonitorTool extends Tool {
 		nodesController.addNodeEventHandler(handler);
 	}
 
-	public void execute(String[] args) {
+	public void execute(String[] args, boolean debugEnabled, boolean quiet) {
 		parseCommandLineArguments(args);
 
 		if (serverHostOption != null) {
@@ -224,7 +224,7 @@ public class MonitorTool extends Tool {
 
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("monitor", options);
+		formatter.printHelp("monitor [options]", options);
 	}
 
 	protected Options constructGnuOptions() {

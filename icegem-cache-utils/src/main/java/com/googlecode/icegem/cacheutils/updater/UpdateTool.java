@@ -67,7 +67,7 @@ public class UpdateTool extends Tool {
 	
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( "update", options );
+		formatter.printHelp( "update [options]", options );
 	}
 	
 	protected Options constructGnuOptions() {
@@ -83,7 +83,7 @@ public class UpdateTool extends Tool {
 		return gnuOptions;
 	}
 
-    public void execute(String[] args) {
+    public void execute(String[] args, boolean debugEnabled, boolean quiet) {
 		parseCommandLineArguments(args);
 		log.info("Connecting to the system as admin member...");
 		AdminService admin = null;

@@ -28,7 +28,7 @@ public class CheckReplicationTool extends Tool {
 	private static final String TIMEOUT_OPTION = "timeout";
 
 	/* Name of locators option */
-	private static final String CLUSTERS_OPTION = "clusters";
+	private static final String CLUSTER_OPTION = "cluster";
 
 	/* Name of region option */
 	private static final String REGION_OPTION = "region";
@@ -45,14 +45,6 @@ public class CheckReplicationTool extends Tool {
 	/* Default region name is "proxy" */
 	private static final String DEFAULT_REGION_NAME = "proxy";
 
-	private static final boolean DEFAULT_DEBUG_ENABLED = false;
-
-	private static final boolean DEFAULT_QUIET = false;
-
-	private static final String DEBUG_OPTION = "debug";
-
-	private static final String QUIET_OPTION = "quiet";
-
 	/* Waiting timeout */
 	private static long timeout = DEFAULT_TIMEOUT;
 
@@ -61,9 +53,7 @@ public class CheckReplicationTool extends Tool {
 
 	private Properties clustersProperties;
 
-	private boolean debugEnabled = DEFAULT_DEBUG_ENABLED;
-
-	private boolean quiet = DEFAULT_QUIET;
+	private boolean debugEnabled;
 
 	private class ProcessorTask implements Runnable {
 
@@ -106,14 +96,16 @@ public class CheckReplicationTool extends Tool {
 	/**
 	 * Runs the tool. All the tools run in this way.
 	 */
-	public void execute(String[] args) {
+	public void execute(String[] args, boolean debugEnabled, boolean quiet) {
 		try {
-			System.out.println("Connecting...");
+			this.debugEnabled = debugEnabled;
 
 			debug("CheckReplicationTool#execute(String[]): args = "
 				+ Arrays.asList(args));
 
 			parseCommandLineArguments(args);
+
+			System.out.println("Connecting...");
 
 			debug("CheckReplicationTool#execute(String[]): Creating CheckReplicationTool.ProcessorTask with parameters: clustersProperties = "
 				+ clustersProperties
@@ -164,14 +156,6 @@ public class CheckReplicationTool extends Tool {
 				printHelp(options);
 			}
 
-			if (line.hasOption(DEBUG_OPTION)) {
-				debugEnabled = true;
-			}
-
-			if (!debugEnabled && line.hasOption(QUIET_OPTION)) {
-				quiet = true;
-			}
-
 			if (line.hasOption(REGION_OPTION)) {
 				regionName = line.getOptionValue(REGION_OPTION);
 			}
@@ -181,8 +165,12 @@ public class CheckReplicationTool extends Tool {
 				timeout = Long.parseLong(timeoutString);
 			}
 
-			if (line.hasOption(CLUSTERS_OPTION)) {
-				clustersProperties = line.getOptionProperties(CLUSTERS_OPTION);
+			if (line.hasOption(CLUSTER_OPTION)) {
+				clustersProperties = line.getOptionProperties(CLUSTER_OPTION);
+
+				if (clustersProperties.keySet().size() < 2) {
+					printHelp(options);
+				}
 			} else {
 				printHelp(options);
 			}
@@ -200,7 +188,7 @@ public class CheckReplicationTool extends Tool {
 	 */
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("check-replication", options);
+		formatter.printHelp("check-replication [options]", options);
 
 		System.exit(1);
 	}
@@ -214,24 +202,25 @@ public class CheckReplicationTool extends Tool {
 		final Options gnuOptions = new Options();
 
 		gnuOptions
-			.addOption("t", TIMEOUT_OPTION, true, "Timeout, ms")
+			.addOption("t", TIMEOUT_OPTION, true,
+				"Timeout, ms. Default timeout is " + DEFAULT_TIMEOUT)
 			.addOption(
 				"r",
 				REGION_OPTION,
 				true,
 				"The name of region for this test. Default name is \""
 					+ DEFAULT_REGION_NAME + "\"")
-			.addOption("d", DEBUG_OPTION, false, "Print debug information")
-			.addOption("q", QUIET_OPTION, false, "Quiet output")
 			.addOption("h", HELP_OPTION, false, "Print usage information");
 
 		@SuppressWarnings("static-access")
 		Option locatorsOption = OptionBuilder
 			.hasArgs()
 			.withDescription(
-				"Clusters and its locators of GemFire system. Example: -c cluster1=host1[port1],host2[port2] -c cluster2=host3[port3]")
+				"Cluster name and list of its locators. " +
+				"There should be at least two clusters. " +
+				"Example: -c cluster1=host1[port1],host2[port2] -c cluster2=host3[port3]")
 			.withValueSeparator().withArgName("cluster=locators")
-			.withLongOpt(CLUSTERS_OPTION).create("c");
+			.withLongOpt(CLUSTER_OPTION).create("c");
 
 		gnuOptions.addOption(locatorsOption);
 
