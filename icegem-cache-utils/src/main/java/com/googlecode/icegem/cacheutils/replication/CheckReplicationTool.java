@@ -27,7 +27,7 @@ public class CheckReplicationTool extends Tool {
 	/* Name of timeout option */
 	private static final String TIMEOUT_OPTION = "timeout";
 
-	/* Name of locators option */
+	/* Name of cluster option */
 	private static final String CLUSTER_OPTION = "cluster";
 
 	/* Name of region option */
@@ -51,10 +51,15 @@ public class CheckReplicationTool extends Tool {
 	/* Technical region name */
 	private static String regionName = DEFAULT_REGION_NAME;
 
+	/* Clusters properties */
 	private Properties clustersProperties;
 
+	/* Debug enabled flag */
 	private boolean debugEnabled;
 
+	/**
+	 * Contains processing operation
+	 */
 	private class ProcessorTask implements Runnable {
 
 		private int exitCode;
@@ -216,9 +221,9 @@ public class CheckReplicationTool extends Tool {
 		Option locatorsOption = OptionBuilder
 			.hasArgs()
 			.withDescription(
-				"Cluster name and list of its locators. " +
-				"There should be at least two clusters. " +
-				"Example: -c cluster1=host1[port1],host2[port2] -c cluster2=host3[port3]")
+				"Cluster name and list of its locators. "
+					+ "There should be at least two clusters. "
+					+ "Example: -c cluster1=host1[port1],host2[port2] -c cluster2=host3[port3]")
 			.withValueSeparator().withArgName("cluster=locators")
 			.withLongOpt(CLUSTER_OPTION).create("c");
 
@@ -227,10 +232,24 @@ public class CheckReplicationTool extends Tool {
 		return gnuOptions;
 	}
 
+	/**
+	 * Prints debug information if the debug is enabled
+	 * 
+	 * @param message
+	 *            - the debug message
+	 */
 	private void debug(String message) {
 		debug(message, null);
 	}
 
+	/**
+	 * Prints debug information if the debug is enabled
+	 * 
+	 * @param message
+	 *            - the debug message
+	 * @param t
+	 *            - the instance of Throwable
+	 */
 	private void debug(String message, Throwable t) {
 		if (debugEnabled) {
 			System.err.println("0 [CheckReplicationTool] " + message);

@@ -14,7 +14,7 @@ import com.googlecode.icegem.utils.JavaProcessLauncher;
  */
 public class ReplicationProcessor {
 
-	/* Set of locators */
+	/* Clusters properties */
 	private Properties clustersProperties;
 
 	/* Timeout, milliseconds */
@@ -23,29 +23,32 @@ public class ReplicationProcessor {
 	/* Name of the technical region */
 	private final String regionName;
 
+	/* Debug enabled flag */
 	private final boolean debugEnabled;
-	/** Field javaProcessLauncher */
-	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(
-		true, true, false);
 
+	/* Quiet flag */
 	private final boolean quiet;
 
+	/* Field javaProcessLauncher */
+	private JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(
+		true, true, false);
+
+	/* The time at which the processing has started */
 	private long processingStartedAt;
 
 	/**
 	 * Configures and creates the instance of replication processor
 	 * 
 	 * @param clustersProperties
-	 *            - the set of locators
+	 *            - the clusters' properties
 	 * @param timeout
 	 *            - the timeout, milliseconds
-	 * @param licenseFilePath
-	 *            - the path to the license file
-	 * @param licenseType
 	 * @param regionName
 	 *            - the name of technical region
 	 * @param debugEnabled
+	 *            - the debug enabled flag
 	 * @param quiet
+	 *            - the quiet flag
 	 */
 	public ReplicationProcessor(Properties clustersProperties, long timeout,
 		String regionName, boolean debugEnabled, boolean quiet) {
@@ -130,6 +133,12 @@ public class ReplicationProcessor {
 		return mainExitCode;
 	}
 
+	/**
+	 * Prints debug information if the debug is enabled
+	 * 
+	 * @param message
+	 *            - the debug message
+	 */
 	private void debug(String message) {
 		if (debugEnabled) {
 			long currentTime = System.currentTimeMillis();

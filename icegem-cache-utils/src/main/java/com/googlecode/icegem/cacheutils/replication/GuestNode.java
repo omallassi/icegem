@@ -15,27 +15,36 @@ import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 /**
- * The cache server which is used for replication test. Connects to the cluster
- * represented by a locator, puts its locator as a key and current time as a
- * value to the technical region and waits events from other GuestNodes. After
- * that calculates time of replication ant prints it to system output.
+ * The client cache which is used for replication test. Connects to the cluster
+ * represented by a locator, puts name of the locator as a key and current time
+ * as a value to the technical region and waits events from other GuestNodes.
+ * After that calculates time of replication ant prints it to the system output.
  * 
  * Returns 0 as exit code in case of all the expected events received, 1
  * otherwise.
  * 
  */
 public class GuestNode {
+	/* Prefix of the gemfire system properties */
 	private static final String GEMFIRE_PREFIX = "gemfire.";
 
+	/* Polling period, ms */
 	private static final int CHECK_PERIOD = 50;
 
+	/* Prefix of the check replication tool keys */
 	private static final String KEY_PREFIX = "check-replication-";
 
+	/* Postfix of the check replication tool keys used for the startedAt entries */
 	private static final String KEY_POSTFIX_STARTED_AT = "-startedAt";
+	/* Postfix of the check replication tool keys used for the sentAt entries */
 	private static final String KEY_POSTFIX_SENT_AT = "-sentAt";
+	/*
+	 * Postfix of the check replication tool keys used for the receivedAt
+	 * entries
+	 */
 	private static final String KEY_POSTFIX_DURATION = "-receivedAt";
 
-	/* Local cluster */
+	/* Local cluster name */
 	private String localClusterName;
 
 	/* Cache instance */
@@ -47,24 +56,33 @@ public class GuestNode {
 	/* The name of technical region */
 	private String regionName;
 
+	/* Clusters' properties */
 	private Properties clustersProperties;
 
+	/* Debug enabled flag */
 	private boolean debugEnabled;
 
-	private long processingStartedAt;
-
+	/* Quiet flag */
 	private boolean quiet;
+
+	/* The time at which the processing has started */
+	private long processingStartedAt;
 
 	/**
 	 * Creates the instance of guest node
 	 * 
+	 * @param cluster
+	 *            - the name of local cluster
 	 * @param clustersProperties
-	 *            - the list of locators of remote clusters
-	 * @param licenseFile
-	 *            - the path to license file
+	 *            - the clusters' properties
 	 * @param regionName
 	 *            - the name of the technical region
+	 * @param debugEnabled
+	 *            - the debug enabled flag
+	 * @param quiet
+	 *            - the quiet flag
 	 * @param processingStartedAt
+	 *            - the time at which the processing has started
 	 */
 	private GuestNode(String cluster, Properties clustersProperties,
 		String regionName, boolean debugEnabled, boolean quiet,
@@ -88,14 +106,37 @@ public class GuestNode {
 		init();
 	}
 
+	/**
+	 * Creates the startedAt key
+	 * 
+	 * @param clusterName
+	 *            - the name of cluster
+	 * @return - the startedAt key
+	 */
 	private String createStartedAtKey(String clusterName) {
 		return KEY_PREFIX + clusterName + KEY_POSTFIX_STARTED_AT;
 	}
 
+	/**
+	 * Creates the sentAt key
+	 * 
+	 * @param clusterName
+	 *            - the name of cluster
+	 * @return - the sentAt key
+	 */
 	private String createSentAtKey(String clusterName) {
 		return KEY_PREFIX + clusterName + KEY_POSTFIX_SENT_AT;
 	}
 
+	/**
+	 * Creates the receivedAt key
+	 * 
+	 * @param fromClusterName
+	 *            - the name of cluster from which the entry received
+	 * @param toClusterName
+	 *            - the name of cluster on which the entry received
+	 * @return - the receivedAt key
+	 */
 	private String createReceivedAtKey(String fromClusterName,
 		String toClusterName) {
 
@@ -104,8 +145,7 @@ public class GuestNode {
 	}
 
 	/**
-	 * Initializes the technical region and puts the local entry with its
-	 * locator as a key and current time as a value
+	 * Initializes the technical region
 	 */
 	private void init() {
 		try {
@@ -169,6 +209,9 @@ public class GuestNode {
 		}
 	}
 
+	/**
+	 * Wait until the other clients started
+	 */
 	private void waitForStarted() {
 		debug("GuestNode#waitForStarted(): Waiting for other clusters started");
 
@@ -207,6 +250,10 @@ public class GuestNode {
 		debug("GuestNode#waitForStarted(): Other clusters started");
 	}
 
+	/**
+	 * Wait until received all the entries from other clients. Put the
+	 * receivedAt entries to cache.
+	 */
 	private void waitForSent() {
 		debug("GuestNode#waitForSent(): Waiting for other clusters sent");
 
@@ -266,6 +313,9 @@ public class GuestNode {
 		debug("GuestNode#waitForSent(): Other clusters sent");
 	}
 
+	/**
+	 * Wait until all the clients received all the receivedAt entries.
+	 */
 	private void waitForConnected() {
 		debug("GuestNode#waitForConnected(): Waiting for all the clusters connected");
 
@@ -306,9 +356,24 @@ public class GuestNode {
 	}
 
 	/**
-	 * Periodically checks the status of connections to the remote clusters
+	 * The processing task. Contains the main algorithm of the GuestNode:
+	 * <ul>
+	 * <li>Put startedAt entry with a special startedAt key and date of the
+	 * start as the value</li>
+	 * <li>Wait until in the local region will be all the startedAt entries from
+	 * other clients</li>
+	 * <li>Put sentAt entry with a special sentAt key and date of the start as
+	 * the value</li>
+	 * <li>Wait until in the local region will be all the sentAt entries from
+	 * other clients. When such entry received, put new special entry receivedAt
+	 * into the region</li>
+	 * <li>Wait until in the local region will be all the receivedAt entries
+	 * from other clients</li>
+	 * </ul>
+	 * 
+	 * See the special keys formats in the appropriate methods.
 	 */
-	private class ConnectionCheckTask implements Runnable {
+	private class ProcessingTask implements Runnable {
 		private boolean connected = false;
 
 		public void run() {
@@ -337,8 +402,7 @@ public class GuestNode {
 	}
 
 	/**
-	 * Waits for responses from all the remote clusters. If they don't respond
-	 * in timeout milliseconds, interrupts the process.
+	 * Waits for processing finished.
 	 * 
 	 * @param timeout
 	 *            - the timeout in milliseconds
@@ -349,7 +413,7 @@ public class GuestNode {
 		debug("GuestNode#waitFor(long): Waiting for task finish with timeout = "
 			+ timeout);
 
-		ConnectionCheckTask connectionCheckTask = new ConnectionCheckTask();
+		ProcessingTask connectionCheckTask = new ProcessingTask();
 
 		Utils.execute(connectionCheckTask, timeout);
 
@@ -459,10 +523,24 @@ public class GuestNode {
 		}
 	}
 
+	/**
+	 * Prints debug information if the debug is enabled
+	 * 
+	 * @param message
+	 *            - the debug message
+	 */
 	private void debug(String message) {
 		debug(message, null);
 	}
 
+	/**
+	 * Prints debug information if the debug is enabled
+	 * 
+	 * @param message
+	 *            - the debug message
+	 * @param t
+	 *            - the instance of Throwable
+	 */
 	private void debug(String message, Throwable t) {
 		if (debugEnabled) {
 			long currentTime = System.currentTimeMillis();
