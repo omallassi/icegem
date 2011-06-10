@@ -2,6 +2,7 @@ package com.googlecode.icegem.cacheutils.replication;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -19,13 +20,8 @@ public class ReplicationProcessor {
 	/* Timeout, milliseconds */
 	private long timeout;
 
-	/* Path to the license file */
-	private final String licenseFilePath;
-
 	/* Name of the technical region */
 	private final String regionName;
-
-	private final String licenseType;
 
 	private final boolean debugEnabled;
 	/** Field javaProcessLauncher */
@@ -52,15 +48,12 @@ public class ReplicationProcessor {
 	 * @param quiet
 	 */
 	public ReplicationProcessor(Properties clustersProperties, long timeout,
-		String licenseFilePath, String licenseType, String regionName,
-		boolean debugEnabled, boolean quiet) {
+		String regionName, boolean debugEnabled, boolean quiet) {
 
 		processingStartedAt = System.currentTimeMillis();
 
 		this.clustersProperties = clustersProperties;
 		this.timeout = timeout;
-		this.licenseFilePath = licenseFilePath;
-		this.licenseType = licenseType;
 		this.regionName = regionName;
 		this.debugEnabled = debugEnabled;
 		this.quiet = quiet;
@@ -78,6 +71,14 @@ public class ReplicationProcessor {
 	public int process() throws IOException, InterruptedException {
 		debug("ReplicationProcessor#process(): Processing start");
 
+		Properties gemfireProperties = PropertiesHelper.filterProperties(
+			System.getProperties(), "gemfire.");
+		String[] vmOptions = PropertiesHelper
+			.propertiesToVMOptions(gemfireProperties);
+
+		debug("ReplicationProcessor#process(): vmOptions = "
+			+ Arrays.asList(vmOptions));
+
 		List<Process> processesList = new ArrayList<Process>();
 		for (Object keyObject : clustersProperties.keySet()) {
 			String cluster = (String) keyObject;
@@ -90,20 +91,15 @@ public class ReplicationProcessor {
 				+ clustersPropertiesString
 				+ ", timeout = "
 				+ timeout
-				+ ", licenseFilePath = "
-				+ licenseFilePath
-				+ ", licenseType = "
-				+ licenseType + ", regionName = " + regionName);
+				+ ", regionName = " + regionName);
 
-			Process process = javaProcessLauncher
-				.runWithoutConfirmation(
-					GuestNode.class,
-					null,
-					new String[] { cluster, clustersPropertiesString,
-						String.valueOf(timeout), licenseFilePath, licenseType,
-						regionName, String.valueOf(debugEnabled),
-						String.valueOf(quiet),
-						String.valueOf(processingStartedAt) });
+			Process process = javaProcessLauncher.runWithoutConfirmation(
+				GuestNode.class,
+				vmOptions,
+				new String[] { cluster, clustersPropertiesString,
+					String.valueOf(timeout), regionName,
+					String.valueOf(debugEnabled), String.valueOf(quiet),
+					String.valueOf(processingStartedAt) });
 
 			debug("ReplicationProcessor#process(): Adding GuestNode to processList");
 

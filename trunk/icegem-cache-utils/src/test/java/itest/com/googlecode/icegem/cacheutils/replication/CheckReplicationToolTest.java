@@ -56,15 +56,18 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
+		String[] vmArguments = new String[] {
+			"-Dgemfire.license-file="
+				+ propertiesHelper.getStringProperty("license-file"),
+			"-Dgemfire.license-type="
+				+ propertiesHelper.getStringProperty("license-type"),
+			"-Dgemfire.log-level=none" };
+
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class,
-			null,
-			new String[] { "check-replication", "-c",
-				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
-				"-c", "clusterC=localhost[18083]", "-lf",
-				propertiesHelper.getStringProperty("license-file"), "-lt",
-				propertiesHelper.getStringProperty("license-type"), "-t",
-				"30000" });
+			Launcher.class, vmArguments, new String[] { "check-replication",
+				"-c", "clusterA=localhost[18081]", "-c",
+				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
+				"-t", "30000" });
 
 		assertThat(exitCode).isEqualTo(0);
 	}
@@ -76,14 +79,19 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
+		String[] vmArguments = new String[] {
+			"-Dgemfire.license-file="
+				+ propertiesHelper.getStringProperty("license-file"),
+			"-Dgemfire.license-type="
+				+ propertiesHelper.getStringProperty("license-type"),
+			"-Dgemfire.log-level=none" };
+
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class, null, new String[] { "check-replication", "-c",
+			Launcher.class, vmArguments, new String[] { "check-replication",
+				"-c",
 				"clusterA=localhost[18081],localhost[18084],localhost[18085]",
 				"-c", "clusterB=localhost[18082],localhost[18086]", "-c",
-				"clusterC=localhost[18083],localhost[18087]", "-lf",
-				propertiesHelper.getStringProperty("license-file"), "-lt",
-				propertiesHelper.getStringProperty("license-type"), "-t",
-				"30000" });
+				"clusterC=localhost[18083],localhost[18087]", "-t", "30000" });
 
 		assertThat(exitCode).isEqualTo(0);
 	}
@@ -95,21 +103,24 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
+		String[] vmArguments = new String[] {
+			"-Dgemfire.license-file="
+				+ propertiesHelper.getStringProperty("license-file"),
+			"-Dgemfire.license-type="
+				+ propertiesHelper.getStringProperty("license-type"),
+			"-Dgemfire.log-level=none" };
+
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class,
-			null,
-			new String[] { "check-replication", "-c",
-				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
-				"-c", "clusterD=localhost[18084]", "-lf",
-				propertiesHelper.getStringProperty("license-file"), "-lt",
-				propertiesHelper.getStringProperty("license-type"), "-t",
-				"10000" });
+			Launcher.class, vmArguments, new String[] { "check-replication",
+				"-c", "clusterA=localhost[18081]", "-c",
+				"clusterB=localhost[18082]", "-c", "clusterD=localhost[18084]",
+				"-t", "10000" });
 
 		assertThat(exitCode).isEqualTo(1);
 	}
 
 	@Test
-	public void testMainNegativeDefaultLicense() throws Exception {
+	public void testMainPositiveDefaultLicense() throws Exception {
 		System.out.println("testMainNegativeDefaultLicense");
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
@@ -117,7 +128,7 @@ public class CheckReplicationToolTest {
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterC=localhost[18083]", "-t", "10000" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertThat(exitCode).isEqualTo(0);
 	}
 
 	@Test
@@ -137,15 +148,18 @@ public class CheckReplicationToolTest {
 		PropertiesHelper propertiesHelper = new PropertiesHelper(
 			"/checkReplicationToolGatewayA.properties");
 
+		String[] vmArguments = new String[] {
+			"-Dgemfire.license-file="
+				+ propertiesHelper.getStringProperty("license-file"),
+			"-Dgemfire.license-type="
+				+ propertiesHelper.getStringProperty("license-type"),
+			"-Dgemfire.log-level=none" };
+
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class,
-			null,
-			new String[] { "check-replication", "-c",
-				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
-				"-c", "clusterC=localhost[18083]", "-lf",
-				propertiesHelper.getStringProperty("license-file"), "-lt",
-				propertiesHelper.getStringProperty("license-type"), "-t",
-				"10000", "-r", "wrong" });
+			Launcher.class, vmArguments, new String[] { "check-replication",
+				"-c", "clusterA=localhost[18081]", "-c",
+				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
+				"-t", "10000", "-r", "wrong" });
 
 		assertThat(exitCode).isEqualTo(1);
 	}

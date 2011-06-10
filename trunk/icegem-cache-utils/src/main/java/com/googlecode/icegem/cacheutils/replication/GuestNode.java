@@ -25,6 +25,8 @@ import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
  * 
  */
 public class GuestNode {
+	private static final String GEMFIRE_PREFIX = "gemfire.";
+
 	private static final int CHECK_PERIOD = 50;
 
 	private static final String KEY_PREFIX = "check-replication-";
@@ -41,11 +43,6 @@ public class GuestNode {
 
 	/* Technical region instance */
 	private Region<String, Long> region;
-
-	/* Path to the license file */
-	private String licenseFile;
-
-	private String licenseType;
 
 	/* The name of technical region */
 	private String regionName;
@@ -70,22 +67,17 @@ public class GuestNode {
 	 * @param processingStartedAt
 	 */
 	private GuestNode(String cluster, Properties clustersProperties,
-		String licenseFile, String licenseType, String regionName,
-		boolean debugEnabled, boolean quiet, long processingStartedAt) {
+		String regionName, boolean debugEnabled, boolean quiet,
+		long processingStartedAt) {
 
 		debug("GuestNode#GuestNode(String, Properties, String, String, String): Creating instance with parameters: cluster = "
 			+ cluster
 			+ ", clustersProperties = "
 			+ clustersProperties
-			+ ", licenseFile = "
-			+ licenseFile
-			+ ", licenseType = "
-			+ licenseType + ", regionName = " + regionName);
+			+ ", regionName = " + regionName);
 
 		this.localClusterName = cluster;
 		this.clustersProperties = clustersProperties;
-		this.licenseFile = licenseFile;
-		this.licenseType = licenseType;
 		this.regionName = regionName;
 		this.debugEnabled = debugEnabled;
 		this.quiet = quiet;
@@ -121,13 +113,22 @@ public class GuestNode {
 
 			ClientCacheFactory clientCacheFactory = new ClientCacheFactory();
 
-			if ((licenseFile != null) && (licenseType != null)) {
-				clientCacheFactory.set("license-file", licenseFile).set(
-					"license-type", licenseType);
+			Properties gemfireProperties = PropertiesHelper.filterProperties(
+				System.getProperties(), GEMFIRE_PREFIX);
+
+			for (Object keyObject : gemfireProperties.keySet()) {
+				String key = (String) keyObject;
+				String value = gemfireProperties.getProperty(key);
+
+				String name = key.substring(GEMFIRE_PREFIX.length());
+
+				debug("GuestNode#init(): Configuring ClientCacheFactory with key = "
+					+ name + ", value = " + value);
+
+				clientCacheFactory.set(name, value);
 			}
 
-			clientCacheFactory.set("log-level", "none")
-				.setPoolSubscriptionEnabled(true);
+			clientCacheFactory.setPoolSubscriptionEnabled(true);
 
 			String locators = clustersProperties.getProperty(localClusterName);
 			String[] locatorsArray = locators.split(",");
@@ -428,7 +429,7 @@ public class GuestNode {
 	 */
 	public static void main(String[] args) {
 		try {
-			if (args.length != 9) {
+			if (args.length != 7) {
 				System.exit(1);
 			}
 
@@ -436,16 +437,13 @@ public class GuestNode {
 			Properties clustersProperties = PropertiesHelper
 				.stringToProperties(args[1]);
 			long timeout = Long.parseLong(args[2]);
-			String licenseFile = (args[3] == "null" ? null : args[3]);
-			String licenseType = args[4];
-			String regionName = args[5];
-			boolean debugEnabled = ("true".equals(args[6]) ? true : false);
-			boolean quiet = ("true".equals(args[7]) ? true : false);
-			long processingStartedAt = Long.parseLong(args[8]);
+			String regionName = args[3];
+			boolean debugEnabled = ("true".equals(args[4]) ? true : false);
+			boolean quiet = ("true".equals(args[5]) ? true : false);
+			long processingStartedAt = Long.parseLong(args[6]);
 
 			GuestNode guestNode = new GuestNode(cluster, clustersProperties,
-				licenseFile, licenseType, regionName, debugEnabled, quiet,
-				processingStartedAt);
+				regionName, debugEnabled, quiet, processingStartedAt);
 
 			boolean connected = guestNode.waitFor(timeout);
 

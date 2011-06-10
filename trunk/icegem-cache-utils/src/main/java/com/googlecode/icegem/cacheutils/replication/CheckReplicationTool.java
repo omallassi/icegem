@@ -33,11 +33,6 @@ public class CheckReplicationTool extends Tool {
 	/* Name of region option */
 	private static final String REGION_OPTION = "region";
 
-	/* Name of license file option */
-	private static final String LICENSE_FILE_OPTION = "license-file";
-
-	private static final String LICENSE_TYPE_OPTION = "license-type";
-
 	/* Name of help option */
 	private static final String HELP_OPTION = "help";
 
@@ -46,11 +41,6 @@ public class CheckReplicationTool extends Tool {
 
 	/* Additional timeout */
 	private static final long DELTA_TIMEOUT = 10 * 1000;
-
-	/* Default license file is gemfireLicense.zip */
-	private static final String DEFAULT_LICENSE_FILE_PATH = null;
-
-	private static final String DEFAULT_LICENSE_TYPE = "evaluation";
 
 	/* Default region name is "proxy" */
 	private static final String DEFAULT_REGION_NAME = "proxy";
@@ -66,11 +56,6 @@ public class CheckReplicationTool extends Tool {
 	/* Waiting timeout */
 	private static long timeout = DEFAULT_TIMEOUT;
 
-	/* Path to the license file */
-	private static String licenseFilePath = DEFAULT_LICENSE_FILE_PATH;
-
-	private static String licenseType = DEFAULT_LICENSE_TYPE;
-
 	/* Technical region name */
 	private static String regionName = DEFAULT_REGION_NAME;
 
@@ -83,21 +68,16 @@ public class CheckReplicationTool extends Tool {
 	private class ProcessorTask implements Runnable {
 
 		private int exitCode;
-		private final Properties clustersProperties;
-		private final long timeout;
-		private final String licenseFilePath;
-		private final String regionName;
-		private final String licenseType;
-		private final boolean debugEnabled;
-		private final boolean quiet;
+		private Properties clustersProperties;
+		private long timeout;
+		private String regionName;
+		private boolean debugEnabled;
+		private boolean quiet;
 
 		public ProcessorTask(Properties clustersProperties, long timeout,
-			String licenseFilePath, String licenseType, String regionName,
-			boolean debugEnabled, boolean quiet) {
+			String regionName, boolean debugEnabled, boolean quiet) {
 			this.clustersProperties = clustersProperties;
 			this.timeout = timeout;
-			this.licenseFilePath = licenseFilePath;
-			this.licenseType = licenseType;
 			this.regionName = regionName;
 			this.debugEnabled = debugEnabled;
 			this.quiet = quiet;
@@ -105,8 +85,7 @@ public class CheckReplicationTool extends Tool {
 
 		public void run() {
 			ReplicationProcessor processor = new ReplicationProcessor(
-				clustersProperties, timeout, licenseFilePath, licenseType,
-				regionName, debugEnabled, quiet);
+				clustersProperties, timeout, regionName, debugEnabled, quiet);
 
 			exitCode = 1;
 			try {
@@ -140,13 +119,10 @@ public class CheckReplicationTool extends Tool {
 				+ clustersProperties
 				+ ", timeout = "
 				+ timeout
-				+ ", licenseFilePath = "
-				+ licenseFilePath
-				+ ", licenseType = "
-				+ licenseType + ", regionName = " + regionName);
+				+ ", regionName = " + regionName);
 
 			ProcessorTask task = new ProcessorTask(clustersProperties, timeout,
-				licenseFilePath, licenseType, regionName, debugEnabled, quiet);
+				regionName, debugEnabled, quiet);
 
 			debug("CheckReplicationTool#execute(String[]): Starting CheckReplicationTool.ProcessorTask");
 
@@ -196,14 +172,6 @@ public class CheckReplicationTool extends Tool {
 				quiet = true;
 			}
 
-			if (line.hasOption(LICENSE_FILE_OPTION)) {
-				licenseFilePath = line.getOptionValue(LICENSE_FILE_OPTION);
-			}
-
-			if (line.hasOption(LICENSE_TYPE_OPTION)) {
-				licenseType = line.getOptionValue(LICENSE_TYPE_OPTION);
-			}
-
 			if (line.hasOption(REGION_OPTION)) {
 				regionName = line.getOptionValue(REGION_OPTION);
 			}
@@ -247,9 +215,6 @@ public class CheckReplicationTool extends Tool {
 
 		gnuOptions
 			.addOption("t", TIMEOUT_OPTION, true, "Timeout, ms")
-			.addOption("lf", LICENSE_FILE_OPTION, true,
-				"The path to non default license file")
-			.addOption("lt", LICENSE_TYPE_OPTION, true, "The type of license")
 			.addOption(
 				"r",
 				REGION_OPTION,
