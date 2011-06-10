@@ -362,21 +362,21 @@ public class JavaProcessLauncher {
 			+ "java";
 		String classpath = System.getProperty("java.class.path");
 
-		List<String> argimentsList = new ArrayList<String>();
-		argimentsList.add(javaBin);
-		argimentsList.add("-cp");
-		argimentsList.add(classpath);
+		List<String> argumentsList = new ArrayList<String>();
+		argumentsList.add(javaBin);
+		argumentsList.add("-cp");
+		argumentsList.add(classpath);
 
 		if (javaArguments != null && javaArguments.length > 0) {
-			argimentsList.addAll(Arrays.asList(javaArguments));
+			argumentsList.addAll(Arrays.asList(javaArguments));
 		}
 
-		argimentsList.add(klazz.getCanonicalName());
+		argumentsList.add(klazz.getCanonicalName());
 
 		if (processArguments != null && processArguments.length > 0) {
-			argimentsList.addAll(Arrays.asList(processArguments));
+			argumentsList.addAll(Arrays.asList(processArguments));
 		}
-		return argimentsList;
+		return argumentsList;
 	}
 
 	/**
