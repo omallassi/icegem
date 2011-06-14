@@ -152,7 +152,7 @@ public class AllowedJdkTypesTest extends TestParent { //todo: what if field of t
         Assertions.assertThat(actual.getDate()).isEqualTo(expected.getDate());
     }
 
-    @Test(dataProvider = "date -> exception", expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = TestParent.MSG)
+    @Test(dataProvider = "date -> exception", expectedExceptions = RuntimeException.class)
     public void testDateWithException(Date date) {
         testDate(date);
     }

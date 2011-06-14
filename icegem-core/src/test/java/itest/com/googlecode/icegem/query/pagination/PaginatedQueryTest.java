@@ -163,7 +163,7 @@ public class PaginatedQueryTest {
             QueryInvocationTargetException, TypeMismatchException, LimitExceededException {
         int numberOfEntriesForPopulation = 10;
         PersonUtils.populateRegionByPersons(data, numberOfEntriesForPopulation);
-        String queryString = "SELECT * FROM /data.keySet";
+        String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
         int pageSize = 20;
         PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
@@ -193,7 +193,7 @@ public class PaginatedQueryTest {
     public void testPageMethod() throws NameResolutionException, FunctionDomainException, QueryInvocationTargetException,
             TypeMismatchException, LimitExceededException {
         PersonUtils.populateRegionByPersons(data, 100);
-        String queryString = "SELECT * FROM /data.keySet";
+        String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
         int pageSize = 20;
         PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
@@ -243,7 +243,8 @@ public class PaginatedQueryTest {
             TypeMismatchException, LimitExceededException {
         PersonUtils.populateRegionByPersons(data, 100);
         int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", "SELECT * FROM /data.keySet", pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data",
+                "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber", pageSize);
 
         int pageNumber = 1;
 
@@ -286,7 +287,8 @@ public class PaginatedQueryTest {
             QueryInvocationTargetException, TypeMismatchException, LimitExceededException {
         PersonUtils.populateRegionByPersons(data, 100);
         int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", "SELECT * FROM /data.keySet", pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data",
+                "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber", pageSize);
 
         query.next();
         query.next();
@@ -340,12 +342,31 @@ public class PaginatedQueryTest {
 
         query.page(pageNumber);
     }
-    
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testQueryOrderByWithoutKeyInProjection() throws FunctionDomainException, QueryInvocationTargetException,
+            TypeMismatchException, NameResolutionException, LimitExceededException {
+        PersonUtils.populateRegionByPersons(data, 100);
+        PaginatedQuery query = new PaginatedQuery(cache, "data",
+                "SELECT DISTINCT e.value.socialNumber, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
+        query.page(1);
+    }
+
+    @Test(expectedExceptions = ServerOperationException.class)
+    public void testQueryOrderByWithoutOrderByFieldInProjection() throws FunctionDomainException, QueryInvocationTargetException,
+            TypeMismatchException, NameResolutionException, LimitExceededException {
+        PersonUtils.populateRegionByPersons(data, 100);
+        PaginatedQuery query = new PaginatedQuery(cache, "data",
+                "SELECT DISTINCT e.key FROM /data.entrySet e ORDER BY e.value.socialNumber");
+        query.page(1);
+    }
+
     @Test
     public void testPaginatedComplexQuering() throws FunctionDomainException, QueryInvocationTargetException,
             TypeMismatchException, NameResolutionException, LimitExceededException {
         PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query = new PaginatedQuery(cache, "data", "SELECT e.key FROM /data.entrySet e WHERE e.value.socialNumber = $1", new Object[]{1});
+        PaginatedQuery query = new PaginatedQuery(cache, "data",
+                "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e WHERE e.value.socialNumber = $1 ORDER BY e.value.socialNumber", new Object[]{1});
 
         List pageEntries = query.page(1);
 
@@ -404,7 +425,7 @@ public class PaginatedQueryTest {
     }
 
     @Test
-    public void testInitialQueryLimitThatEqualToPaginatedQueryLimitForSmallSizeOfEntries() throws NameResolutionException, 
+    public void testInitialQueryLimitThatEqualToPaginatedQueryLimitForSmallSizeOfEntries() throws NameResolutionException,
             FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, LimitExceededException {
         PersonUtils.populateRegionByPersons(data, 5);
         int queryLimit = 6;

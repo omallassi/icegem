@@ -1,6 +1,7 @@
 package com.googlecode.icegem.serialization.codegen;
 
 import com.googlecode.icegem.serialization.BeanVersion;
+import com.googlecode.icegem.serialization.codegen.exception.IceGemRuntimeException;
 import com.googlecode.icegem.serialization.codegen.impl.FromDataFieldProcessor;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class MethodFromDataProcessor {
     public String process(XClass element) {
         if (Enum.class.isAssignableFrom(element.getType())) {
             if (element.getType() == Enum.class) {
-                throw new InternalError("Never here!"); //todo: correct ex? more info?
+                throw new IceGemRuntimeException("Never here!"); //todo: correct ex? more info?
             } else {
                 return processEnum(element);
             }
@@ -37,15 +38,15 @@ public class MethodFromDataProcessor {
                 // check a bean version of the class
                 .append(tab("int currentVersion = " + element.getType().getAnnotation(BeanVersion.class).value() +"; \n"))
                 .append(tab("int actualVersion = in.readInt();\n"))
-                .append(tab("if (currentVersion < actualVersion) {\n" +
-                        tab("throw new ClassCastException(\"current bean version is less than serialized: \" + " +
-                                "currentVersion + \" < \" + actualVersion);\n}")))
+                .append(tab("if (currentVersion < actualVersion) {\n"))
+                .append(tab(2, "throw new ClassCastException(\"current bean version is less than serialized: \" + " +
+                                "currentVersion + \" < \" + actualVersion);\n}"))
 
                 // check a hash code of the class model
                 .append(tab("int currentClassModelHashCode = " + CodeGenUtils.getClassModelHashCodeBasedOnClassFields(fields) +"; \n"))
                 .append(tab("int actualClassModelHashCode = in.readInt();\n"))
-                .append(tab("if ((currentVersion == actualVersion) && (currentClassModelHashCode != actualClassModelHashCode)) {\n" +
-                        tab("throw new ClassCastException(\"Model of the current class does not match with the model of the serialized class. Maybe you have forgotten to increase a version of the bean\");\n}")))
+                .append(tab("if ((currentVersion == actualVersion) && (currentClassModelHashCode != actualClassModelHashCode)) {\n"))
+                .append(tab(2, "throw new ClassCastException(\"Model of the current class does not match with the model of the serialized class. Maybe you have forgotten to increase a version of the bean\");\n}"))
 
                 .append(tab("// create 'empty' bean\n"))
                 .append(tab(className + " result = new " + className + "();\n")); //todo: no-arg constructor

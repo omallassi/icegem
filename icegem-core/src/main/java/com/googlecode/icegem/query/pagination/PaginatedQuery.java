@@ -13,16 +13,22 @@ import java.util.*;
  * This component allows to execute paginated queries both from client and peer/server sides.
  * It caches paginated query results in a help region and allows to iterate on them using paginated query API.
  *
- * Query results will be ordered by entry keys automatically, if a key object implements java.lang.Comparable interface.
- * @see Comparable
- *
- * See http://code.google.com/p/icegem/wiki/Documentation#Paginated_Query for more details.
+ * See http://code.google.com/p/icegem/wiki/Documentation#Paginated_Query for more details and examples.
  *
  * RESTRICTIONS:
  * 1). A query string for paginated query can be arbitrarily complex
- * but must return keys of entries that obtained during the query.
+ * but entry key must be part of projection list.
  * 2). For partitioned regions a query string must meet the requirements
- * described in a GemFire? documentation for querying partitioned regions.
+ * described in a GemFire documentation for querying partitioned regions.
+ *
+ * ORDER BY on Partitioned Regions
+ * A paginated query supports order by functionality on partitioned regions.
+ * The fields specified in the order by clause must be part of the projection list.
+ *
+ * Examples:
+ *
+ * SELECT * FROM /data.keySet;
+ * SELECT DISTINCT d.key, d.value.field1 FROM /data.entrySet d ORDER BY d.value.field1;
  *
  * @author Andrey Stepanov aka standy
  */
@@ -228,7 +234,7 @@ public class PaginatedQuery<V> {
             logger.warn(e.getMessage());
             throw e;
         }
-        return getSortedValues(entriesKeysForPage);
+        return getValues(entriesKeysForPage);
     }
 
     /**
@@ -363,34 +369,22 @@ public class PaginatedQuery<V> {
     }
 
     /**
-     * Returns sorted by keys values for given keys.
-     * Values will be sorted by keys, if keys implement Comparable interface.
+     * Returns values for given keys.
      *
      * @param entriesKeysForPage of type List<Object>
      * @return List<V>
      */
-    @SuppressWarnings({ "unchecked" })
-    private List<V> getSortedValues(List<Object> entriesKeysForPage) {
+    private List<V> getValues(List<Object> entriesKeysForPage) {
         if (entriesKeysForPage.size() == 0) {
             return new ArrayList<V>(0);
         }
-        Map<Object, V> entries = queryRegion.getAll(entriesKeysForPage);
-        List<Object> keys = new ArrayList<Object>(entries.keySet());
+        Map<Object, V> entriesMap = queryRegion.getAll(entriesKeysForPage);
 
-        if (!(keys.get(0) instanceof Comparable)) {
-            return new ArrayList<V> (entries.values());
+        List<V> entries = new ArrayList<V>(entriesKeysForPage.size());
+        for (Object key : entriesKeysForPage) {
+            entries.add(entriesMap.get(key));
         }
-
-        Collections.sort(keys, new Comparator<Object>() {
-            public int compare(Object o1, Object o2) {
-                return ((Comparable) o1).compareTo(o2);
-            }
-        });
-        List<V> values = new ArrayList<V>(entries.size());
-        for (Object key : keys) {
-            values.add(entries.get(key));
-        }
-        return values;
+        return entries;
     }
 
     /**
@@ -416,7 +410,26 @@ public class PaginatedQuery<V> {
                 logger.warn(e.getMessage());
                 throw e;
             }
-            storePaginatedQueryPagesAndGeneralInfo(results.asList());
+            if (results.getCollectionType().getElementType().isStructType()) {
+                // List of structures. Should extract keys from it.
+                List<Object> keys = new ArrayList<Object>(results.size());
+                for (Object result : results) {
+                    Object key;
+                    try {
+                        key = ((Struct) result).get("key");
+                    } catch (IllegalArgumentException e) {
+                        IllegalArgumentException exception = new IllegalArgumentException(e.getMessage() +
+                                " (hint: maybe you forgot to include entry key into query projection list)");
+                        logger.warn(exception.getMessage());
+                        throw exception;
+                    }
+                    keys.add(key);
+                }
+                storePaginatedQueryPagesAndGeneralInfo(keys);
+            } else {
+                // List of keys.
+                storePaginatedQueryPagesAndGeneralInfo(results.asList());
+            }
         }
     }
 
@@ -425,17 +438,8 @@ public class PaginatedQuery<V> {
      *
      * @param keys of type List<Object>
      */
-    @SuppressWarnings({ "unchecked" })
     private void storePaginatedQueryPagesAndGeneralInfo(List<Object> keys) {
         storePaginatedQueryGeneralInfo(keys.size());
-
-        if (keys.size() > 0 && keys.get(0) instanceof Comparable) {
-            Collections.sort(keys, new Comparator<Object>() {
-                public int compare(Object o1, Object o2) {
-                    return ((Comparable) o1).compareTo(o2);
-                }
-            });
-        }
 
         int keyNumber = 0;
         int pageNumber = 0;

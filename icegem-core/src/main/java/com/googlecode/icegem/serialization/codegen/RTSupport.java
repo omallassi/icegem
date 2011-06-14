@@ -1,5 +1,7 @@
 package com.googlecode.icegem.serialization.codegen;
 
+import com.googlecode.icegem.serialization.codegen.exception.MethodFrameStackOverflowException;
+
 import java.io.InvalidClassException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -23,7 +25,7 @@ import static java.util.Arrays.asList;
 /**
  * @author igolovach
  */
-
+// TODO: Complete this class.
 public class RTSupport {
 
     private static final Set<Class<?>> JDK_ALLOWED_CLASSES;
@@ -73,13 +75,14 @@ public class RTSupport {
 
     private static void checkAllowedInCompileTimeCustomType(Class<?> clazz) {
         //To change body of created methods use File | Settings | File Templates.
+        // TODO: Write method body
     }
 
     public static void checkAllowedInRealTime(Object obj) throws InvalidClassException {
         try {
             checkAllowedInRealTime0(obj, 1); //todo: correct 1? or 0?
-        } catch (StackOverflowError e) {
-            throw new StackOverflowError(MethodFrameCounter.MSG + ". For object: " + obj.toString());
+        } catch (MethodFrameStackOverflowException e) {
+            throw new MethodFrameStackOverflowException(MethodFrameCounter.STACK_OVERFLOW_MSG + ". For object: " + obj.toString());
         }
     }
 
@@ -87,11 +90,12 @@ public class RTSupport {
      * With stack counter
      *
      * @param obj
+     * @param depth of
      * @throws InvalidClassException
      */
     private static void checkAllowedInRealTime0(Object obj, int depth) throws InvalidClassException {
-        if (depth > MethodFrameCounter.MAX_STACK_DEPTH) { //todo: correct >? or >=?
-            throw new StackOverflowError();
+        if (depth >= MethodFrameCounter.MAX_STACK_DEPTH) { //todo: correct >? or >=?
+            throw new MethodFrameStackOverflowException();
         }
         Class<?> clazz = obj.getClass();
 
