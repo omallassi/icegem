@@ -8,6 +8,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.MonitorTool;
 import com.googlecode.icegem.cacheutils.regioncomparator.CompareTool;
 import com.googlecode.icegem.cacheutils.replication.CheckReplicationTool;
@@ -139,7 +140,7 @@ public class Launcher {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(sb.toString(), options);
 
-		System.exit(1);
+		Utils.exitWithFailure();
 	}
 
 	/**
@@ -262,7 +263,7 @@ public class Launcher {
 			debug(
 				"Launcher#main(): Throwable caught with message = "
 					+ t.getMessage(), t);
-			System.exit(1);
+			Utils.exitWithFailure();
 		}
 	}
 

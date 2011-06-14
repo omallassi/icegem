@@ -15,11 +15,11 @@ import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 
 import com.googlecode.icegem.cacheutils.Tool;
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.NodesController;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.cacheutils.monitor.utils.EmailService;
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 /**
  * Periodically checks the distributed system status and sends mail in case of
@@ -152,18 +152,13 @@ public class MonitorTool extends Tool {
 					e);
 			}
 
-			int status;
 			if (serverAlive) {
-				status = 0;
-
 				System.out.println("alive");
-			} else {
-				status = 1;
-
-				System.out.println("down");
+				Utils.exitWithSuccess();
 			}
 
-			System.exit(status);
+			System.out.println("down");
+			Utils.exitWithFailure();
 		} else if (allOption) {
 			MonitorTool monitoringTool = null;
 			try {
@@ -184,7 +179,6 @@ public class MonitorTool extends Tool {
 
 		if (commandLineArguments.length < 1) {
 			printHelp(options);
-			System.exit(1);
 		}
 
 		CommandLineParser parser = new GnuParser();
@@ -193,7 +187,6 @@ public class MonitorTool extends Tool {
 
 			if (line.hasOption("help")) {
 				printHelp(options);
-				System.exit(0);
 			}
 
 			boolean allOptionTemp = line.hasOption("all");
@@ -211,20 +204,20 @@ public class MonitorTool extends Tool {
 				allOption = allOptionTemp;
 			} else {
 				printHelp(options);
-				System.exit(1);
 			}
 
 		} catch (Throwable t) {
 			System.err
 				.println("Parsing of options failed. Please check that you use correct option or specify a server in format host[port].");
 			printHelp(options);
-			System.exit(1);
 		}
 	}
 
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("monitor [options]", options);
+
+		Utils.exitWithFailure();
 	}
 
 	protected Options constructGnuOptions() {

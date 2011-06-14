@@ -1,4 +1,4 @@
-package com.googlecode.icegem.cacheutils.monitor.utils;
+package com.googlecode.gemfire.cacheutils.common;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -9,6 +9,7 @@ import java.util.Date;
 
 import org.testng.annotations.Test;
 
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
 
 public class UtilsTest {

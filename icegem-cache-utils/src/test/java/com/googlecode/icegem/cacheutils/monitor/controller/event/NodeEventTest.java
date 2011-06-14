@@ -2,8 +2,8 @@ package com.googlecode.icegem.cacheutils.monitor.controller.event;
 
 import org.testng.annotations.Test;
 
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 import static org.fest.assertions.Assertions.assertThat;
 

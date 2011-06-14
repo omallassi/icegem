@@ -1,16 +1,27 @@
 package com.googlecode.icegem.cacheutils.latencymeasurer;
 
-import com.googlecode.icegem.cacheutils.Executable;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.apache.commons.cli.*;
-import com.gemstone.gemfire.cache.*;
-import static com.gemstone.gemfire.cache.DynamicRegionFactory.*;
-import com.googlecode.icegem.cacheutils.latencymeasurer.listeners.LatencyDynamicRegionListener;
+import static com.gemstone.gemfire.cache.DynamicRegionFactory.get;
 
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.Scanner;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gemstone.gemfire.cache.Cache;
+import com.gemstone.gemfire.cache.CacheFactory;
+import com.gemstone.gemfire.cache.DynamicRegionFactory;
+import com.gemstone.gemfire.cache.Region;
+import com.googlecode.icegem.cacheutils.Executable;
+import com.googlecode.icegem.cacheutils.common.Utils;
+import com.googlecode.icegem.cacheutils.latencymeasurer.listeners.LatencyDynamicRegionListener;
 
 
 public class LatencyMeasurerManager implements Executable{
@@ -63,7 +74,7 @@ public class LatencyMeasurerManager implements Executable{
         Options options = constructGnuOptions();
         if (commandLineArguments.length < 1) {
             printHelp(options);
-            System.exit(0);
+            Utils.exitWithSuccess();
         }
         CommandLineParser parser = new GnuParser();
         try {
@@ -72,7 +83,7 @@ public class LatencyMeasurerManager implements Executable{
                 clusterNameOption = line.getOptionValue("clustername");
                 if (clusterNameOption.indexOf("/") != -1) {
                     log.error("Cluster name should not contain /. Please try another name.");
-                    System.exit(0);
+                    Utils.exitWithSuccess();
                 }
                 if (line.hasOption("frequency")) {
                     measureFrequencyOption = line.getOptionValue("frequency");
@@ -80,21 +91,21 @@ public class LatencyMeasurerManager implements Executable{
                         measureFrequency = Integer.parseInt(measureFrequencyOption);
                     } catch (Exception ex) {
                         log.error("Measure frequency should be integer.");
-                        System.exit(0);
+                        Utils.exitWithSuccess();
                     }
                 }
             } else if (line.hasOption("help")) {
                 printHelp(options);
-                System.exit(0);
+                Utils.exitWithSuccess();
             } else {
                 printHelp(options);
-                System.exit(0);
+                Utils.exitWithSuccess();
             }
         }
         catch (ParseException exp) {
             log.error("Parsing options had failed.", exp);
             printHelp(options);
-            System.exit(0);
+            Utils.exitWithSuccess();
         }
     }
 

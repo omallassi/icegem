@@ -1,7 +1,7 @@
 package com.googlecode.icegem.cacheutils.monitor.controller.event;
 
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 /**
  * Represents the node event.

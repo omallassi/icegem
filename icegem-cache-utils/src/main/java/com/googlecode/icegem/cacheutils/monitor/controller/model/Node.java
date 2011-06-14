@@ -1,7 +1,7 @@
 package com.googlecode.icegem.cacheutils.monitor.controller.model;
 
 import com.gemstone.gemfire.cache.client.Pool;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
+import com.googlecode.icegem.cacheutils.common.Utils;
 
 /**
  * Represents the node - the set of information related to the instance of

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEvent;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventType;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 /**
  * Container for the detected nodes.
