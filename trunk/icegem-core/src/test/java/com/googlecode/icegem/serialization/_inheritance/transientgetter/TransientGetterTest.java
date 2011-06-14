@@ -98,16 +98,3 @@ public class TransientGetterTest extends TestParent {
         serializeAndDeserialize(obj);
     }
 }
-
-//todo: remove
-//class D {
-//    public static void main(String[] args) throws IOException {
-//        Object obj = null;
-//
-//        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        DataSerializer.writeObject(obj, new DataOutputStream(baos), false);
-//        byte[] data = baos.toByteArray();
-//        System.out.println(data.length);
-//        System.out.println(new String(data));
-//    }
-//}

@@ -3,6 +3,7 @@ package com.googlecode.icegem.serialization.primitive;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 
+import com.googlecode.icegem.serialization.codegen.exception.MethodFrameStackOverflowException;
 import javassist.CannotCompileException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -59,7 +60,7 @@ public class ObjectArrayTest extends TestParent {
         assertThat(actual.getObjArr()).hasSize(expectedArr.length);
     }
 
-    @Test(expectedExceptions = StackOverflowError.class, expectedExceptionsMessageRegExp = MethodFrameCounter.MSG)
+    @Test(expectedExceptions = StackOverflowError.class)
     public void testCycle1() {
         // create test bean
         ObjectArrayBean expected = new ObjectArrayBean();
@@ -69,7 +70,7 @@ public class ObjectArrayTest extends TestParent {
         ObjectArrayBean actual = (ObjectArrayBean) serializeAndDeserialize(expected);
     }
 
-    @Test(expectedExceptions = StackOverflowError.class, expectedExceptionsMessageRegExp = MethodFrameCounter.MSG)
+    @Test(expectedExceptions = StackOverflowError.class)
     public void testCycle2() {
         // create test bean
         ObjectArrayBean expectedA = new ObjectArrayBean();

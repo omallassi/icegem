@@ -14,16 +14,17 @@ import java.io.InvalidClassException;
  * @author igolovach
  */
 
-public class CyclicObjectRef3Test extends TestParent {
+public class CyclicObjectRef3WithDisabledMethodFrameCounterTest extends TestParent {
 
     @BeforeClass
     public void before() throws InvalidClassException, CannotCompileException {
         // register
         HierarchyRegistry.registerAll(getContextClassLoader(), CyclicObjectRef3BeanA.class, CyclicObjectRef3BeanB.class, CyclicObjectRef3BeanC.class);
     }
-    
-    @Test
-    public void test(){
+
+    @Test(expectedExceptions = StackOverflowError.class)
+    public void testWithDisabledMethodFrameCounter(){
+        System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "false");
         // create test bean
         CyclicObjectRef3BeanA expectedA = new CyclicObjectRef3BeanA();
         CyclicObjectRef3BeanB expectedB = new CyclicObjectRef3BeanB();
@@ -31,16 +32,7 @@ public class CyclicObjectRef3Test extends TestParent {
         expectedA.setNext(expectedB);
         expectedB.setNext(expectedC);
         expectedC.setNext(expectedA);
-        
-        try {
-            // Register / Serialize / Deserialize
-            CyclicObjectRef3BeanA actualA = (CyclicObjectRef3BeanA) serializeAndDeserialize(expectedA);
-            throw new AssertionError("Must be StackOverflowError");
-        } catch (StackOverflowError e) {
-            final String message = e.getMessage();
-            if (!message.contains(MethodFrameCounter.MSG)) {
-                throw new AssertionError("Must be StackOverflowError with message: '" + MethodFrameCounter.MSG + "'");
-            }
-        }
+
+        serializeAndDeserialize(expectedA);
     }
 }

@@ -1,5 +1,7 @@
 package com.googlecode.icegem.serialization.codegen;
 
+import com.googlecode.icegem.serialization.codegen.exception.IceGemRuntimeException;
+
 import java.util.List;
 
 /**
@@ -7,12 +9,20 @@ import java.util.List;
  */
 
 public class CodeGenUtils {
+    public static String TAB = "    ";
 
     public static String tab(String str) {
+        return tab(1, str);
+    }
+
+    public static String tab(int tabCount, String str) {
         String[] arr = str.split("\n");
         StringBuilder result = new StringBuilder();
         for (String s : arr) {
-            result.append("    ").append(s).append("\n");
+            for (int i = 1; i <= tabCount; i++) {
+                result.append(TAB);
+            }
+            result.append(s).append("\n");
         }
         if (!str.endsWith("\n")) {
             return result.substring(0, result.length() - 1);
@@ -62,7 +72,7 @@ public class CodeGenUtils {
                 } else if (clazz == double.class) {
                     primitiveClassName = "double";
                 } else {
-                    throw new InternalError("Never here! - You try to generate code for Void[]...[]: clazz = " + clazz);
+                    throw new IceGemRuntimeException("Never here! - You try to generate code for Void[]...[]: clazz = " + clazz);
                 }
                 return primitiveClassName + ending;
             } else {

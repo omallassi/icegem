@@ -28,6 +28,8 @@ public class TestParent {
 
             // Deserialize
             return (T) DataSerializer.readObject(new DataInputStream(new ByteArrayInputStream(data)));
+        } catch (RuntimeException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(MSG, e);
         }
@@ -42,6 +44,8 @@ public class TestParent {
 
             // Deserialize
             return (T) DataSerializer.readObject(new DataInputStream(new ByteArrayInputStream(data)));
+        } catch (RuntimeException re) {
+            throw re;
         } catch (Exception e) {
             throw new RuntimeException(MSG, e);
         }

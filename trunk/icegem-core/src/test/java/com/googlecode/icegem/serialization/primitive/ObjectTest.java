@@ -3,6 +3,7 @@ package com.googlecode.icegem.serialization.primitive;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 
+import com.googlecode.icegem.serialization.codegen.exception.MethodFrameStackOverflowException;
 import javassist.CannotCompileException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -76,7 +77,7 @@ public class ObjectTest extends TestParent {
         assertThat(actual.getObj()).isEqualTo(expected.getObj());
     }
 
-    @Test(expectedExceptions = StackOverflowError.class, expectedExceptionsMessageRegExp = MethodFrameCounter.MSG)
+    @Test(expectedExceptions = StackOverflowError.class)
     public void testCycle1() {
         // create test bean
         ObjectBean expected = new ObjectBean();
@@ -86,7 +87,7 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
     }    
 
-    @Test(expectedExceptions = StackOverflowError.class, expectedExceptionsMessageRegExp = MethodFrameCounter.MSG)
+    @Test(expectedExceptions = StackOverflowError.class)
     public void testCycle2() {
         // create test bean
         ObjectBean expectedA = new ObjectBean();

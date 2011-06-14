@@ -71,7 +71,7 @@
     </modules>
 
     <properties>
-        <com.gemstone.gemfire.version>6.5.1.2</com.gemstone.gemfire.version>
+        <com.gemstone.gemfire.version>6.5.1.17</com.gemstone.gemfire.version>
         <javassist.version>3.8.0.GA</javassist.version>
         <org.testng.version>5.14.6</org.testng.version>
         <org.ehoffman.version>0.5</org.ehoffman.version>
@@ -269,6 +269,12 @@
             <id>TestNG-extensions-repo</id>
             <name>TestNG-extensions Repository</name>
             <url>http://www.e-hoffman.org/released/repo/</url>
+        </repository>
+
+        <repository>
+            <id>icegem-public-repo</id>
+            <name>IceGem public repo</name>
+            <url>https://nexus.griddynamics.net/nexus/content/repositories/Icegem-pub</url>
         </repository>
     </repositories>
 
