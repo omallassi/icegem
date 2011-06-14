@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.gemstone.gemfire.cache.Region;
 import com.googlecode.icegem.cacheutils.Tool;
 import com.googlecode.icegem.cacheutils.common.PeerCacheService;
+import com.googlecode.icegem.cacheutils.common.Utils;
 
 public class CompareTool extends Tool {
 	private static final Logger log = LoggerFactory
@@ -42,7 +43,7 @@ public class CompareTool extends Tool {
 		Options options = constructGnuOptions();
 		if (commandLineArguments.length < 1) {
 			printHelp(options);
-			System.exit(0);
+            Utils.exitWithSuccess();
 		}
 		CommandLineParser parser = new GnuParser();
 		try {
@@ -50,7 +51,7 @@ public class CompareTool extends Tool {
 			if (!line.hasOption("path") || line.hasOption("help")
 				|| !(line.hasOption("locators") || line.hasOption("servers"))) {
 				printHelp(options);
-				System.exit(0);
+	            Utils.exitWithSuccess();
 			}
 
 			if (line.hasOption("packages"))
@@ -65,7 +66,7 @@ public class CompareTool extends Tool {
 		} catch (ParseException exp) {
 			System.err.println("Parsing options failed. " + exp.getMessage());
 			printHelp(options);
-			System.exit(0);
+            Utils.exitWithSuccess();
 		}
 	}
 
@@ -143,7 +144,7 @@ public class CompareTool extends Tool {
 				scanPackagesOption);
 		} catch (Exception e) {
 			log.info("Failed to startup updater cache. " + e.getMessage());
-			System.exit(0);
+            Utils.exitWithSuccess();
 		}
 		Map<String, String> regionPathNameMap = createRegionPathNameMap(regionPathOption);
 		Region<?, ?> region = peerCacheService.createRegion(regionPathNameMap);

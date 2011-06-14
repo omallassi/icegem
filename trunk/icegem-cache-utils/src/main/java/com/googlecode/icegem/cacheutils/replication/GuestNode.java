@@ -11,8 +11,8 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 /**
  * The client cache which is used for replication test. Connects to the cluster
@@ -494,7 +494,7 @@ public class GuestNode {
 	public static void main(String[] args) {
 		try {
 			if (args.length != 7) {
-				System.exit(1);
+				Utils.exitWithFailure();
 			}
 
 			String cluster = args[0];
@@ -515,11 +515,13 @@ public class GuestNode {
 
 			guestNode.close();
 
-			int exitCode = connected ? 0 : 1;
+			if (connected) {
+				Utils.exitWithSuccess();
+			}
 
-			System.exit(exitCode);
+			Utils.exitWithFailure();
 		} catch (Throwable t) {
-			System.exit(1);
+			Utils.exitWithFailure();
 		}
 	}
 

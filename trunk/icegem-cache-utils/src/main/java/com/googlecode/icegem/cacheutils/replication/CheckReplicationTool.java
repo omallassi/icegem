@@ -12,7 +12,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 import com.googlecode.icegem.cacheutils.Tool;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
+import com.googlecode.icegem.cacheutils.common.Utils;
 
 /**
  * The main class of the replication measurement tool. It parses command-line
@@ -130,13 +130,17 @@ public class CheckReplicationTool extends Tool {
 			debug("CheckReplicationTool#execute(String[]): CheckReplicationTool.ProcessorTask finished with exitCode = "
 				+ exitCode);
 
-			System.exit(exitCode);
+			if (exitCode == 0) {
+				Utils.exitWithSuccess();
+			}
+			
+			Utils.exitWithFailure();
 		} catch (Throwable t) {
 			debug(
 				"CheckReplicationTool#execute(String[]): Throwable caught with message = "
 					+ t.getMessage(), t);
 
-			System.exit(1);
+			Utils.exitWithFailure();
 		}
 	}
 
@@ -195,7 +199,7 @@ public class CheckReplicationTool extends Tool {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("check-replication [options]", options);
 
-		System.exit(1);
+		Utils.exitWithFailure();
 	}
 
 	/**

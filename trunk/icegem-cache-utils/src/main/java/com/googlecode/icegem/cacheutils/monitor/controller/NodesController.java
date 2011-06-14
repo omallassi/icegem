@@ -15,13 +15,13 @@ import com.gemstone.gemfire.cache.client.Pool;
 import com.gemstone.gemfire.cache.client.PoolFactory;
 import com.gemstone.gemfire.cache.client.PoolManager;
 import com.googlecode.icegem.cacheutils.common.AdminService;
+import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEvent;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.NodesContainer;
 import com.googlecode.icegem.cacheutils.monitor.utils.EmailService;
 import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
 
 public class NodesController {
 

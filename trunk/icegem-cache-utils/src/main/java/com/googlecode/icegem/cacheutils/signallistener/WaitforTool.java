@@ -14,6 +14,7 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.cacheutils.Tool;
+import com.googlecode.icegem.cacheutils.common.Utils;
 
 /**
  * User: Artem Kondratyev, e-mail: kondratevae@gmail.com
@@ -85,7 +86,7 @@ public class WaitforTool extends Tool {
 		if (!cmd.hasOption("region") || !cmd.hasOption("locators")
 			|| !cmd.hasOption("key")) {
 			printHelp(options);
-			System.exit(1);
+            Utils.exitWithFailure();
 		}
 
 		locators = cmd.getOptionValue("locators");

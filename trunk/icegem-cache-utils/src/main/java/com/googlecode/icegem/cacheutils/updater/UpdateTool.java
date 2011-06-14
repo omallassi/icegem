@@ -19,6 +19,7 @@ import com.gemstone.gemfire.cache.Region;
 import com.googlecode.icegem.cacheutils.Tool;
 import com.googlecode.icegem.cacheutils.common.AdminService;
 import com.googlecode.icegem.cacheutils.common.PeerCacheService;
+import com.googlecode.icegem.cacheutils.common.Utils;
 
 public class UpdateTool extends Tool {
 	private static final Logger log = LoggerFactory.getLogger(UpdateTool.class);
@@ -32,7 +33,7 @@ public class UpdateTool extends Tool {
 		Options options = constructGnuOptions();
 		if (commandLineArguments.length < 1) {
 			printHelp(options);
-            System.exit(0);
+            Utils.exitWithSuccess();
 		}
 		CommandLineParser parser = new GnuParser();
 	    try {
@@ -52,16 +53,16 @@ public class UpdateTool extends Tool {
                     scanPackagesOption = Arrays.asList(line.getOptionValue("packages").split(","));
 	        } else if (line.hasOption("help")) {
 	        	printHelp(options);
-	        	System.exit(0);
+	            Utils.exitWithSuccess();
 	        } else {
 	        	printHelp(options);
-	        	System.exit(0);
+	            Utils.exitWithSuccess();
 	        }
 	    }
 	    catch(ParseException exp) {
 	        System.err.println( "Parsing options failed. " + exp.getMessage() );
 	        printHelp(options);
-	        System.exit(0);
+            Utils.exitWithSuccess();
 	    }
 	}
 	
@@ -91,7 +92,7 @@ public class UpdateTool extends Tool {
 			admin = new AdminService(locatorOption);
 		} catch (Exception e) {
 			log.info("Failed to connect to the system. " + e.getMessage());
-			System.exit(0);
+            Utils.exitWithSuccess();
 		}
 		log.info("Collect system regions...");
 		Map<String, String> regionNames = null;
@@ -100,7 +101,7 @@ public class UpdateTool extends Tool {
 		} catch (AdminException e) {
 			log.info("Failed to get system regions. " + e.getMessage());
             admin.close();
-			System.exit(0);
+            Utils.exitWithSuccess();
 		}
         log.info("Found following system regions: " + regionNames.values());
         log.info("Closing admin member...");
@@ -113,7 +114,7 @@ public class UpdateTool extends Tool {
             peerCacheService = new PeerCacheService(serverOption, scanPackagesOption);
         } catch (Exception e) {
             log.info("Failed to startup updater cache. " + e.getMessage());
-			System.exit(0);
+            Utils.exitWithSuccess();
         }
         Set<Region<?,?>> regions = peerCacheService.createRegions(regionNames);
 		Updater updater = new Updater();

@@ -1,4 +1,4 @@
-package com.googlecode.icegem.cacheutils.monitor.utils;
+package com.googlecode.icegem.cacheutils.common;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -128,4 +128,11 @@ public class Utils {
 		return dateToString(System.currentTimeMillis());
 	}
 
+	public static void exitWithSuccess() {
+		System.exit(0);
+	}
+
+	public static void exitWithFailure() {
+		System.exit(1);
+	}
 }

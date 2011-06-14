@@ -5,7 +5,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.testng.annotations.Test;
 
 import com.gemstone.gemfire.cache.client.Pool;
-import com.googlecode.icegem.cacheutils.monitor.utils.Utils;
+import com.googlecode.icegem.cacheutils.common.Utils;
 
 public class NodeTest {
 
