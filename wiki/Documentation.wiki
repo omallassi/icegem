@@ -564,6 +564,28 @@ This is the list of available commands:
   * waitfor
   * check-replication
 
+Cache utils also has the possibility to specify GemFire properties as the system properties:
+{{{
+java -Dgemfire.log-level=none -Dgemfire.license-file=C:\bin\GemFire6512\gemfireLicense.zip -Dgemfire.license-type=evaluation -jar icegem-cache-utils-0.8-SNAPSHOT-executable.jar -d check-replication -c clusterA=localhost[18081] -c clusterB=localhost[18082] -c clusterC=localhost[18083] -t 30000
+}}}
+
+The JVM arguments `-Dgemfire.log-level=none -Dgemfire.license-file=C:\bin\GemFire6512\gemfireLicense.zip -Dgemfire.license-type=evaluation` will be trasferred to the following gemfire properties:
+{{{
+log-level=none
+license-file=C:\bin\GemFire6512\gemfireLicense.zip
+license-type=evaluation
+}}}
+
+Also there are options which are common for all the commands and specified next after jar name:
+{{{
+D:\Temp>java -jar icegem-cache-utils-0.8-SNAPSHOT-executable.jar
+usage: java -jar icegem-cache-utils-<version>.jar [options] <compare |
+            monitor | check-replication | update | waitfor>
+            [command_specific_options]
+ -d,--debug   Print debug information
+ -h,--help    Print usage information
+ -q,--quiet   Quiet output. Doesn't work if --debug specified.
+}}}
 
 == compare ==
 
@@ -655,18 +677,6 @@ mail.from=alerts@icegem.googlecode.com
 # The addresses to whom send the alert email
 mail.to=john.smith.sendmail@gmail.com
 
-# List of locators
-com.googlecode.icegem.cacheutils.monitor.locators=localhost[10355]
-
-# Delay before the first run
-com.googlecode.icegem.cacheutils.monitor.timer.delay=0
-
-# Period of run
-com.googlecode.icegem.cacheutils.monitor.timer.period=10000
-
-# Timeout of the checking function, ms
-com.googlecode.icegem.cacheutils.monitor.function.timeout=3000
-
 # Subject of the alert email
 com.googlecode.icegem.cacheutils.monitor.email.alert.subject=IceGem monitoring tool alert
 
@@ -710,14 +720,19 @@ log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
 This is the application help for the command "monitor":
 
 {{{
-D:\Temp\icegem-cache-utils-0.7-SNAPSHOT>java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor
-usage: monitor
- -a,--all            Periodically check all the servers related to
-                     locators specified in monitoring.properties file
- -h,--help           Print usage information
- -s,--server <arg>   Check one server and exit with status 0 if server
-                     alive, or with status 1 if server is dead or down.
-                     Server should be in format host[port].
+D:\Temp>java -jar icegem-cache-utils-0.8-SNAPSHOT-executable.jar monitor
+usage: monitor <--help | --server [--timeout] | --all <--locators>
+               [--period] [--timeout] >
+ -a,--all              Periodically check all the servers related to
+                       locators specified in monitoring.properties file
+ -h,--help             Print usage information
+ -l,--locators <arg>   List of locators in format
+                       host1[port1],host2[port2]
+ -p,--period <arg>     Period between runs, ms. Default value is 10000
+ -s,--server <arg>     Check one server and exit with status 0 if server
+                       alive, or with status 1 if server is dead or down.
+                       Server should be in format host[port].
+ -t,--timeout <arg>    Timeout, ms. Default value is 3000
 }}}
 
 Examples of usage:
@@ -728,9 +743,9 @@ Checks that server on host=localhost and port=40404 is alive. Returns exit code 
 
 
 {{{
-java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor -a
+java -jar icegem-cache-utils-0.7-SNAPSHOT.jar monitor -a -l localhost[10355]
 }}}
-Monitor will check periodically all the servers related to locators specified in property `icegem.cacheutils.monitor.locators` of property file `monitoring properties`, write to console and log file, and also will send alert messages.
+Monitor will check periodically all the servers related to locator `localhost[10355]`, write to console and log file, and also will send alert messages.
 
 == update ==
 
@@ -833,35 +848,37 @@ Please note that each gateway should have a technical region "proxy" (correspond
 This is the application help for the command "replication":
 
 {{{
-D:\Temp\icegem-cache-utils-0.8-SNAPSHOT>java -jar icegem-cache-utils-0.8-SNAPSHOT.jar replication
-usage: replication
- -h,--help                  Print usage information
- -l,--locators <arg>        List of clusters' locators to check. Example:
-                            host1[port1],host2[port2]
- -lf,--license-file <arg>   The path to non default license file
- -r,--region <arg>          The name of region for this test. Default name
-                            is "proxy"
- -t,--timeout <arg>         Timeout, seconds
+D:\Temp>java -jar icegem-cache-utils-0.8-SNAPSHOT-executable.jar check-replication
+usage: check-replication [options]
+ -c,--cluster <cluster=locators>   Cluster name and list of its locators.
+                                   There should be at least two clusters.
+                                   Example: -c
+                                   cluster1=host1[port1],host2[port2] -c
+                                   cluster2=host3[port3]
+ -h,--help                         Print usage information
+ -r,--region <arg>                 The name of region for this test.
+                                   Default name is "proxy"
+ -t,--timeout <arg>                Timeout, ms. Default timeout is 60000
 }}}
 
 Examples of usage:
 
 {{{
-java -jar icegem-cache-utils-0.8-SNAPSHOT.jar replication -l localhost[18081],localhost[18082],localhost[18083] -t 10000 -lf C:\bin\GemFire6512\gemfireLicense.zip
+java -Dgemfire.log-level=none -Dgemfire.license-file=C:\bin\GemFire6512\gemfireLicense.zip -Dgemfire.license-type=evaluation -jar icegem-cache-utils-0.8-SNAPSHOT-executable.jar check-replication -c clusterA=localhost[18081] -c clusterB=localhost[18082] -c clusterC=localhost[18083] -t 10000
 }}}
 
 Replication tool will check replication for the clusters with locators `localhost[18081]`, `localhost[18082]` and `localhost[18083]`. In case of replication works in all directions, the tool will print time of replication and return exit code 0. 
 
 {{{
-Replicated to localhost[18081] from [localhost[18083], 956ms], [localhost[18082], 1242ms]
-Replicated to localhost[18083] from [localhost[18082], 722ms], [localhost[18081], 590ms]
-Replicated to localhost[18082] from [localhost[18083], 1054ms], [localhost[18081], 177ms]
+clusterA <= [clusterB, 956ms][clusterC, 1242ms]
+clusterC <= [clusterB, 722ms][clusterA, 590ms]
+clusterB <= [clusterC, 1054ms][clusterA, 177ms]
 }}}
 
 In case of replication doesn't work it will automatically finish in 10 seconds and return exit code 1.
 
 {{{
-Replicated to localhost[18081] from [localhost[18083], 468ms], [localhost[18082], 751ms]
-Connection process is not finished for localhost[18083]
-Replicated to localhost[18082] from [localhost[18083], 556ms], [localhost[18081], 684ms]
+clusterA <= [clusterC, 468ms][clusterB, 751ms]
+Connection process is not finished for clusterB
+clusterC <= [clusterA, 556ms][clusterB, 684ms]
 }}}
