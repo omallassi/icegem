@@ -45,7 +45,7 @@ public class MethodToDataProcessor {
                 // todo: not call if fields - not beans! for example - primitives
                 // todo: analyze - if exception - we clean counter?
                 .append(tab(2, "if (Boolean.getBoolean(com.googlecode.icegem.serialization.codegen.MethodFrameCounter.SYSTEM_PROPERTY_NAME)) {\n"))
-                .append(tab(3, "com.googlecode.icegem.serialization.codegen.MethodFrameCounter.enterFrame();\n")) //todo: analize exist MethodFrameCounter.class in runtime
+                .append(tab(3, "com.googlecode.icegem.serialization.codegen.MethodFrameCounter.enterFrame(\"" + className + "\");\n")) //todo: analize exist MethodFrameCounter.class in runtime
                 .append(tab(2, "}\n"))
 
                 .append(tab(2, "// convert to concrete type\n"))
@@ -76,7 +76,7 @@ public class MethodToDataProcessor {
                 .append(tab("} finally {\n"))
                 .append(tab(2, "if (Boolean.getBoolean(com.googlecode.icegem.serialization.codegen.MethodFrameCounter.SYSTEM_PROPERTY_NAME)) {\n"))
                 .append(tab(3, "// decrement thread-local method-frame counter\n"))
-                .append(tab(3, "com.googlecode.icegem.serialization.codegen.MethodFrameCounter.exitFrame();\n"))
+                .append(tab(3, "com.googlecode.icegem.serialization.codegen.MethodFrameCounter.exitFrame(\"" + className + "\");\n"))
                 .append(tab(2, "}\n"))
 
                 .append(tab("}\n"))
