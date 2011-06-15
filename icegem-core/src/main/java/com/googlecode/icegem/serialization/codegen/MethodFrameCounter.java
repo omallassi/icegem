@@ -3,12 +3,15 @@ package com.googlecode.icegem.serialization.codegen;
 import com.googlecode.icegem.serialization.codegen.exception.IceGemRuntimeException;
 import com.googlecode.icegem.serialization.codegen.exception.MethodFrameStackOverflowException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Analog of javassist.runtime.Cflow
  *
  * @author igolovach
+ * @author Andrey Stepanov aka standy 
  */
 
 public class MethodFrameCounter extends ThreadLocal<AtomicInteger> {
@@ -22,31 +25,61 @@ public class MethodFrameCounter extends ThreadLocal<AtomicInteger> {
         }
     };
 
+    private static final ThreadLocal<List<String>> classNames = new ThreadLocal<List<String>>() {
+        protected synchronized List<String> initialValue() {
+            return new ArrayList<String>();
+        }
+    };
+
     /**
      * Increment the counter.
+     * @param className name of class to enter.
      */
-    public static void enterFrame() {
+    public static void enterFrame(String className) {
         int counter = local.get().incrementAndGet();
+        classNames.get().add(className);
         if (counter == MAX_STACK_DEPTH) {
-            throw new MethodFrameStackOverflowException(STACK_OVERFLOW_MSG);
+            throw new MethodFrameStackOverflowException(STACK_OVERFLOW_MSG + getClassNames());
         }
     }
 
     /**
-     * Decrement the counter.
+     * Decrement the counter and remove class name from the list.
+     * @param className name of class to exit from.
      */
-    public static void exitFrame() {
+    public static void exitFrame(String className) {
         int counter = local.get().decrementAndGet();
         if (counter < 0) {
+            String errorMessage = "Method frame counter is less then 0. Some programming error: count(exitFrame) > count(enterFrame)."
+                    + getClassNames();
             clearCounter();
-            throw new IceGemRuntimeException("Method frame counter is less then 0. Some programming error: count(exitFrame) > count(enterFrame).");
+            throw new IceGemRuntimeException(errorMessage);
+        }
+        String frameToExit = classNames.get().remove(classNames.get().size() - 1);
+        if (!className.equals(frameToExit)) {
+            throw new IceGemRuntimeException("Method frame counter try to exit from the class '" + className
+                    + "' but must exit from the class '" + frameToExit + "' first." + getClassNames());
         }
     }
 
+
     /**
-     * Clear the counter.
+     * Clear the counter and list of class names.
      */
     private static void clearCounter() {
         local.get().set(0);
+        classNames.get().clear();
+    }
+
+    /**
+     * Creates string with all classes that have been entered by method frame counter.
+     * @return String
+     */
+    private static String getClassNames() {
+        StringBuilder result = new StringBuilder("\nMethod frame counter enter to the following classes:\n");
+        for (String className : classNames.get()) {
+            result.append(className).append("\n");
+        }
+        return result.toString();
     }
 }
