@@ -16,7 +16,7 @@ Icegem imposes some constraints on model classes. Which are:
   * A getter name start with "get", take 0 parameters, returns a value and is not parametrized. 
   * A setter name start with "set", takes 1 parameter and not be parametrized. 
 
-Also object should not contain cyclic references.
+Object should not contain circular references. See section [Documentation#Autodetection of circular references] for more information about built-in mechanism for detecting circular references. 
 
 = Architecture and implementation =
 
@@ -69,6 +69,19 @@ Class generation is performed with the help of [http://www.csg.is.titech.ac.jp/~
 === Introspector ===   
 
 Introspector performs tasks of checking class validity. 
+
+=== Autodetection of circular references ===
+If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
+IceGem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.control.methodframes`. This property can be set via JVM parameters: 
+{{{
+-Dicegem.serialization.control.methodframes=true
+}}}
+or from the code using the following command:
+{{{
+import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
+...
+System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
+}}}  
 
 = Usage instructions =
 
