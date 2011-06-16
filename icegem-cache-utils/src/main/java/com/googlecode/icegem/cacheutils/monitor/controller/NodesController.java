@@ -30,14 +30,15 @@ public class NodesController {
 	private PropertiesHelper propertiesHelper;
 	private PoolFactory poolFactory;
 	private BufferedNodeEventHandler bufferedNodeEventHandler;
+	private long timeout;
 
-	public NodesController(PropertiesHelper propertiesHelper, boolean useLocator)
-		throws Exception {
+	public NodesController(PropertiesHelper propertiesHelper, String locators,
+		long timeout) throws Exception {
+
 		this.propertiesHelper = propertiesHelper;
+		this.timeout = timeout;
 
-		adminService = new AdminService(
-			useLocator ? propertiesHelper.getStringProperty("icegem.cacheutils.monitor.locators")
-				: null, false);
+		adminService = new AdminService(locators, false);
 
 		poolFactory = PoolManager.createFactory();
 		bufferedNodeEventHandler = new BufferedNodeEventHandler();
@@ -117,8 +118,7 @@ public class NodesController {
 
 		FunctionExecutionThread functionExecutionThread = new FunctionExecutionThread(
 			pool);
-		Utils.execute(functionExecutionThread, propertiesHelper
-			.getLongProperty("icegem.cacheutils.monitor.function.timeout"));
+		Utils.execute(functionExecutionThread, timeout);
 		int zero = functionExecutionThread.getZero();
 
 		if (zero == 0) {

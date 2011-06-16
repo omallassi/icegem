@@ -1,7 +1,8 @@
 package com.googlecode.icegem.cacheutils.monitor;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,15 +27,36 @@ import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
  * failure
  */
 public class MonitorTool extends Tool {
+	private static final String HELP_OPTION = "help";
+
+	private static final String TIMEOUT_OPTION = "timeout";
+
+	private static final String PERIOD_OPTION = "period";
+
+	private static final String LOCATORS_OPTION = "locators";
+
+	private static final String ALL_OPTION = "all";
+
+	private static final String SERVER_OPTION = "server";
+
 	private static final Logger log = Logger.getLogger(MonitorTool.class);
 
-	private static boolean allOption;
-	private static String serverHostOption;
-	private static int serverPortOption;
+	private static final long DEFAULT_TIMEOUT = 3000;
+
+	private static final long DEFAULT_PERIOD = 10000;
+
+	private boolean allOption;
+	private String serverHostOption;
+	private int serverPortOption;
+	private long timeout = DEFAULT_TIMEOUT;
+	private long period = DEFAULT_PERIOD;
+	private String locators = null;
 
 	private NodesController nodesController;
 	private PropertiesHelper propertiesHelper;
 	private Timer timer;
+
+	private List<NodeEventHandler> customEventHandlersList = new ArrayList<NodeEventHandler>();
 
 	/**
 	 * Periodically running task which checks the system status
@@ -46,7 +68,7 @@ public class MonitorTool extends Tool {
 			try {
 				nodesController.update();
 			} catch (Throwable t) {
-				log.error(Utils.currentDate() + "  Throwable catched", t);
+				log.error(Utils.currentDate() + "  Throwable caught", t);
 				t.printStackTrace();
 				try {
 					EmailService
@@ -68,50 +90,44 @@ public class MonitorTool extends Tool {
 	}
 
 	/**
-	 * Creates
-	 * 
-	 * @throws Exception
-	 */
-	public MonitorTool() {
-
-	}
-
-	/**
 	 * configuration
 	 * */
-	public void init() {
-		log.info(Utils.currentDate() + "");
-		log.info(Utils.currentDate()
-			+ "  --------------------------------------------------");
-		log.info(Utils.currentDate() + "  Monitoring tool started");
-		log.info(Utils.currentDate()
-			+ "  --------------------------------------------------");
-
+	private void init() {
 		try {
+			log.info(Utils.currentDate() + "");
+			log.info(Utils.currentDate()
+				+ "  --------------------------------------------------");
+			log.info(Utils.currentDate() + "  Monitoring tool started");
+			log.info(Utils.currentDate()
+				+ "  --------------------------------------------------");
+
 			propertiesHelper = new PropertiesHelper("/monitoring.properties");
-		} catch (IOException e) {
-			throw new RuntimeException(
-				"error reading properties \'/monitoring.properties\' ", e);
-		}
 
-		try {
-			nodesController = new NodesController(propertiesHelper, true);
-		} catch (Exception e) {
-			throw new RuntimeException("error creating NodesController", e);
-		}
-		nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
+			nodesController = new NodesController(propertiesHelper, locators,
+				timeout);
 
-		timer = new Timer();
+			nodesController.addNodeEventHandler(new LoggerNodeEventHandler());
+
+			for (NodeEventHandler handler : customEventHandlersList) {
+				nodesController.addNodeEventHandler(handler);
+			}
+
+			timer = new Timer();
+		} catch (Throwable t) {
+			Utils.exitWithFailure("Throwable caught during the initialization",
+				t);
+		}
 	}
 
 	/**
 	 * Starts the checking task
 	 */
-	public void start() {
-		timer.schedule(new IsAliveTimerTask(), propertiesHelper
-			.getLongProperty("icegem.cacheutils.monitor.timer.delay"),
-			propertiesHelper
-				.getLongProperty("icegem.cacheutils.monitor.timer.period"));
+	private void start() {
+		try {
+			timer.schedule(new IsAliveTimerTask(), 0, period);
+		} catch (Throwable t) {
+			Utils.exitWithFailure("Throwable caught during the startup", t);
+		}
 	}
 
 	public void shutdown() {
@@ -121,56 +137,55 @@ public class MonitorTool extends Tool {
 		timer = null;
 	}
 
-	public static boolean isServerAlive(String host, int port) throws Exception {
-		PropertiesHelper propertiesHelper = new PropertiesHelper(
-			"/monitoring.properties");
+	public static boolean isServerAlive(String host, int port, long timeout) {
+		boolean serverAlive = false;
 
-		NodesController nodesController = new NodesController(propertiesHelper,
-			false);
+		try {
+			PropertiesHelper propertiesHelper = new PropertiesHelper(
+				"/monitoring.properties");
 
-		boolean serverAlive = nodesController.isServerAlive(host, port);
+			NodesController nodesController = new NodesController(
+				propertiesHelper, null, timeout);
 
-		nodesController.shutdown();
+			serverAlive = nodesController.isServerAlive(host, port);
+
+			nodesController.shutdown();
+		} catch (Throwable t) {
+			Utils.exitWithFailure(
+				"Throwable caught during the check if the server alive", t);
+		}
 
 		return serverAlive;
 	}
 
 	public void addNodeEventHandler(NodeEventHandler handler) {
-		nodesController.addNodeEventHandler(handler);
+		customEventHandlersList.add(handler);
 	}
 
 	public void execute(String[] args, boolean debugEnabled, boolean quiet) {
-		parseCommandLineArguments(args);
+		try {
+			parseCommandLineArguments(args);
 
-		if (serverHostOption != null) {
-			boolean serverAlive = false;
-			try {
-				serverAlive = MonitorTool.isServerAlive(serverHostOption,
-					serverPortOption);
-			} catch (Exception e) {
-				throw new RuntimeException("error in checking server liveness",
-					e);
-			}
+			if (serverHostOption != null) {
+				boolean serverAlive = MonitorTool.isServerAlive(
+					serverHostOption, serverPortOption, timeout);
 
-			if (serverAlive) {
-				System.out.println("alive");
-				Utils.exitWithSuccess();
-			}
+				if (serverAlive) {
+					System.out.println("alive");
+					Utils.exitWithSuccess();
+				}
 
-			System.out.println("down");
-			Utils.exitWithFailure();
-		} else if (allOption) {
-			MonitorTool monitoringTool = null;
-			try {
-				monitoringTool = new MonitorTool();
-				monitoringTool.init();
-			} catch (Exception e) {
-				throw new RuntimeException(
-					"error in creating monitoring tool object. ", e);
+				System.out.println("down");
+				Utils.exitWithFailure();
+			} else if (allOption) {
+				init();
+				start();
+			} else {
+				Utils
+					.exitWithFailure("Cannot determine the mode of application");
 			}
-			monitoringTool.start();
-		} else {
-			throw new IllegalStateException("Cannot define application mode");
+		} catch (Throwable t) {
+			Utils.exitWithFailure("Unexpected throwable", t);
 		}
 	}
 
@@ -181,16 +196,24 @@ public class MonitorTool extends Tool {
 			printHelp(options);
 		}
 
-		CommandLineParser parser = new GnuParser();
 		try {
+			CommandLineParser parser = new GnuParser();
 			CommandLine line = parser.parse(options, commandLineArguments);
 
-			if (line.hasOption("help")) {
+			if (line.hasOption(HELP_OPTION)) {
 				printHelp(options);
 			}
 
-			boolean allOptionTemp = line.hasOption("all");
-			String serverOptionTemp = line.getOptionValue("server");
+			if (line.hasOption(TIMEOUT_OPTION)) {
+				timeout = Long.parseLong(line.getOptionValue(TIMEOUT_OPTION));
+			}
+
+			if (line.hasOption(PERIOD_OPTION)) {
+				period = Long.parseLong(line.getOptionValue(PERIOD_OPTION));
+			}
+
+			boolean allOptionTemp = line.hasOption(ALL_OPTION);
+			String serverOptionTemp = line.getOptionValue(SERVER_OPTION);
 
 			if (serverOptionTemp != null) {
 				int indexOfPortStart = serverOptionTemp.indexOf('[');
@@ -202,20 +225,33 @@ public class MonitorTool extends Tool {
 				serverPortOption = Integer.parseInt(portString);
 			} else if (allOptionTemp) {
 				allOption = allOptionTemp;
+
+				if (line.hasOption(LOCATORS_OPTION)) {
+					locators = line.getOptionValue(LOCATORS_OPTION);
+				} else {
+					Utils.exitWithFailure("The option --" + LOCATORS_OPTION
+						+ " should be used when the option --" + ALL_OPTION
+						+ " specified");
+				}
 			} else {
-				printHelp(options);
+				Utils.exitWithFailure("The option --" + SERVER_OPTION
+					+ " or --" + ALL_OPTION + " should be specified");
 			}
 
 		} catch (Throwable t) {
-			System.err
-				.println("Parsing of options failed. Please check that you use correct option or specify a server in format host[port].");
-			printHelp(options);
+			Utils
+				.exitWithFailure(
+					"Throwable caught during the command-line arguments parsing",
+					t);
 		}
 	}
 
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("monitor [options]", options);
+		formatter.printHelp("monitor <--" + HELP_OPTION + " | --"
+			+ SERVER_OPTION + " [--" + TIMEOUT_OPTION + "] | --" + ALL_OPTION
+			+ " <--" + LOCATORS_OPTION + "> [--" + PERIOD_OPTION + "] [--"
+			+ TIMEOUT_OPTION + "] >", options);
 
 		Utils.exitWithFailure();
 	}
@@ -226,17 +262,24 @@ public class MonitorTool extends Tool {
 		gnuOptions
 			.addOption(
 				"s",
-				"server",
+				SERVER_OPTION,
 				true,
 				"Check one server and exit with status 0 if server alive, or with status 1 if server is dead or down. Server should be in format host[port].")
 			.addOption(
 				"a",
-				"all",
+				ALL_OPTION,
 				false,
 				"Periodically check all the servers related to locators specified in monitoring.properties file")
-			.addOption("h", "help", false, "Print usage information");
+			.addOption("l", LOCATORS_OPTION, true,
+				"List of locators in format host1[port1],host2[port2]")
+			.addOption("p", PERIOD_OPTION, true,
+				"Period between runs, ms. Default value is " + DEFAULT_PERIOD)
+			.addOption("t", TIMEOUT_OPTION, true,
+				"Timeout, ms. Default value is " + DEFAULT_TIMEOUT)
+			.addOption("h", HELP_OPTION, false, "Print usage information");
 
 		return gnuOptions;
+
 	}
 
 }
