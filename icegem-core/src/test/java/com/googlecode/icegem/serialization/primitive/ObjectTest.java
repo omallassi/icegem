@@ -1,9 +1,7 @@
 package com.googlecode.icegem.serialization.primitive;
 
 import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 
-import com.googlecode.icegem.serialization.codegen.exception.MethodFrameStackOverflowException;
 import javassist.CannotCompileException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

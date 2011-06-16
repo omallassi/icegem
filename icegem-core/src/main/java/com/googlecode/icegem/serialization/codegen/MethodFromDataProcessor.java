@@ -1,7 +1,6 @@
 package com.googlecode.icegem.serialization.codegen;
 
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.codegen.exception.IceGemRuntimeException;
 import com.googlecode.icegem.serialization.codegen.impl.FromDataFieldProcessor;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class MethodFromDataProcessor {
     public String process(XClass element) {
         if (Enum.class.isAssignableFrom(element.getType())) {
             if (element.getType() == Enum.class) {
-                throw new IceGemRuntimeException("Never here!"); //todo: correct ex? more info?
+                throw new RuntimeException("Never here!"); //todo: correct ex? more info?
             } else {
                 return processEnum(element);
             }

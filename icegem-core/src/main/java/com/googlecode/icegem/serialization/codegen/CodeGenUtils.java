@@ -1,7 +1,5 @@
 package com.googlecode.icegem.serialization.codegen;
 
-import com.googlecode.icegem.serialization.codegen.exception.IceGemRuntimeException;
-
 import java.util.List;
 
 /**
@@ -32,6 +30,10 @@ public class CodeGenUtils {
 
     public static String firstLetterToUpperCase(String fieldName) {
         return fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+    }
+
+    public static String firstLetterToLowerCase(String fieldName) {
+        return fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1);
     }
 
     /**
@@ -72,7 +74,7 @@ public class CodeGenUtils {
                 } else if (clazz == double.class) {
                     primitiveClassName = "double";
                 } else {
-                    throw new IceGemRuntimeException("Never here! - You try to generate code for Void[]...[]: clazz = " + clazz);
+                    throw new RuntimeException("Never here! - You try to generate code for Void[]...[]: clazz = " + clazz);
                 }
                 return primitiveClassName + ending;
             } else {
