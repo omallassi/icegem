@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cache PUBLIC "-//GemStone Systems, Inc.//GemFire Declarative Cache 6.5//EN" "http://www.gemstone.com/dtd/cache6_5.dtd">
+<cache>
+	<gateway-hub id="hubC" port="44444">
+		<gateway id="gatewayC">
+			<gateway-endpoint id="gatewayA" host="localhost"
+				port="22222" />
+			<!-- <gateway-endpoint id="gatewayB" host="localhost" port="33333" /> -->
+			<gateway-queue enable-persistence="true"
+				disk-store-name="cDiskStore" />
+		</gateway>
+	</gateway-hub>
+
+	<disk-store name="cDiskStore">
+		<disk-dirs>
+			<disk-dir>target</disk-dir>
+		</disk-dirs>
+	</disk-store>
+
+	<region name="proxy" refid="REPLICATE_PROXY">
+		<region-attributes enable-gateway="true">
+			<subscription-attributes interest-policy="all" />
+		</region-attributes>
+	</region>
+</cache>
