@@ -1,7 +1,6 @@
 package com.googlecode.icegem.serialization.codegen;
 
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.codegen.exception.IceGemRuntimeException;
 import com.googlecode.icegem.serialization.codegen.impl.ToDataFieldProcessor;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class MethodToDataProcessor {
     public String process(XClass element) {
         if (Enum.class.isAssignableFrom(element.getType())) {
             if (element.getType() == Enum.class) {
-                throw new IceGemRuntimeException("Never here!"); //todo: correct ex? more info?
+                throw new RuntimeException("Never here!"); //todo: correct ex? more info?
             } else {
                 return processEnum(element);
             }
@@ -55,9 +54,13 @@ public class MethodToDataProcessor {
 
         //save bean value
         if (element.getType().getAnnotation(BeanVersion.class) != null) {
+            int beanVersion = element.getType().getAnnotation(BeanVersion.class).value();
+            if (beanVersion < 1) {
+                throw new RuntimeException("Value of annotation @BeanVersion must be positive, current value = " + beanVersion + " (class '" + className + "')");
+            }
             builder.append(tab(2, "out.writeInt(" + element.getType().getAnnotation(BeanVersion.class).value()+");\n"));  //todo: value is hardcoded in result code
         } else {
-            throw new RuntimeException("class must be annotated with @BeanVersion: " + element.getType().getCanonicalName());
+            throw new RuntimeException("Class must be annotated with @BeanVersion: " + element.getType().getCanonicalName());
         }
 
         //save class model hash code

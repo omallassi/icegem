@@ -3,6 +3,8 @@ package com.googlecode.icegem.serialization.versioning;
 import com.gemstone.gemfire.DataSerializer;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.serialization.primitive.TestParent;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.Bird;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.Cat;
 import com.googlecode.icegem.serialization.versioning.beans.singleversion.Dog;
 import com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv1.Company;
 import com.googlecode.icegem.serialization.versioning.beans.modified.beanv1.Person;
@@ -10,6 +12,7 @@ import com.googlecode.icegem.serialization.versioning.beans.incorrect.v1.Illegal
 import com.googlecode.icegem.serialization.versioning.beans.inheritance.v1.Son;
 import com.googlecode.icegem.serialization.versioning.beans.manyVersions.v1.Car;
 
+import com.googlecode.icegem.serialization.versioning.beans.wrong.Fish;
 import javassist.CannotCompileException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -30,9 +33,30 @@ public class SerializeForVersioningTest extends TestParent {
     }
 
     @Test
-    public void serializeSingleVersion() throws IOException, CannotCompileException {
+    public void serializeClassWithSingleVersion() throws IOException, CannotCompileException {
         Dog dog = new Dog("Rex");
         DataSerializer.writeObject(dog, new DataOutputStream(new FileOutputStream("dog.versionTest")));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void serializeClassWithNegativeVersion() throws IOException, CannotCompileException {
+        HierarchyRegistry.registerAll(getContextClassLoader(), Cat.class);
+        Cat cat = new Cat("Murka");
+        DataSerializer.writeObject(cat, new DataOutputStream(new FileOutputStream("cat.versionTest")));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void serializeClassWithNegativeFiledVersion() throws IOException, CannotCompileException {
+        HierarchyRegistry.registerAll(getContextClassLoader(), Bird.class);
+        Bird bird = new Bird("Kesha");
+        DataSerializer.writeObject(bird, new DataOutputStream(new FileOutputStream("bird.versionTest")));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void serializeClassWithoutBeanVersionAnnotation() throws IOException, CannotCompileException {
+        HierarchyRegistry.registerAll(getContextClassLoader(), Fish.class);
+        Fish bird = new Fish("Fish");
+        DataSerializer.writeObject(bird, new DataOutputStream(new FileOutputStream("fish.versionTest")));
     }
 
     @Test

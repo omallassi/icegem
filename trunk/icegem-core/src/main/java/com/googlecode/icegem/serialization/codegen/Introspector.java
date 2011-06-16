@@ -64,17 +64,23 @@ public class Introspector { //todo: move to CodeGenUtils
         final ArrayList<XField> result = new ArrayList<XField>();
         for (Map.Entry<String, Method> entry : gettersMap.entrySet()) {
             final Method method = entry.getValue();
-            //result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass()));
             List annotations = getFieldAnnotation(clazz, entry.getKey());
-            int fieldVersion = 0;
-            for(Object annotation: annotations)
+            int fieldVersion = 1;
+            for (Object annotation: annotations)
                 if (annotation instanceof FieldVersion) {
                     fieldVersion = ((FieldVersion) annotation).since();
+                    if (fieldVersion < 1) {
+                        String fieldName = CodeGenUtils.firstLetterToLowerCase((method.getName().startsWith("is") ?
+                                method.getName().substring(2) : method.getName().substring(3)));
+                        throw new RuntimeException("Since value of annotation @FieldVersion must be positive, current since value = "
+                                + fieldVersion + " (field '" + fieldName + "', class '"  + clazz.getName() + "')");
+                    }
                     break;
                 }
             boolean isBoolean = false;
-            if (method.getName().startsWith("is"))
+            if (method.getName().startsWith("is")) {
                 isBoolean = true;
+            }
             result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass(), annotations, fieldVersion, isBoolean));
         }
         return result;

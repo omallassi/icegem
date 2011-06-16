@@ -1,7 +1,5 @@
 package com.googlecode.icegem.serialization.codegen;
 
-import com.googlecode.icegem.serialization.codegen.exception.MethodFrameStackOverflowException;
-
 import java.io.InvalidClassException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -81,8 +79,8 @@ public class RTSupport {
     public static void checkAllowedInRealTime(Object obj) throws InvalidClassException {
         try {
             checkAllowedInRealTime0(obj, 1); //todo: correct 1? or 0?
-        } catch (MethodFrameStackOverflowException e) {
-            throw new MethodFrameStackOverflowException(MethodFrameCounter.STACK_OVERFLOW_MSG + ". For object: " + obj.toString());
+        } catch (RuntimeException e) {
+            throw new RuntimeException(MethodFrameCounter.STACK_OVERFLOW_MSG + ". For object: " + obj.toString());
         }
     }
 
@@ -95,7 +93,7 @@ public class RTSupport {
      */
     private static void checkAllowedInRealTime0(Object obj, int depth) throws InvalidClassException {
         if (depth >= MethodFrameCounter.MAX_STACK_DEPTH) { //todo: correct >? or >=?
-            throw new MethodFrameStackOverflowException();
+            throw new RuntimeException();
         }
         Class<?> clazz = obj.getClass();
 
