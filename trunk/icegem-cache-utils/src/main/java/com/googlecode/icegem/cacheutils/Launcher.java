@@ -263,7 +263,7 @@ public class Launcher {
 			debug(
 				"Launcher#main(): Throwable caught with message = "
 					+ t.getMessage(), t);
-			Utils.exitWithFailure();
+			Utils.exitWithFailure("Unexpected throwable", t);
 		}
 	}
 

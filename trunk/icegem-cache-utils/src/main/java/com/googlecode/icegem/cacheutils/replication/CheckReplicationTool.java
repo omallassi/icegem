@@ -133,14 +133,14 @@ public class CheckReplicationTool extends Tool {
 			if (exitCode == 0) {
 				Utils.exitWithSuccess();
 			}
-			
+
 			Utils.exitWithFailure();
 		} catch (Throwable t) {
 			debug(
 				"CheckReplicationTool#execute(String[]): Throwable caught with message = "
 					+ t.getMessage(), t);
 
-			Utils.exitWithFailure();
+			Utils.exitWithFailure("Unexpected throwable", t);
 		}
 	}
 
@@ -178,14 +178,18 @@ public class CheckReplicationTool extends Tool {
 				clustersProperties = line.getOptionProperties(CLUSTER_OPTION);
 
 				if (clustersProperties.keySet().size() < 2) {
-					printHelp(options);
+					Utils
+						.exitWithFailure("At least two clusters should be defined");
 				}
 			} else {
-				printHelp(options);
+				Utils.exitWithFailure("No clusters defined");
 			}
 
 		} catch (Throwable t) {
-			printHelp(options);
+			Utils
+				.exitWithFailure(
+					"Throwable caught during the command-line arguments parsing",
+					t);
 		}
 	}
 

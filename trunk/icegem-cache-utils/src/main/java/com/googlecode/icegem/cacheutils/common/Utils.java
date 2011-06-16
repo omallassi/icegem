@@ -132,7 +132,23 @@ public class Utils {
 		System.exit(0);
 	}
 
-	public static void exitWithFailure() {
+	public static void exitWithFailure(String message, Throwable t) {
+		if (message != null) {
+			System.err.println(message);
+		}
+		
+		if (t != null) {
+			t.printStackTrace(System.err);
+		}
+
 		System.exit(1);
+	}
+
+	public static void exitWithFailure(String message) {
+		exitWithFailure(message, null);
+	}
+
+	public static void exitWithFailure() {
+		exitWithFailure(null);
 	}
 }
