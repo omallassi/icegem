@@ -16,7 +16,7 @@ Icegem imposes some constraints on model classes. Which are:
   * A getter name start with "get", take 0 parameters, returns a value and is not parametrized. 
   * A setter name start with "set", takes 1 parameter and not be parametrized. 
 
-Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references] for more information about built-in mechanism for detecting circular references. 
+Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references. 
 
 = Architecture and implementation =
 
