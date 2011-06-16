@@ -9,7 +9,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.integration.Message;
 
 import com.gemstone.bp.edu.emory.mathcs.backport.java.util.Collections;
 import com.gemstone.gemfire.cache.Region;
@@ -20,7 +19,7 @@ import com.gemstone.gemfire.cache.execute.FunctionService;
  * MessageBarrierInputBean implements client side of PeerRegionListeningBarrierBean. 
  * 
  * <br/>
- * For each message injected to the barrier through {@link #process(Message)}, 
+ * For each message injected to the barrier through {@link #process(Serializable)}, 
  * external strategy object {@link BarrierPolicy} is invoked to check whether message can pass the barrier.
  * <br/>
  * On positive decision, the message is sent to the destination. Otherwise, 
