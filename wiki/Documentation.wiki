@@ -27,12 +27,12 @@ Each class that will be auto serialized should be annotated with annotations:
 
 The architecture of Icegem library consists of the four main components:
 
-  * [Documentation#DataSerializerGenerator 3264]
+  * [Documentation#Data_Serializer_Generator 3264]
   * [HierarchyRegistry]
   * [Introspector]
   * [AutoSerializableRegistrarBean]
 
-== DataSerializerGenerator ==
+== Data Serializer Generator ==
 
 The main component of the system. It performs main operations of the framework - generation of [http://www.gemstone.com/docs/6.5.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html DataSerializers] for domain classes. The algorithm of generating DataSerializer for custom class contains the following steps:
  * validate for compliance with the domain class requirements
