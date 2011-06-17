@@ -49,7 +49,7 @@ HierarchyRegistry.registerAll(RegistryBean.class.getClassLoader(), classesList);
 
 === DataSerializerGenerator ===
 
-The main component of the system. It performs main operations of the framework -  generation of DataSerializers for model classes. The algorithm is simple. First class is checked for validity, i.e. it should conform with requirements described in [Document#Model_objects_constraints Model objects constraints] section. Then if class is valid DataSerializerGenerator creates <Class name>DataSerializer class which extends [http://www.gemstone.com/docs/6.5.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html] class. There are four public method to be implemented within those DataSerializers:
+The main component of the system. It performs main operations of the framework -  generation of DataSerializers for model classes. The algorithm is simple. First class is checked for validity, i.e. it should conform with requirements described in [Document#Model_objects_constraints Model objects constraints] section. Then if class is valid DataSerializerGenerator creates <Class name>DataSerializer class which extends [http://www.gemstone.com/docs/6.5.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html DataSerializer] class. There are four public method to be implemented within those DataSerializers:
 {{{
 public Class[] getSupportedClasses();
 
