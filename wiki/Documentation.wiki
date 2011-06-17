@@ -27,10 +27,10 @@ Each class that will be auto serialized should be annotated with annotations:
 
 The architecture of Icegem library consists of the four main components:
 
-  * [Documentation#Data_Serializer_Generator 3264]
-  * [HierarchyRegistry]
-  * [Introspector]
-  * [AutoSerializableRegistrarBean]
+  * [Documentation#Data_Serializer_Generator Data Serializer Generator]
+  * [Documentation#Hierarchy_Registry Hierarchy Registry]
+  * [Documentation#Introspector Introspector]
+  * [Documentation#Auto_Serializable_Registrar_Bean Auto Serializable Registrar Bean]
 
 == Data Serializer Generator ==
 
@@ -54,9 +54,9 @@ public Object fromData(DataInput in) throws IOException, ClassNotFoundException;
 
 Data serializer class generation is performed with help of [http://www.csg.is.titech.ac.jp/~chiba/javassist/ javassist library]. 
 
-=== HierarchyRegistry ===
+== HierarchyRegistry ==
 
-Takes as parameter list of classes to be serialized and sends them to the [Documentation#DataSerializerGenerator DataSerializerGenerator] which generates corresponding `DataSerializers`. `HierarchyRegistry` then registers these `DataSerializers` with GemFire serialization framework.
+Takes as parameter list of classes to be serialized and sends them to the [Documentation#Data_Serializer_Generator Data Serializer Generator] which generates corresponding `DataSerializers`. `HierarchyRegistry` then registers these `DataSerializers` with GemFire serialization framework.
 
 {{{
 class RegistryBean {
@@ -75,7 +75,7 @@ Introspector contains help methods for class validation during generation of dat
 
 === AutoSerializableRegistrarBean ===
 
-This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#HierarchyRegistry HierarchyRegistry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
+This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
 === Autodetection of circular references ===
 
