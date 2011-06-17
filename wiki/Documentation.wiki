@@ -4,14 +4,14 @@
 
 = Introduction =
 
-Icegem is an extension for GemFire^tm^ which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the model classes and cases where part of the objects are already implementing serialization. 
+Icegem is an extension for in-memory data grid [http://community.gemstone.com/display/gemfire/GemFire+Enterprise GemFire Enterprise]^tm^ which provides serialization mechanism for domain classes that will be stored in the GemFire out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the domain model classes and cases where part of the classes have already been serializable.
+This library also extends GemFire API (e.g. supports [Documentation#Paginated_queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], etc.) and contains a set [Documentation#Cache-utils cache utils] for managing GemFire distributed system.
 
+= Domain class requirements =
 
-= Object model constraints =
-
-Icegem imposes some constraints on a class model. Which are:
-  * A class should have public parameterless constructor.
-  * If the class extends another class, superclass should either conform this constrains or it should be serializable.
+Icegem imposes some constraints on a domain class for which serialization is required. This constraints are the following:
+  * A class should have a public no-arguments constructor.
+  * If the class extends another class, superclass should either satisfy this constrains or it should be serializable.
   * Nested classes for this class should not be serializable.
   * All class fields should have getters and setters.
   * A getter name should start with "get" ("is" for boolean fields), take 0 parameters, return a value and should not be parametrized.
@@ -21,20 +21,38 @@ Icegem imposes some constraints on a class model. Which are:
 
 = Architecture and implementation =
 
-The architecture of Icegem consists of the four main components:
+The architecture of Icegem library consists of the four main components:
 
-  * GemFireBeanRegistry
-  * HierarchyRegistry
-  * DataSerializerGenerator
-  * Introspector
+  * [Documentation#DataSerializerGenerator]
+  * [Documentation#HierarchyRegistry]
+  * [Documentation#Introspector]
+  * [Documentation#AutoSerializableRegistrarBean]
 
-=== GemFireBeanRegistry ===
+== DataSerializerGenerator ==
 
-It resides in icegem-spring module, apart from core functionality. And it is just convenient utility for spring-based projects which helps to find all classes for which serialization is required. In short GemFireBeanRegistry scans model packages for classes annotated with @AutoSerialized annotation, creates DataSerializers for them and registeres them with GemFire, so no additional job is required. Usage details you can find below in [Documentation#Spring_Integration Spring Integration] section. There is also section, describes how to use Icegem without icegem-spring - [Documentation#Lib_without_Spring_integration Lib without Spring integration]
+The main component of the system. It performs main operations of the framework - generation of [http://www.gemstone.com/docs/6.5.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html DataSerializers] for domain classes. The algorithm of generating DataSerializer for custom class contains the following steps:
+ * validate for compliance with the domain class requirements
+ * generate `<class name>DataSerializer` class for specified class. This generated class extends `DataSerializer` class and implements it's four methods:
+{{{
+public Class[] getSupportedClasses();
+
+public int getId();
+
+public boolean toData(Object o, DataOutput out) throws IOException;
+
+public Object fromData(DataInput in) throws IOException, ClassNotFoundException;
+}}}
+
+  * `getSupportedClasses()` - returns class for which serializer is created;
+  * `getId()` - returns unique identifier of this `DataSerializer`
+  * `toData(Object o, DataOutput out)` - serializes an object to a `DataOutput`
+  * `fromData(DataInput in)` - reads an object from a `DataInput`
+
+Data serializer class generation is performed with help of [http://www.csg.is.titech.ac.jp/~chiba/javassist/ javassist library]. 
 
 === HierarchyRegistry ===
 
-Takes as parameter list of classes (@AutoSerializable) to be serialized and sends them to DataSerializerGenerator which generates corresponding DataSerializers. HierarchyRegistry then registers these DataSerializers with GemFire serialization framework.
+Takes as parameter list of classes to be serialized and sends them to the [Documentation#DataSerializerGenerator] which generates corresponding `DataSerializers`. `HierarchyRegistry` then registers these `DataSerializers` with GemFire serialization framework.
 
 {{{
 class RegistryBean {
@@ -47,31 +65,16 @@ HierarchyRegistry.registerAll(RegistryBean.class.getClassLoader(), classesList);
 }
 }}}
 
-=== DataSerializerGenerator ===
-
-The main component of the system. It performs main operations of the framework -  generation of DataSerializers for model classes. The algorithm is simple. First class is checked for validity, i.e. it should conform with requirements described in [Document#Model_objects_constraints Model objects constraints] section. Then if class is valid DataSerializerGenerator creates <Class name>DataSerializer class which extends [http://www.gemstone.com/docs/6.5.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html DataSerializer] class. There are four public method to be implemented within those DataSerializers:
-{{{
-public Class[] getSupportedClasses();
-
-public int getId();
-
-public boolean toData(Object o, DataOutput out) throws IOException;
-
-public Object fromData(DataInput in) throws IOException, ClassNotFoundException;
-}}}
-
-  * `getSupportedClasses()` - this method will return sole class for which serializer is created
-  * `getId()` - will return unique identifier of DataSerializer
-  * `toData(...)` - will serialize an object to a `DataOutput`
-  * `fromData(...)` -will read an object from a `DataInput`
-
-Class generation is performed with the help of [http://www.csg.is.titech.ac.jp/~chiba/javassist/ javassist library]. 
-
 === Introspector ===   
 
-Introspector contains help methods for class validation during generation of data serializer. 
+Introspector contains help methods for class validation during generation of data serializers. 
+
+=== AutoSerializableRegistrarBean ===
+
+This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#HierarchyRegistry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
 === Autodetection of circular references ===
+
 If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
 IceGem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.control.methodframes`. This property can be set via JVM parameters: 
 {{{
@@ -83,10 +86,6 @@ import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 ...
 System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
 }}}  
-
-= Usage instructions =
-
-There are two ways of integrating Icegem into progect - via spring and manually. Both cases are described below:
 
 == Versioning ==
 
@@ -104,15 +103,21 @@ class Client {
 
 In accordance to serialization/deserialization process we impose some restrictions:
 
-1. you cann't delete field in elder version
+1. you can't delete field in elder version
 
 2. a field that doesn't exist in first version should be annotated with @FieldVersion and version from which field appeared
 
 These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object)
 
-== Spring Integration ==
+= Usage instructions =
 
-spring-icegem.jar has useful class to register all files with annotation @AutoSerializable. to use it, you need register it in spring like:
+== Library integration ==
+
+There are two ways of integrating the IceGem library into a progect: via spring and manually. Both cases are described below:
+
+== Library integration using Spring ==
+
+icegem-core.jar contains a class `AutoSerializableRegistrarBean` that can be used for registration of classes with annotation @AutoSerializable. to use it, you need register it in spring like:
 
   # define bean with class  com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry
         e.g. 
@@ -132,13 +137,12 @@ spring-icegem.jar has useful class to register all files with annotation @AutoSe
 }}}
   # add javassist.jar, icegem-core.jar to ClassPath.
 
-== Lib without Spring integration ==
+== Manual library integration ==
 
 To use  library without spring-icegem.jar
 
   # add javassist.jar, icegem-core.jar to ClassPath
-  # call HierarchyRegistry.registerAll with two arguments: class loader and list of annotated classes with @AutoSerilizable
-
+  # call HierarchyRegistry.registerAll with two arguments: class loader and list of domain model classes that meet the rules for use in the IceGem library.
 
 = Build description=
 
@@ -346,7 +350,7 @@ SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SEL
 }}}
 *Note:* `icegem-core.jar` should be added to a ClassPath of all members in a distributed system where OQL query will be executed.
 
-=Paginated Query=
+=Paginated Queries=
 
 This component allows to execute paginated queries both from client and peer/server sides. It caches paginated query results in a help region and allows to iterate on them using paginated query API.
 
