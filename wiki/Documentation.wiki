@@ -5,7 +5,7 @@
 = Introduction =
 
 Icegem is an extension for in-memory data grid [http://community.gemstone.com/display/gemfire/GemFire+Enterprise GemFire Enterprise]^tm^ which provides serialization mechanism for domain classes that will be stored in the GemFire out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the domain model classes and cases where part of the classes have already been serializable.
-This library also extends GemFire API (e.g. supports [Documentation#Paginated_queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], etc.) and contains a set [Documentation#Cache-utils cache utils] for managing GemFire distributed system.
+This library also extends GemFire API (e.g. supports [Documentation#Paginated_Queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], [Documentation#Smart_expiration smart expiration], etc.) and contains a set [Documentation#Cache_utils cache utils] for managing GemFire distributed system.
 
 = Domain class requirements =
 
