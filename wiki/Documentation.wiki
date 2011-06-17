@@ -27,7 +27,7 @@ Each class that will be auto serialized should be annotated with annotations:
 
 The architecture of Icegem library consists of the four main components:
 
-  * [DataSerializerGenerator]
+  * [Documentation#DataSerializerGenerator 3264]
   * [HierarchyRegistry]
   * [Introspector]
   * [AutoSerializableRegistrarBean]
