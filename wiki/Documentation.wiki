@@ -7,16 +7,17 @@
 Icegem is an extension for GemFire^tm^ which provides serialization mechanism for domain objects out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the model classes and cases where part of the objects are already implementing serialization. 
 
 
-= Model objects constraints =
+= Object model constraints =
 
-Icegem imposes some constraints on model classes. Which are:
-  * Model class should have public parameterless constructor, which doesn't declare it could throw any exception.
-  * If model class extends another class implicitly, superclass should either conform with previous constraint or it should be serializable as well.
-  * It's nested classes should not be serializable.
-  * A getter name start with "get", take 0 parameters, returns a value and is not parametrized. 
-  * A setter name start with "set", takes 1 parameter and not be parametrized. 
+Icegem imposes some constraints on a class model. Which are:
+  * A class should have public parameterless constructor.
+  * If the class extends another class, superclass should either conform this constrains or it should be serializable.
+  * Nested classes for this class should not be serializable.
+  * All class fields should have getters and setters.
+  * A getter name should start with "get" ("is" for boolean fields), take 0 parameters, return a value and should not be parametrized.
+  * A setter name should start with "set", take 1 parameter and should not be parametrized. 
 
-Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references. 
+*Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references. 
 
 = Architecture and implementation =
 
@@ -48,7 +49,7 @@ HierarchyRegistry.registerAll(RegistryBean.class.getClassLoader(), classesList);
 
 === DataSerializerGenerator ===
 
-The main component of the system. It performs main operations of the framework -  generation of DataSerializers for model classes. The algorithm is simple. First class is checked for validity, i.e. it should conform with requirements described in [Document#Model_objects_constraints Model objects constraints] section. Then if class is valid DataSerializerGenerator creates <Class name>DataSerializer class which extends [http://www.gemstone.com/docs/6.0.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html com.gemstone.gemfire.DataSerializer] class. There are four public method to be implemented within those DataSerializers:
+The main component of the system. It performs main operations of the framework -  generation of DataSerializers for model classes. The algorithm is simple. First class is checked for validity, i.e. it should conform with requirements described in [Document#Model_objects_constraints Model objects constraints] section. Then if class is valid DataSerializerGenerator creates <Class name>DataSerializer class which extends [http://www.gemstone.com/docs/6.5.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html] class. There are four public method to be implemented within those DataSerializers:
 {{{
 public Class[] getSupportedClasses();
 
