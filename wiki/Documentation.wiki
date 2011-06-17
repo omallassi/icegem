@@ -69,7 +69,7 @@ Class generation is performed with the help of [http://www.csg.is.titech.ac.jp/~
 
 === Introspector ===   
 
-Introspector performs tasks of checking class validity. 
+Introspector contains help methods for class validation during generation of data serializer. 
 
 === Autodetection of circular references ===
 If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
