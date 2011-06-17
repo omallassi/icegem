@@ -5,7 +5,7 @@
 = Introduction =
 
 Icegem is an extension for in-memory data grid [http://community.gemstone.com/display/gemfire/GemFire+Enterprise GemFire Enterprise]^tm^ which provides serialization mechanism for domain classes that will be stored in the GemFire out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the domain model classes and cases where part of the classes have already been serializable.
-This library also extends GemFire API (e.g. supports [Documentation#Paginated_Queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], [Documentation#Smart_expiration smart expiration], etc.) and contains a set [Documentation#Cache_utils cache utils] for managing GemFire distributed system.
+This library also extends GemFire API (e.g. supports [Documentation#Paginated_Queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], [Documentation#Smart_expiration smart expiration], etc.) and contains a set of [Documentation#Cache_utils cache utils] for managing GemFire distributed system.
 
 = Domain class requirements =
 
@@ -17,7 +17,11 @@ Icegem imposes some constraints on a domain class for which serialization is req
   * A getter name should start with "get" ("is" for boolean fields), take 0 parameters, return a value and should not be parametrized.
   * A setter name should start with "set", take 1 parameter and should not be parametrized. 
 
-*Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references. 
+*Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references.
+
+Each class that will be auto serialized should be annotated with annotations:
+ * `@AutoSerializeble` - this annotations contains only one required property `dataSerializerID` - the unique id for generated data serializer;
+ * `@BeanVersion` - this annotations contains only one required property `value` - version of the current bean. This version should be positive. For more details about domain class versioning see this [Documentation#Bean_versioning section].    
 
 = Architecture and implementation =
 
@@ -87,7 +91,7 @@ import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
 }}}  
 
-== Versioning ==
+== Bean versioning ==
 
 Icegem supports data model versioning. 
 
@@ -103,9 +107,8 @@ class Client {
 
 In accordance to serialization/deserialization process we impose some restrictions:
 
-1. you can't delete field in elder version
-
-2. a field that doesn't exist in first version should be annotated with @FieldVersion and version from which field appeared
+ * you can't delete field in elder version;
+ * a field that doesn't exist in the first version should be annotated with `@FieldVersion` and version from which field appeared. `@FieldVersion` value should be positive.
 
 These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object)
 
