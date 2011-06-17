@@ -10,12 +10,12 @@ This library also extends GemFire API (e.g. supports [Documentation#Paginated_Qu
 = Domain class requirements =
 
 Icegem imposes some constraints on a domain class for which serialization is required. This constraints are the following:
-  * A class should have a public no-arguments constructor.
-  * If the class extends another class, superclass should either satisfy this constrains or it should be serializable.
-  * Nested classes for this class should not be serializable.
-  * All class fields should have getters and setters.
-  * A getter name should start with "get" ("is" for boolean fields), take 0 parameters, return a value and should not be parametrized.
-  * A setter name should start with "set", take 1 parameter and should not be parametrized. 
+  * a class should have a public no-arguments constructor;
+  * if the class extends another class, superclass should either satisfy this constrains or it should be serializable;
+  * nested classes for this class should not be serializable;
+  * all class fields should have getters and setters;
+  * a getter name should start with "get" ("is" for boolean fields), take 0 parameters, return a value and should not be parametrized;
+  * a setter name should start with "set", take 1 parameter and should not be parametrized. 
 
 *Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references.
 
@@ -27,10 +27,10 @@ Each class that will be auto serialized should be annotated with annotations:
 
 The architecture of Icegem library consists of the four main components:
 
-  * [Documentation#DataSerializerGenerator]
-  * [Documentation#HierarchyRegistry]
-  * [Documentation#Introspector]
-  * [Documentation#AutoSerializableRegistrarBean]
+  * [Documentation#DataSerializerGenerator DataSerializerGenerator]
+  * [Documentation#HierarchyRegistry HierarchyRegistry]
+  * [Documentation#Introspector Introspector]
+  * [Documentation#AutoSerializableRegistrarBean AutoSerializableRegistrarBean]
 
 == DataSerializerGenerator ==
 
@@ -56,7 +56,7 @@ Data serializer class generation is performed with help of [http://www.csg.is.ti
 
 === HierarchyRegistry ===
 
-Takes as parameter list of classes to be serialized and sends them to the [Documentation#DataSerializerGenerator] which generates corresponding `DataSerializers`. `HierarchyRegistry` then registers these `DataSerializers` with GemFire serialization framework.
+Takes as parameter list of classes to be serialized and sends them to the [Documentation#DataSerializerGenerator DataSerializerGenerator] which generates corresponding `DataSerializers`. `HierarchyRegistry` then registers these `DataSerializers` with GemFire serialization framework.
 
 {{{
 class RegistryBean {
@@ -75,7 +75,7 @@ Introspector contains help methods for class validation during generation of dat
 
 === AutoSerializableRegistrarBean ===
 
-This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#HierarchyRegistry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
+This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#HierarchyRegistry HierarchyRegistry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
 === Autodetection of circular references ===
 
