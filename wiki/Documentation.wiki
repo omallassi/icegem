@@ -5,6 +5,7 @@
 = Introduction =
 
 Icegem is an extension for in-memory data grid [http://community.gemstone.com/display/gemfire/GemFire+Enterprise GemFire Enterprise]^tm^ which provides serialization mechanism for domain classes that will be stored in the GemFire out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the domain model classes and cases where part of the classes have already been serializable.
+
 This library also extends GemFire API (e.g. supports [Documentation#Paginated_Queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], [Documentation#Smart_expiration smart expiration], etc.) and contains a set of [Documentation#Cache_utils cache utils] for managing GemFire distributed system.
 
 = Domain class requirements =
@@ -21,7 +22,9 @@ Icegem imposes some constraints on a domain class for which serialization is req
 
 Each class that will be auto serialized should be annotated with annotations:
  * `@AutoSerializeble` - this annotations contains only one required property `dataSerializerID` - the unique id for generated data serializer;
- * `@BeanVersion` - this annotations contains only one required property `value` - version of the current bean. This version should be positive. For more details about domain class versioning see this [Documentation#Bean_versioning section].    
+ * `@BeanVersion` - this annotations contains only one required property `value` - version of the current bean. This version should be positive. For more details about domain class versioning see this [Documentation#Bean_versioning section].
+
+See domain class [Documentation#Domain_class_examples examples] for more details.    
 
 = Architecture and implementation =
 
@@ -93,26 +96,90 @@ System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
 
 == Bean versioning ==
 
-Icegem supports data model versioning. 
+Icegem supports data model versioning. It's achieved by using two annotations `@BeanVersion` and `@FieldVersion`.
 
-Each class with @AutoSerializable annotation should also be annotated with @BeanVersion
+In accordance to serialization/deserialization process we impose some restrictions for classes that use versioning:
 
-{{{
-@AutoSerializable(dataSerializerID = 1234234)
-@BeanVersion(1)
-class Client {
-    ...
-}
-}}}
+ * already existed in previous version of the class field can't be deleted in new version;
+ * a field that doesn't exist in the first version should be annotated with `@FieldVersion` specifying version from which this field appeared. `@FieldVersion` value should be positive;
+ * for different versions of the class annotation `@AutoSerializable` should specify the same `dataSerializerID`.
 
-In accordance to serialization/deserialization process we impose some restrictions:
-
- * you can't delete field in elder version;
- * a field that doesn't exist in the first version should be annotated with `@FieldVersion` and version from which field appeared. `@FieldVersion` value should be positive.
-
-These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object)
+These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object).
+See domain class [Documentation#Domain_class_examples examples] for more details.
 
 = Usage instructions =
+
+== Domain class examples ==
+
+The first version of the class `Company`:
+{{{
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
+
+@AutoSerializable(dataSerializerID = 1412)
+@BeanVersion(1)
+public class Company {
+    private int id;
+
+    public Company() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    @Override
+    public String toString() {
+        return "Company{" +
+                "id=" + id +
+                '}';
+    }
+}
+}}}
+The second version of the class `Company` where a new field `name` has been added:
+{{{
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
+import com.googlecode.icegem.serialization.FieldVersion;
+
+@AutoSerializable(dataSerializerID = 1412)
+@BeanVersion(2)
+public class Company {
+    private int id;
+    @FieldVersion(since = 2)
+    private String name;
+
+    public Company() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Company{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
+}}}
 
 == Library integration ==
 
@@ -142,10 +209,10 @@ icegem-core.jar contains a class `AutoSerializableRegistrarBean` that can be use
 
 == Manual library integration ==
 
-To use  library without spring-icegem.jar
+To use  library without spring:
 
   # add javassist.jar, icegem-core.jar to ClassPath
-  # call HierarchyRegistry.registerAll with two arguments: class loader and list of domain model classes that meet the rules for use in the IceGem library.
+  # call `HierarchyRegistry.registerAll` with two arguments: class loader and list of domain classes that meet the [Documentation#Domain_class_requirements requirements] for use in the IceGem library.
 
 = Build description=
 
@@ -156,8 +223,7 @@ To use  library without spring-icegem.jar
  # integration testing: mvn verify
 
 == License ==
-Some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file.
- 
+Some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file. 
 
 = Special cases (mixing auto and manual serialization) =
 
