@@ -72,11 +72,11 @@ HierarchyRegistry.registerAll(RegistryBean.class.getClassLoader(), classesList);
 }
 }}}
 
-=== Introspector ===   
+== Introspector ==   
 
 Introspector contains help methods for class validation during generation of data serializers. 
 
-=== Auto Serializable Registrar Bean ===
+== Auto Serializable Registrar Bean ==
 
 This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
