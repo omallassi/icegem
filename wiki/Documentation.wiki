@@ -80,7 +80,7 @@ Introspector contains help methods for class validation during generation of dat
 
 This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
-=== Autodetection of circular references ===
+== Autodetection of circular references ==
 
 If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
 IceGem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.control.methodframes`. This property can be set via JVM parameters: 
@@ -226,7 +226,7 @@ To use  library without spring:
 
 *Note*: some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file.
 
-== Special cases (mixing auto and manual serialization) ==
+= Mixing auto and manual serialization =
 
 In a project both annotated and casual serializable classes (implementing DataSerializable/Serializable or extending DataSerilizer) can be used.
 
