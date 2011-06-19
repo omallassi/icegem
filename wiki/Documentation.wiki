@@ -94,7 +94,7 @@ import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
 }}}  
 
-== Bean versioning ==
+= Bean versioning =
 
 Icegem supports data model versioning. It's achieved by using two annotations `@BeanVersion` and `@FieldVersion`.
 
@@ -107,9 +107,7 @@ In accordance to serialization/deserialization process we impose some restrictio
 These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object).
 See domain class [Documentation#Domain_class_examples examples] for more details.
 
-= Usage instructions =
-
-== Domain class examples ==
+= Domain class examples =
 
 The first version of the class `Company`:
 {{{
@@ -185,7 +183,7 @@ public class Company {
 }
 }}}
 
-== Library integration ==
+= Library integration =
 
 There are two ways of integrating the IceGem library into a progect: via spring and manually. Both cases are described below:
 
@@ -218,7 +216,7 @@ To use  library without spring:
   # add javassist.jar, icegem-core.jar to ClassPath
   # call `HierarchyRegistry.registerAll` with two arguments: class loader and list of domain classes that meet the [Documentation#Domain_class_requirements requirements] for use in the IceGem library.
 
-= Build description=
+= Build description =
 
  # getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
  # building artifacts: mvn install
@@ -226,12 +224,11 @@ To use  library without spring:
  # testing: mvn test
  # integration testing: mvn verify
 
-== License ==
-Some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file. 
+*Note*: some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file.
 
-= Special cases (mixing auto and manual serialization) =
+== Special cases (mixing auto and manual serialization) ==
 
-In a project you can use both annotated classes and casual serializable classes (implementing DataSerializable/Serializable or extending DataSerilizer)
+In a project both annotated and casual serializable classes (implementing DataSerializable/Serializable or extending DataSerilizer) can be used.
 
 = Performance characteristics =
 
