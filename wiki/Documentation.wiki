@@ -587,7 +587,7 @@ expirationController.close();
 
 }}}
 
-== How to get access to the other regions inside of isExpired(Entry<Object, Object>) method ==
+== How to get access to other regions inside of isExpired(Entry<Object, Object>) method ==
 
 {{{
 new ExpirationPolicy() {
