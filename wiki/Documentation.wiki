@@ -113,6 +113,8 @@ See domain class [Documentation#Domain_class_examples examples] for more details
 
 The first version of the class `Company`:
 {{{
+package com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv1;
+
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
 
@@ -141,6 +143,8 @@ public class Company {
 }}}
 The second version of the class `Company` where a new field `name` has been added:
 {{{
+package com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv2;
+
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
 import com.googlecode.icegem.serialization.FieldVersion;
