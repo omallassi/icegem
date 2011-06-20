@@ -1,6 +1,7 @@
 package com.googlecode.icegem.cacheutils.updater;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,10 @@ public class UpdateTool extends Tool {
 	
 	protected void printHelp(final Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( "update [options]", options );
+		formatter
+			.printHelp(
+				"update <--regions <--locator> <--server> [--subregions] [--packages]  | --all <--locator> <--server> [--packages] | --help>",
+				options);
 	}
 	
 	protected Options constructGnuOptions() {
@@ -84,12 +88,23 @@ public class UpdateTool extends Tool {
 		return gnuOptions;
 	}
 
+	private void filterRegions(Set<Region<?,?>> regionsSet) {
+		Set<Region<?,?>> childRegionsSet = new HashSet<Region<?,?>>();
+		for (Region<?, ?> region : regionsSet) {
+			if (region.getParentRegion() != null) {
+				childRegionsSet.add(region);
+			}
+		}
+		
+		regionsSet.removeAll(childRegionsSet);
+	}
+
     public void execute(String[] args, boolean debugEnabled, boolean quiet) {
 		parseCommandLineArguments(args);
 		log.info("Connecting to the system as admin member...");
 		AdminService admin = null;
 		try {
-			admin = new AdminService(locatorOption);
+			admin = new AdminService(locatorOption, false);
 		} catch (Exception e) {
 			log.info("Failed to connect to the system. " + e.getMessage());
             Utils.exitWithSuccess();
@@ -117,6 +132,14 @@ public class UpdateTool extends Tool {
             Utils.exitWithSuccess();
         }
         Set<Region<?,?>> regions = peerCacheService.createRegions(regionNames);
+        
+		log.info("withSubRegionsOption = " + withSubRegionsOption);
+		if (!withSubRegionsOption) {
+			log.info("Regions size before filtering: " + regions.size());
+			filterRegions(regions);
+			log.info("Regions size after filtering: " + regions.size());
+		}
+
 		Updater updater = new Updater();
 		log.info("Updating regions...");
 		updater.updateRegions(regions);
