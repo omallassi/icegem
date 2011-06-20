@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cache PUBLIC "-//GemStone Systems, Inc.//GemFire Declarative Cache 6.5//EN" "http://www.gemstone.com/dtd/cache6_5.dtd">
+<cache>
+	<cache-server port="41415" />
+
+	<region name="data1" refid="REPLICATE">
+		<region-attributes statistics-enabled="true" />
+
+		<region name="sr1" refid="REPLICATE">
+			<region-attributes statistics-enabled="true" />
+		</region>
+	</region>
+
+	<region name="data2" refid="REPLICATE">
+		<region-attributes statistics-enabled="true" />
+	</region>
+</cache>

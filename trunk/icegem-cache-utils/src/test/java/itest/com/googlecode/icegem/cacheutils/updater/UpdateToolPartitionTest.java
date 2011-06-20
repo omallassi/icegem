@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.gemstone.gemfire.cache.Region;
@@ -23,10 +23,9 @@ import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
 
-public class UpdateToolTest {
+public class UpdateToolPartitionTest {
 	private static final String REGION_DATA1 = "data1";
 	private static final String REGION_DATA2 = "data2";
-	private static final String REGION_DATA1_SR1 = "data1/sr1";
 
 	private static final String KEY = "key";
 	private static final String KEY_AS1 = "key-as1";
@@ -36,6 +35,8 @@ public class UpdateToolTest {
 
 	/** Field cacheServer1 */
 	private static Process cacheServer1;
+	/** Field cacheServer2 */
+	private static Process cacheServer2;
 	/** Field javaProcessLauncher */
 	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(
 		false, false, false);
@@ -43,19 +44,27 @@ public class UpdateToolTest {
 	private ClientRegionFactory<Object, Object> clientRegionFactory;
 	private Map<String, Region<Object, Object>> nameToRegionMap = new HashMap<String, Region<Object, Object>>();
 	private ClientCache clientCache;
+	private PropertiesHelper propertiesHelper;
 
-	@BeforeMethod
+	@BeforeClass
 	public void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 
+		propertiesHelper = new PropertiesHelper(
+			"/updateToolPartitionServerProperties41514.properties");
+
 		startCacheServers();
 
-		createRegions(new String[] { REGION_DATA1, REGION_DATA2,
-			REGION_DATA1_SR1 });
+		createRegions(new String[] { REGION_DATA1, REGION_DATA2 });
 
 		put(REGION_DATA1, KEY, VALUE);
 		put(REGION_DATA2, KEY, VALUE);
-		put(REGION_DATA1_SR1, KEY, VALUE);
+	}
+
+	@AfterClass
+	public void tearDown() throws IOException, InterruptedException {
+		clientCache.close();
+		stopCacheServers();
 	}
 
 	private void createRegions(String[] regionNames) {
@@ -70,39 +79,16 @@ public class UpdateToolTest {
 
 		Region<Object, Object> region = null;
 		for (String regionName : regionNames) {
-			String[] regionNameParts = regionName.split("/");
-			for (int i = 0; i < regionNameParts.length; i++) {
-				String regionNamePart = regionNameParts[i];
-				if (i == 0) {
-					region = clientCache.getRegion(regionNamePart);
+			region = clientCache.getRegion(regionName);
 
-					if (region == null) {
-						region = clientRegionFactory.create(regionNamePart);
-					}
-				} else {
-					nameToRegionMap.get(regionNamePart);
-					Region<Object, Object> subregion = region
-						.getSubregion(regionNamePart);
-
-					if (subregion == null) {
-						subregion = region.createSubregion(regionNamePart,
-							region.getAttributes());
-					}
-
-					region = subregion;
-				}
+			if (region == null) {
+				region = clientRegionFactory.create(regionName);
 			}
 
 			region.registerInterestRegex(".*");
 
 			nameToRegionMap.put(regionName, region);
 		}
-	}
-
-	@AfterMethod
-	public void tearDown() throws IOException, InterruptedException {
-		clientCache.close();
-		stopCacheServers();
 	}
 
 	private void put(String regionName, Object key, Object value) {
@@ -115,21 +101,23 @@ public class UpdateToolTest {
 		return region.getEntry(key);
 	}
 
+	private void destroy(String regionName, Object key) {
+		Region<Object, Object> region = nameToRegionMap.get(regionName);
+		region.destroy(key);
+	}
+
 	@Test
 	public void testMainPositiveOneRegion() throws Exception {
 		System.out.println("testMainPositiveOneRegion");
 
 		long updateStartTime = System.currentTimeMillis();
 
-		PropertiesHelper propertiesHelper = new PropertiesHelper(
-			"/updateToolServerProperties41414.properties");
-
 		String[] vmArguments = new String[] { "-Dgemfire.log-level=none" };
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, vmArguments, new String[] { "update", "-l",
 				propertiesHelper.getStringProperty("locators"), "-s",
-				"localhost[41414]", "-r", REGION_DATA1 });
+				"localhost[41514],localhost[41515]", "-r", REGION_DATA1 });
 
 		long lastModifiedTime = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
@@ -144,23 +132,20 @@ public class UpdateToolTest {
 
 		long updateStartTime = System.currentTimeMillis();
 
-		PropertiesHelper propertiesHelper = new PropertiesHelper(
-			"/updateToolServerProperties41414.properties");
-
 		String[] vmArguments = new String[] { "-Dgemfire.log-level=none" };
 
-		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
-			Launcher.class, vmArguments, new String[] { "update", "-l",
-				propertiesHelper.getStringProperty("locators"), "-s",
-				"localhost[41414]", "-r", REGION_DATA1, "-c" });
+		int exitCode = javaProcessLauncher
+			.runAndWaitProcessExitCode(
+				Launcher.class,
+				vmArguments,
+				new String[] { "update", "-l",
+					propertiesHelper.getStringProperty("locators"), "-s",
+					"localhost[41514],localhost[41515]", "-r", REGION_DATA1,
+					"-c" });
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
 		assertThat(lastModifiedTimeForData1).isGreaterThan(updateStartTime);
-
-		long lastModifiedTimeForData1Sr1 = get(REGION_DATA1_SR1, KEY)
-			.getStatistics().getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1Sr1).isGreaterThan(updateStartTime);
 
 		assertThat(exitCode).isEqualTo(0);
 	}
@@ -171,15 +156,13 @@ public class UpdateToolTest {
 
 		long updateStartTime = System.currentTimeMillis();
 
-		PropertiesHelper propertiesHelper = new PropertiesHelper(
-			"/updateToolServerProperties41414.properties");
-
 		String[] vmArguments = new String[] { "-Dgemfire.log-level=none" };
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, vmArguments, new String[] { "update", "-l",
 				propertiesHelper.getStringProperty("locators"), "-s",
-				"localhost[41414]", "-r", REGION_DATA1 + "," + REGION_DATA2 });
+				"localhost[41514],localhost[41515]", "-r",
+				REGION_DATA1 + "," + REGION_DATA2 });
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
@@ -188,11 +171,6 @@ public class UpdateToolTest {
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
 		assertThat(lastModifiedTimeForData2).isGreaterThan(updateStartTime);
-
-		long lastModifiedTimeForData1Sr1 = get(REGION_DATA1_SR1, KEY)
-			.getStatistics().getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1Sr1).isLessThanOrEqualTo(
-			updateStartTime);
 
 		assertThat(exitCode).isEqualTo(0);
 	}
@@ -203,15 +181,12 @@ public class UpdateToolTest {
 
 		long updateStartTime = System.currentTimeMillis();
 
-		PropertiesHelper propertiesHelper = new PropertiesHelper(
-			"/updateToolServerProperties41414.properties");
-
 		String[] vmArguments = new String[] { "-Dgemfire.log-level=none" };
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, vmArguments, new String[] { "update", "-l",
 				propertiesHelper.getStringProperty("locators"), "-s",
-				"localhost[41414]", "-a" });
+				"localhost[41514],localhost[41515]", "-a" });
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
@@ -220,11 +195,6 @@ public class UpdateToolTest {
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
 		assertThat(lastModifiedTimeForData2).isGreaterThan(updateStartTime);
-
-		long lastModifiedTimeForData1Sr1 = get(REGION_DATA1_SR1, KEY)
-			.getStatistics().getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1Sr1).isLessThanOrEqualTo(
-			updateStartTime);
 
 		assertThat(exitCode).isEqualTo(0);
 	}
@@ -235,7 +205,7 @@ public class UpdateToolTest {
 
 		HierarchyRegistry
 			.registerAll(
-				UpdateToolTest.class.getClassLoader(),
+				UpdateToolPartitionTest.class.getClassLoader(),
 				itest.com.googlecode.icegem.cacheutils.updater.as1.SimpleClass.class,
 				itest.com.googlecode.icegem.cacheutils.updater.as2.SimpleClass.class);
 
@@ -248,9 +218,6 @@ public class UpdateToolTest {
 
 		long updateStartTime = System.currentTimeMillis();
 
-		PropertiesHelper propertiesHelper = new PropertiesHelper(
-			"/updateToolServerProperties41414.properties");
-
 		String[] vmArguments = new String[] { "-Dgemfire.log-level=none" };
 
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
@@ -259,13 +226,11 @@ public class UpdateToolTest {
 				"-l",
 				propertiesHelper.getStringProperty("locators"),
 				"-s",
-				"localhost[41414]",
+				"localhost[41514],localhost[41515]",
 				"-a",
 				"-p",
 				"itest.com.googlecode.icegem.cacheutils.updater.as1,"
 					+ "itest.com.googlecode.icegem.cacheutils.updater.as2" });
-
-		Thread.sleep(10 * 1000);
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
@@ -283,23 +248,41 @@ public class UpdateToolTest {
 			.getStatistics().getLastModifiedTime();
 		assertThat(lastModifiedTimeForAs2).isGreaterThan(updateStartTime);
 
-		long lastModifiedTimeForData1Sr1 = get(REGION_DATA1_SR1, KEY)
-			.getStatistics().getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1Sr1).isLessThanOrEqualTo(
-			updateStartTime);
-
 		assertThat(exitCode).isEqualTo(0);
+
+		destroy(REGION_DATA1, KEY_AS1);
+		destroy(REGION_DATA2, KEY_AS2);
+	}
+
+	@Test
+	public void testMainNegativeLocatorOnly() throws Exception {
+		System.out.println("testMainNegativeLocatorOnly");
+
+		String[] vmArguments = new String[] { "-Dgemfire.log-level=none" };
+
+		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
+			Launcher.class, vmArguments, new String[] { "update", "-l",
+				propertiesHelper.getStringProperty("locators"), "-r",
+				REGION_DATA1 });
+
+		assertThat(exitCode).isEqualTo(1);
 	}
 
 	private void startCacheServers() throws IOException, InterruptedException {
 		cacheServer1 = javaProcessLauncher
 			.runWithConfirmation(
 				ServerTemplate.class,
-				new String[] { "-DgemfirePropertyFile=updateToolServerProperties41414.properties" },
+				new String[] { "-DgemfirePropertyFile=updateToolPartitionServerProperties41514.properties" },
+				null);
+		cacheServer2 = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=updateToolPartitionServerProperties41515.properties" },
 				null);
 	}
 
 	private void stopCacheServers() throws IOException, InterruptedException {
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
 	}
 }
