@@ -1,7 +1,19 @@
 package com.googlecode.icegem.cacheutils.common;
 
-import java.util.*;
 import java.io.InvalidClassException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javassist.CannotCompileException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.client.ClientCache;
@@ -10,13 +22,6 @@ import com.gemstone.gemfire.cache.client.ClientRegionFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
-
-import javassist.CannotCompileException;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Connects to distributes system as client in order to perform some tasks on a certain regions
@@ -41,7 +46,7 @@ public class PeerCacheService {
                 clientCacheFactory.addPoolServer(serverHost, Integer.parseInt(serverPort));
             }
         }
-        clientCacheFactory.set("log-file", "member.log");
+        clientCacheFactory.set("log-level", "none");
         this.cache = clientCacheFactory.create();
     }
 
