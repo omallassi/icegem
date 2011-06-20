@@ -100,51 +100,57 @@ public class UpdateTool extends Tool {
 	}
 
     public void execute(String[] args, boolean debugEnabled, boolean quiet) {
-		parseCommandLineArguments(args);
-		log.info("Connecting to the system as admin member...");
-		AdminService admin = null;
 		try {
-			admin = new AdminService(locatorOption, false);
-		} catch (Exception e) {
-			log.info("Failed to connect to the system. " + e.getMessage());
-            Utils.exitWithSuccess();
-		}
-		log.info("Collect system regions...");
-		Map<String, String> regionNames = null;
-		try {
-			regionNames = admin.getRegionNames(regionsOption, withSubRegionsOption);
-		} catch (AdminException e) {
-			log.info("Failed to get system regions. " + e.getMessage());
-            admin.close();
-            Utils.exitWithSuccess();
-		}
-        log.info("Found following system regions: " + regionNames.values());
-        log.info("Closing admin member...");
-        admin.close();
-        
+			parseCommandLineArguments(args);
+			log.info("Connecting to the system as admin member...");
+			AdminService admin = null;
+			try {
+				admin = new AdminService(locatorOption, false);
+			} catch (Exception e) {
+				log.info("Failed to connect to the system. " + e.getMessage());
+				Utils.exitWithFailure("Failed to connect to the system");
+			}
+			log.info("Collect system regions...");
+			Map<String, String> regionNames = null;
+			try {
+				regionNames = admin.getRegionNames(regionsOption,
+					withSubRegionsOption);
+			} catch (AdminException e) {
+				log.info("Failed to get system regions. " + e.getMessage());
+				admin.close();
+				Utils.exitWithFailure("Failed to get system regions");
+			}
+			log.info("Found following system regions: " + regionNames.values());
+			log.info("Closing admin member...");
+			admin.close();
 
-		log.info("Connecting to system regions...");
-		PeerCacheService peerCacheService = null;
-        try {
-            peerCacheService = new PeerCacheService(serverOption, scanPackagesOption);
-        } catch (Exception e) {
-            log.info("Failed to startup updater cache. " + e.getMessage());
-            Utils.exitWithSuccess();
-        }
-        Set<Region<?,?>> regions = peerCacheService.createRegions(regionNames);
-        
-		log.info("withSubRegionsOption = " + withSubRegionsOption);
-		if (!withSubRegionsOption) {
-			log.info("Regions size before filtering: " + regions.size());
-			filterRegions(regions);
-			log.info("Regions size after filtering: " + regions.size());
-		}
+			log.info("Connecting to system regions...");
+			PeerCacheService peerCacheService = null;
+			try {
+				peerCacheService = new PeerCacheService(serverOption,
+					scanPackagesOption);
+			} catch (Exception e) {
+				log.info("Failed to startup updater cache. " + e.getMessage());
+				Utils.exitWithFailure("Failed to startup updater cache");
+			}
+			Set<Region<?, ?>> regions = peerCacheService
+				.createRegions(regionNames);
 
-		Updater updater = new Updater();
-		log.info("Updating regions...");
-		updater.updateRegions(regions);
-        log.info("Regions update finished successfuly");
-        log.info("Closing client cache...");
-		peerCacheService.close();
+			log.info("withSubRegionsOption = " + withSubRegionsOption);
+			if (!withSubRegionsOption) {
+				log.info("Regions size before filtering: " + regions.size());
+				filterRegions(regions);
+				log.info("Regions size after filtering: " + regions.size());
+			}
+
+			Updater updater = new Updater();
+			log.info("Updating regions...");
+			updater.updateRegions(regions);
+			log.info("Regions update finished successfuly");
+			log.info("Closing client cache...");
+			peerCacheService.close();
+		} catch (Throwable t) {
+			Utils.exitWithFailure("Unexpected throwable", t);
+		}
     }
 }
