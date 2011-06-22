@@ -32,6 +32,7 @@ public class SignalListenerTest {
                 new String[] {"-DgemfirePropertyFile=signalListener.properties"},
                 null);
         clientCache = new ClientCacheFactory()
+                .set("log-level", "none")
                 .set("cache-xml-file", "signal-client.xml")
                 .create();
         signalRegion = clientCache.getRegion("signal-region");

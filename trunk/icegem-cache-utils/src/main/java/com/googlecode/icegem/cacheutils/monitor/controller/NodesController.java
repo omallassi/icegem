@@ -1,5 +1,6 @@
 package com.googlecode.icegem.cacheutils.monitor.controller;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,10 +93,18 @@ public class NodesController {
 	}
 
 	private void detectNewNodes() throws AdminException {
+		Set<SystemMember> allNodesSet = new HashSet<SystemMember>(); 
+		
 		SystemMember[] systemMemberApplications = adminService.getAdmin()
 			.getSystemMemberApplications();
+		
+		allNodesSet.addAll(Arrays.asList(systemMemberApplications));
+		
+		SystemMember[] cacheVms = adminService.getAdmin().getCacheVms();
 
-		for (SystemMember member : systemMemberApplications) {
+		allNodesSet.addAll(Arrays.asList(cacheVms));
+
+		for (SystemMember member : allNodesSet) {
 			String host = member.getHost();
 			try {
 				Set<Integer> portsSet = extractPortsSet(member);
