@@ -645,8 +645,9 @@ for (Entry<Object, Object> entry : entrySet) {
 Cache utils consists of several utilities which can help with testing, deploying and monitoring of GemFire-related applications.
 
 This is the list of available commands:
-
+<wiki:comment>
   * compare
+</wiki:comment>
   * monitor
   * update
   * waitfor
@@ -674,8 +675,8 @@ usage: java -jar icegem-cache-utils-<version>.jar [options] <compare |
  -h,--help    Print usage information
  -q,--quiet   Quiet output. Doesn't work if --debug specified.
 }}}
-
-== compare ==
+<wiki:comment>
+compare
 
 Compares data of the specified region in specified cache servers (mode REPLICATION) or specified locators of the same cluster. It is also possible to provide list of java packages to restrict comparison.
 
@@ -710,7 +711,7 @@ The following command will start comparator utility. Replicated region with path
 {{{
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar comparator -p /data -s localhost[40402],localhost[40403],localhost[40405]
 }}}
-
+</wiki:comment>
 == monitor ==
 
 Informs about the changes in the GemFire nodes network. It sends email in case of some node has been added, hanged or removed, and in case of some exception. It is also possible to add custom handlers of the monitoring tool events.
