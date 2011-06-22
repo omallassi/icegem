@@ -509,7 +509,9 @@ A paginated query supports order by functionality on partitioned regions.
  # Query string with order by clause must contain `distinct` word.
 
 ==Limiting of results==
-Paginated query result can be limited. By default this limit is 1000 entries. If query results exceeds this limit, `javax.naming.LimitExceededException` will be thrown. 
+Paginated query result can be limited. By default this limit is 1000 entries. You can specify a custom limit value via paginated query constructors argument. If query results exceeds this limit:
+ * only a specified limit number of entries will be cached and returned; 
+ * flag `limitExceeded` will be set to `true`. 
 
 ==Workflow==
 
