@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cache PUBLIC "-//GemStone Systems, Inc.//GemFire Declarative Cache 6.5//EN" "http://www.gemstone.com/dtd/cache6_5.dtd">
+<cache>
+    <cache-server port="0"/>
+    <region name="data" refid="REPLICATE">
+        <region-attributes data-policy="empty"/>
+    </region>
+</cache>

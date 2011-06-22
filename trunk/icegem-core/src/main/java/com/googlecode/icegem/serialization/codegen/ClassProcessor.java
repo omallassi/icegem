@@ -13,7 +13,7 @@ import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 
 public class ClassProcessor {
 
-    public String  process(XClass element) {
+    public String process(XClass element) {
         StringBuilder builder = new StringBuilder();
 
         // class header

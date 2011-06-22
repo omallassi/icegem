@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * //todo: doc
  * Annotation on class for that we create DataSerializer.
  *
  * @author igolovach
@@ -17,4 +16,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface AutoSerializable {
     int dataSerializerID();
+    byte headerVersion() default 1;
+    byte versionHistoryLength() default 5;
 }

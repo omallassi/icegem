@@ -15,7 +15,7 @@ import java.util.List;
 public class Son extends Father {
     private List<Long> brothers;
     @FieldVersion(since = 2)
-    private ArrayList<Long> sisters;
+    private List<Long> sisters;
 
     public Son() {
     }
@@ -28,11 +28,11 @@ public class Son extends Father {
         this.brothers = brothers;
     }
 
-    public ArrayList<Long> getSisters() {
+    public List<Long> getSisters() {
         return sisters;
     }
 
-    public void setSisters(ArrayList<Long> sisters) {
+    public void setSisters(List<Long> sisters) {
         this.sisters = sisters;
     }
 }

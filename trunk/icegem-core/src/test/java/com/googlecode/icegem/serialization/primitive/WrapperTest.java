@@ -2,10 +2,8 @@ package com.googlecode.icegem.serialization.primitive;
 
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 
-import com.googlecode.icegem.serialization.thirdparty.JodaTime;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
-import org.joda.time.DateTime;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

@@ -1,4 +1,4 @@
-package com.googlecode.icegem.serialization.versioning.beans.wrong;
+package com.googlecode.icegem.serialization.versioning.beans.wrong.v2;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
@@ -7,17 +7,26 @@ import com.googlecode.icegem.serialization.FieldVersion;
 /**
  * @author Andrey Stepanov aka standy
  */
-@AutoSerializable(dataSerializerID = 2345856)
-@BeanVersion(1)
-public class Bird {
-    @FieldVersion(since = -1)
+@AutoSerializable(dataSerializerID = 9856123)
+@BeanVersion(2)
+public class Rabbit {
+    private int id;
     private String name;
 
-    public Bird() {
+    public Rabbit() {
     }
 
-    public Bird(String name) {
+    public Rabbit(int id, String name) {
+        this.id = id;
         this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -30,8 +39,9 @@ public class Bird {
 
     @Override
     public String toString() {
-        return "Bird {" +
-                "name=" + name +
+        return "Rabbit {" +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 '}';
     }
 }

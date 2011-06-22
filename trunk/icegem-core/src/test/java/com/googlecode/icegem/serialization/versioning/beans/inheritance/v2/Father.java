@@ -6,6 +6,7 @@ import com.googlecode.icegem.serialization.FieldVersion;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: akondratyev
@@ -18,9 +19,9 @@ public class Father {
     private String name;
     private int age;
     @FieldVersion(since = 2)
-    private Date burthday;
+    private Date birthday;
     @FieldVersion(since = 2)
-    private ArrayList<Son> children;
+    private List<Son> children;
 
     public Father() {
     }
@@ -41,12 +42,12 @@ public class Father {
         this.age = age;
     }
 
-    public Date getBurthday() {
-        return burthday;
+    public Date getBirthday() {
+        return birthday;
     }
 
-    public void setBurthday(Date burthday) {
-        this.burthday = burthday;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public int getId() {
@@ -57,11 +58,11 @@ public class Father {
         this.id = id;
     }
 
-    public ArrayList<Son> getChildren() {
+    public List<Son> getChildren() {
         return children;
     }
 
-    public void setChildren(ArrayList<Son> children) {
+    public void setChildren(List<Son> children) {
         this.children = children;
     }
 }

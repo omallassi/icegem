@@ -1,22 +1,20 @@
-package com.googlecode.icegem.serialization.versioning.beans.wrong;
+package com.googlecode.icegem.serialization.versioning.beans.versionhistory.v2;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
 
 /**
- * @author Andrey Stepanov aka standy
+ * @author Andrey Stepanov aka id
  */
-@AutoSerializable(dataSerializerID = 2345856)
-@BeanVersion(1)
-public class Bird {
-    @FieldVersion(since = -1)
+@AutoSerializable(dataSerializerID = 34814375, versionHistoryLength = 1)
+@BeanVersion(3)
+public class Keyboard {
     private String name;
 
-    public Bird() {
+    public Keyboard() {
     }
 
-    public Bird(String name) {
+    public Keyboard(String name) {
         this.name = name;
     }
 
@@ -30,8 +28,8 @@ public class Bird {
 
     @Override
     public String toString() {
-        return "Bird {" +
-                "name=" + name +
+        return "Keyboard {" +
+                ", name='" + name + '\'' +
                 '}';
     }
 }
