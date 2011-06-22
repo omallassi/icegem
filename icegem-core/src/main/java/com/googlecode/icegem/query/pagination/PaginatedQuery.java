@@ -2,11 +2,14 @@ package com.googlecode.icegem.query.pagination;
 
 import com.gemstone.gemfire.cache.GemFireCache;
 import com.gemstone.gemfire.cache.Region;
+import com.gemstone.gemfire.cache.execute.FunctionException;
+import com.gemstone.gemfire.cache.execute.ResultSender;
 import com.gemstone.gemfire.cache.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.naming.LimitExceededException;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -24,6 +27,13 @@ import java.util.*;
  * ORDER BY on Partitioned Regions
  * A paginated query supports order by functionality on partitioned regions.
  * The fields specified in the order by clause must be part of the projection list.
+ *
+ * Limiting of results:
+ * Paginated query result can be limited. By default this limit is 1000 entries.
+ * You can specify a custom limit value via paginated query constructors argument.
+ * If query results exceeds this limit:
+ *  - only a specified limit number of entries will be cached and returned;
+ *  - flag 'limitExceeded' will be set to 'true'.
  *
  * Examples:
  *
@@ -51,6 +61,8 @@ public class PaginatedQuery<V> {
     private QueryService queryService;
     /** limit on query result */
     private int queryLimit;
+    /** flag that indicates that limit has been exceeded */
+    private boolean limitExceeded;
     /** region for querying  */
     private Region<Object, V> queryRegion;
     /** help region for storing information about paginated queries  */
@@ -210,15 +222,11 @@ public class PaginatedQuery<V> {
      * Use getTotalNumberOfPages() method to know how many pages this query has.
      *
      * @param pageNumber number of page to return
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
+     *
      * @return List<V> list of entries
-     * @throws FunctionDomainException when
-     * @throws TypeMismatchException when
-     * @throws QueryInvocationTargetException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
      */
-    public List<V> page(int pageNumber) throws FunctionDomainException, TypeMismatchException,
-            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+    public List<V> page(int pageNumber) throws QueryException {
         storePaginatedQueryInfoIfNeeded();
         if (!pageNumberExists(pageNumber)) {
             IndexOutOfBoundsException e =  new IndexOutOfBoundsException("A page number {" + pageNumber + "} " +
@@ -243,14 +251,9 @@ public class PaginatedQuery<V> {
      * Use hasNext() method to check that the query has the next page.
      *
      * @return List<V> list of entries
-     * @throws FunctionDomainException when
-     * @throws QueryInvocationTargetException when
-     * @throws TypeMismatchException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
-    public List<V> next() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
-            NameResolutionException, LimitExceededException {
+    public List<V> next() throws QueryException {
         return page(++currentPageNumber);
     }
 
@@ -259,14 +262,9 @@ public class PaginatedQuery<V> {
      * Use hasPrevious() method to check that the query has a previous page.
      *
      * @return List<Object> list of entries
-     * @throws FunctionDomainException when
-     * @throws QueryInvocationTargetException when
-     * @throws TypeMismatchException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
-    public List<V> previous() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
-            NameResolutionException, LimitExceededException {
+    public List<V> previous() throws QueryException {
         return page(--currentPageNumber);
     }
 
@@ -274,14 +272,9 @@ public class PaginatedQuery<V> {
      * Checks that query has the next page.
      *
      * @return boolean
-     * @throws FunctionDomainException when
-     * @throws QueryInvocationTargetException when
-     * @throws TypeMismatchException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
-    public boolean hasNext() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
-            NameResolutionException, LimitExceededException {
+    public boolean hasNext() throws QueryException {
         return pageNumberExists(currentPageNumber + 1);
     }
 
@@ -289,14 +282,9 @@ public class PaginatedQuery<V> {
      * Checks that query has the previous page.
      *
      * @return boolean
-     * @throws FunctionDomainException when
-     * @throws QueryInvocationTargetException when
-     * @throws TypeMismatchException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
-    public boolean hasPrevious() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
-            NameResolutionException, LimitExceededException {
+    public boolean hasPrevious() throws QueryException {
         return pageNumberExists(currentPageNumber - 1);
     }
 
@@ -304,14 +292,9 @@ public class PaginatedQuery<V> {
      * Returns a total number of query entries.
      *
      * @return total number of entries
-     * @throws FunctionDomainException when
-     * @throws TypeMismatchException when
-     * @throws QueryInvocationTargetException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
-    public int getTotalNumberOfEntries() throws FunctionDomainException, TypeMismatchException,
-            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+    public int getTotalNumberOfEntries() throws QueryException {
         storePaginatedQueryInfoIfNeeded();
         return totalNumberOfEntries;
     }
@@ -320,14 +303,9 @@ public class PaginatedQuery<V> {
      * Returns a total number of query pages.
      *
      * @return total number of pages
-     * @throws FunctionDomainException when
-     * @throws TypeMismatchException when
-     * @throws QueryInvocationTargetException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
-    public int getTotalNumberOfPages() throws FunctionDomainException, TypeMismatchException,
-            QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+    public int getTotalNumberOfPages() throws QueryException {
         storePaginatedQueryInfoIfNeeded();
         if (isEmpty()) {
             return 1;
@@ -343,13 +321,8 @@ public class PaginatedQuery<V> {
      * Returns size of page.
      *
      * @return page size
-     * @throws FunctionDomainException when
-     * @throws TypeMismatchException when
-     * @throws QueryInvocationTargetException when
-     * @throws NameResolutionException when
      */
-    public int getPageSize() throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException,
-            NameResolutionException {
+    public int getPageSize() {
         return pageKey.getPageSize();
     }
 
@@ -358,14 +331,15 @@ public class PaginatedQuery<V> {
      *
      * @param pageNumber of type int
      * @return boolean
-     * @throws FunctionDomainException when
-     * @throws TypeMismatchException when
-     * @throws QueryInvocationTargetException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
-    public boolean pageNumberExists(int pageNumber) throws FunctionDomainException, TypeMismatchException, QueryInvocationTargetException, NameResolutionException, LimitExceededException {
+    public boolean pageNumberExists(int pageNumber) throws QueryException {
         return pageNumber == 1 || !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
+    }
+
+    public boolean isLimitExceeded() throws QueryException {
+        storePaginatedQueryInfoIfNeeded();
+        return limitExceeded;
     }
 
     /**
@@ -390,29 +364,40 @@ public class PaginatedQuery<V> {
     /**
      * Stores paginated query info if it has not been stored yet.
      *
-     * @throws FunctionDomainException when
-     * @throws QueryInvocationTargetException when
-     * @throws TypeMismatchException when
-     * @throws NameResolutionException when
-     * @throws javax.naming.LimitExceededException when query limit will be exceeded
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
      */
     @SuppressWarnings({ "unchecked" })
-    private void storePaginatedQueryInfoIfNeeded() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException, NameResolutionException, LimitExceededException {
+    private void storePaginatedQueryInfoIfNeeded() throws QueryException {
         pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
         List<Object> paginatedQueryGeneralInfo = paginatedQueryInfoRegion.get(pageKey);
 
         if (paginatedQueryGeneralInfo == null) {
             Query query = queryService.newQuery(addQueryLimit(pageKey.getQueryString()));
-            SelectResults<Object> results = (SelectResults<Object>) query.execute(pageKey.getQueryParameters());
+            SelectResults<Object> results = null;
+            try {
+                results = (SelectResults<Object>) query.execute(pageKey.getQueryParameters());
+            } catch (FunctionDomainException e) {
+                handleException(e);
+            } catch (TypeMismatchException e) {
+                handleException(e);
+            } catch (NameResolutionException e) {
+                handleException(e);
+            } catch (QueryInvocationTargetException e) {
+                handleException(e);
+            }
             if (results.size() > queryLimit) {
-                LimitExceededException e = new LimitExceededException("Size of query results has exceeded limit ("
-                        + queryLimit + " entries). You should refine the query.");
-                logger.warn(e.getMessage());
-                throw e;
+                limitExceeded = true;
+                String warningMessage = "Size of query results has exceeded limit ("
+                        + queryLimit + " entries). Only " + queryLimit + " query results have been returned. " +
+                        "Maybe you should refine the query.";
+                logger.warn(warningMessage);
+            } else {
+                limitExceeded = false;
             }
             if (results.getCollectionType().getElementType().isStructType()) {
                 // List of structures. Should extract keys from it.
                 List<Object> keys = new ArrayList<Object>(results.size());
+
                 for (Object result : results) {
                     Object key;
                     try {
@@ -439,6 +424,9 @@ public class PaginatedQuery<V> {
      * @param keys of type List<Object>
      */
     private void storePaginatedQueryPagesAndGeneralInfo(List<Object> keys) {
+        if (limitExceeded) {
+            keys.remove(keys.size() - 1);
+        }
         storePaginatedQueryGeneralInfo(keys.size());
 
         int keyNumber = 0;
@@ -467,7 +455,7 @@ public class PaginatedQuery<V> {
      */
     private void storePaginatedQueryGeneralInfo(int totalNumberOfEntries) {
         pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
-        paginatedQueryInfoRegion.put(pageKey, Arrays.asList((Object) totalNumberOfEntries));
+        paginatedQueryInfoRegion.put(pageKey, Arrays.asList((Object) totalNumberOfEntries, limitExceeded));
         this.totalNumberOfEntries = totalNumberOfEntries;
     }
 
@@ -497,5 +485,19 @@ public class PaginatedQuery<V> {
         int limitNumber = Integer.parseInt(queryString.substring(limitIndex + 5).trim());
         return (limitNumber > queryLimit) ?
                 queryString.substring(0, limitIndex) + " LIMIT " + (queryLimit + 1) : queryString;
+    }
+
+    /**
+     * Handles throwable exceptions during query execution and replaces them by checked exception.
+     *
+     * @param e of type Throwable
+     * @throws com.gemstone.gemfire.cache.query.QueryException checked exception
+     */
+    @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
+    private void handleException(Throwable e) throws QueryException {
+        QueryException exception = new QueryException("Exception has been thrown during query execution. " +
+                "Cause exception message: " + e.getMessage(), e);
+        logger.warn(exception.getMessage());
+        throw exception;
     }
 }

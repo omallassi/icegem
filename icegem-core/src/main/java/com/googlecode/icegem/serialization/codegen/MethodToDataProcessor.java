@@ -1,7 +1,10 @@
 package com.googlecode.icegem.serialization.codegen;
 
+import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
 import com.googlecode.icegem.serialization.codegen.impl.ToDataFieldProcessor;
+import sun.awt.image.OffScreenImage;
+import sun.rmi.runtime.NewThreadAction;
 
 import java.util.List;
 
@@ -38,7 +41,6 @@ public class MethodToDataProcessor {
                 .append(tab("try {\n"))
                 .append(tab(2, "// check arg is of correct type\n"))
                 .append(tab(2, "if (obj.getClass() != " + className + ".class) {return false;}\n"));
-
         // add check for cycles using method frame counter
         builder.append(tab(2, "// increment thread-local method-frame counter\n"))
                 // todo: not call if fields - not beans! for example - primitives
@@ -52,19 +54,44 @@ public class MethodToDataProcessor {
 
         builder.append("\n");
 
-        //save bean value
+        int beanVersion;
+
         if (element.getType().getAnnotation(BeanVersion.class) != null) {
-            int beanVersion = element.getType().getAnnotation(BeanVersion.class).value();
+            beanVersion = element.getType().getAnnotation(BeanVersion.class).value();
+            // checks on positive value
             if (beanVersion < 1) {
                 throw new RuntimeException("Value of annotation @BeanVersion must be positive, current value = " + beanVersion + " (class '" + className + "')");
             }
-            builder.append(tab(2, "out.writeInt(" + element.getType().getAnnotation(BeanVersion.class).value()+");\n"));  //todo: value is hardcoded in result code
+
+            builder.append(tab(2, "// write bean version\n"))
+                    .append(tab(2, "out.writeInt(" + element.getType().getAnnotation(BeanVersion.class).value() + ");\n"));  //todo: value is hardcoded in result code
         } else {
             throw new RuntimeException("Class must be annotated with @BeanVersion: " + element.getType().getCanonicalName());
         }
+        builder.append("\n");
 
-        //save class model hash code
-        builder.append(tab(2, "out.writeInt(" + CodeGenUtils.getClassModelHashCodeBasedOnClassFields(fields) +");\n"));
+        // write header version and version history lenght
+        byte headerVersion = element.getType().getAnnotation(AutoSerializable.class).headerVersion();
+        byte versionHistoryLength = element.getType().getAnnotation(AutoSerializable.class).versionHistoryLength();
+
+        if (headerVersion < 1) {
+            throw new RuntimeException("Class header version of annotation @AutoSerializable must be positive, current value = " + headerVersion + " (class '" + className + "')");
+        }
+        if (versionHistoryLength < 1) {
+            throw new RuntimeException("Version history length of annotation @AutoSerializable must be positive, current value = " + versionHistoryLength + " (class '" + className + "')");
+        }
+        versionHistoryLength = (byte) (versionHistoryLength + 1);
+
+        builder.append(tab(2, "// write header version and version history lenght\n"));
+        // TODO: header version will be used in future to implement different serialization/deserialization strategies
+        builder.append(tab(2, "out.writeByte(" + headerVersion + ");\n"))
+                .append(tab(2, "out.writeByte(" + versionHistoryLength + ");\n"));
+
+        int startFromVersion = (beanVersion - versionHistoryLength + 1) > 1 ? (beanVersion - versionHistoryLength + 1) : 1;
+        builder.append(tab(2, "// write class model hash codes for bean versions [" + startFromVersion + ", " + beanVersion + "]\n"));
+        for (int i = startFromVersion; i <= beanVersion; i++) {
+            builder.append(tab(2, "out.writeInt(" + CodeGenUtils.getClassModelHashCodeBasedOnClassFields(fields, i) +");\n"));
+        }
 
         for (XField field : fields) {
             builder.append("\n");

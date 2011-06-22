@@ -3,16 +3,20 @@ package com.googlecode.icegem.serialization.versioning;
 import com.gemstone.gemfire.DataSerializer;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.serialization.primitive.TestParent;
-import com.googlecode.icegem.serialization.versioning.beans.wrong.Bird;
-import com.googlecode.icegem.serialization.versioning.beans.wrong.Cat;
+import com.googlecode.icegem.serialization.versioning.beans.versionhistory.v1.Mouse;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.*;
 import com.googlecode.icegem.serialization.versioning.beans.singleversion.Dog;
 import com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv1.Company;
 import com.googlecode.icegem.serialization.versioning.beans.modified.beanv1.Person;
-import com.googlecode.icegem.serialization.versioning.beans.incorrect.v1.IllegalVersion;
 import com.googlecode.icegem.serialization.versioning.beans.inheritance.v1.Son;
 import com.googlecode.icegem.serialization.versioning.beans.manyVersions.v1.Car;
 
-import com.googlecode.icegem.serialization.versioning.beans.wrong.Fish;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.v1.Man;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.v1.Rabbit;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.v1.Table;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.v1.Woman;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.v2.Bear;
+import com.googlecode.icegem.serialization.versioning.beans.versionhistory.v1.Keyboard;
 import javassist.CannotCompileException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -28,8 +32,10 @@ import java.util.Arrays;
 public class SerializeForVersioningTest extends TestParent {
     @BeforeTest
     public void register() throws InvalidClassException, CannotCompileException {
-        HierarchyRegistry.registerAll(SerializeForVersioningTest.class.getClassLoader(),
-                Dog.class, Company.class, IllegalVersion.class, Son.class, Car.class, Person.class);
+        HierarchyRegistry.registerAll(getContextClassLoader(),
+                Dog.class, Bear.class, Company.class, Son.class,
+                Car.class, Person.class, Rabbit.class, Man.class,
+                Woman.class, Table.class, Keyboard.class, Mouse.class);
     }
 
     @Test
@@ -60,16 +66,16 @@ public class SerializeForVersioningTest extends TestParent {
     }
 
     @Test
+    public void serializeClassWithNewVersion() throws IOException, CannotCompileException {
+        Bear bear = new Bear();
+        DataSerializer.writeObject(bear, new DataOutputStream(new FileOutputStream("bear.versionTest")));
+    }
+
+    @Test
     public void serializeSimpleCompany() throws IOException, CannotCompileException {
         Company company = new Company();
         company.setId(123);
         DataSerializer.writeObject(company, new DataOutputStream(new FileOutputStream("simpleCompany.versionTest")));
-    }
-
-    @Test
-    public void serializeNewClassVersion() throws CannotCompileException, IOException {
-        IllegalVersion illegalVersion = new IllegalVersion();
-        DataSerializer.writeObject(illegalVersion, new DataOutputStream(new FileOutputStream("restoreNewClassVersion.versionTest")));
     }
 
     @Test
@@ -91,5 +97,53 @@ public class SerializeForVersioningTest extends TestParent {
     public void serializePersonVersionOne() throws IOException {
         Person person = new Person(123);
         DataSerializer.writeObject(person, new DataOutputStream(new FileOutputStream("person.versionTest")));
+    }
+
+    @Test
+    public void serializeClassVerisonOne() throws IOException, CannotCompileException {
+        DataSerializer.writeObject(new Rabbit(), new DataOutputStream(new FileOutputStream("rabbit.versionTest")));
+    }
+
+    @Test
+    public void serializeManClassVerisonOne() throws IOException, CannotCompileException {
+        DataSerializer.writeObject(new Man(), new DataOutputStream(new FileOutputStream("man.versionTest")));
+    }
+
+    @Test
+    public void serializeWomanClassVerisonOne() throws IOException, CannotCompileException {
+        DataSerializer.writeObject(new Woman(), new DataOutputStream(new FileOutputStream("woman.versionTest")));
+    }
+
+    @Test
+    public void serializeTableClassVerisonOne() throws IOException, CannotCompileException {
+        DataSerializer.writeObject(new Table(), new DataOutputStream(new FileOutputStream("table.versionTest")));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void serializeClassWithNegativeHeaderVersion() throws IOException, CannotCompileException {
+        HierarchyRegistry.registerAll(getContextClassLoader(), Chair.class);
+        DataSerializer.writeObject(new Chair(), new DataOutputStream(new FileOutputStream("chair.versionTest")));
+    }
+
+    @Test(expectedExceptions = InvalidClassException.class)
+    public void serializeClassWithoutAutoSerializableAnnotation() throws IOException, CannotCompileException {
+        HierarchyRegistry.registerAll(getContextClassLoader(), Pig.class);
+        DataSerializer.writeObject(new Pig(), new DataOutputStream(new FileOutputStream("pig.versionTest")));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void serializeClassWithNegativeVersionHistoryLength() throws IOException, CannotCompileException {
+        HierarchyRegistry.registerAll(getContextClassLoader(), Computer.class);
+        DataSerializer.writeObject(new Computer(), new DataOutputStream(new FileOutputStream("computer.versionTest")));
+    }
+
+    @Test
+    public void serializeKeyboardClassVersionOne() throws IOException, CannotCompileException {
+        DataSerializer.writeObject(new Keyboard(), new DataOutputStream(new FileOutputStream("keyboard.versionTest")));
+    }
+
+    @Test
+    public void serializeMouseClassVersionOne() throws IOException, CannotCompileException {
+        DataSerializer.writeObject(new Mouse(), new DataOutputStream(new FileOutputStream("mouse.versionTest")));
     }
 }

@@ -84,19 +84,22 @@ public class CodeGenUtils {
     }
 
     /**
-     * Returns a hash code of a class model.
+     * Returns a hash code of class model for specified bean version based on fields that this model contains.
      * Class model is defined by an ordered list of class's fields and represented as a string.
      * This string is formed by appending a field's type and name to it.
      *
      * Note: Use XClass.getSerialisedSortedFields() method for providing a constant order of the fields for this method.
-     *  
+     *
      * @param classFields an ordered list of class's fields.
+     * @param beanVersion version of the bean
      * @return int
      */
-    public static int getClassModelHashCodeBasedOnClassFields(List<XField> classFields) {
+    public static int getClassModelHashCodeBasedOnClassFields(List<XField> classFields, int beanVersion) {
         StringBuilder builder = new StringBuilder();
         for (XField field : classFields) {
-            builder.append(field.getType()).append(field.getName());
+            if (beanVersion == -1 || beanVersion >= field.getFieldVersion()) {
+                builder.append(field.getType()).append(field.getName());
+            }
         }
         return builder.toString().hashCode();
     }

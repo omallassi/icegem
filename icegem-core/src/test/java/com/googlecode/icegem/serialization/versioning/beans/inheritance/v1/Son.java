@@ -4,6 +4,7 @@ import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: akondratyev
@@ -11,16 +12,16 @@ import java.util.ArrayList;
 @AutoSerializable(dataSerializerID = 9872340)
 @BeanVersion(1)
 public class Son extends Father {
-    private ArrayList<Long> brothers;
+    private List<Long> brothers;
 
     public Son() {
     }
 
-    public ArrayList<Long> getBrothers() {
+    public List<Long> getBrothers() {
         return brothers;
     }
 
-    public void setBrothers(ArrayList<Long> brothers) {
+    public void setBrothers(List<Long> brothers) {
         this.brothers = brothers;
     }
 }

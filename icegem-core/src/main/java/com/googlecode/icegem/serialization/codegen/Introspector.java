@@ -249,7 +249,7 @@ public class Introspector { //todo: move to CodeGenUtils
     }
 
     protected static void checkClassIsAnnotationMarked(final Class<?> clazz) throws InvalidClassException {
-        if (clazz.getAnnotation(AutoSerializable.class) == null) {
+        {if (clazz.getAnnotation(AutoSerializable.class) == null)
             throw new InvalidClassException("Class " + clazz.getName() + " do not contains annotation @" + AutoSerializable.class.getSimpleName());
         }
     }
@@ -277,7 +277,7 @@ public class Introspector { //todo: move to CodeGenUtils
         try {
             return clazz.getDeclaredConstructor(new Class[0]);
         } catch (NoSuchMethodException e) {
-            throw new InvalidClassException("Class " + clazz.getName() + " have not public no-arg constructor");
+            throw new InvalidClassException("Class " + clazz.getName() + " haven't got public no-arg constructor");
         }
     }
 
