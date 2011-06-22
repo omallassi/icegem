@@ -21,7 +21,7 @@ Icegem imposes some constraints on a domain class for which serialization is req
 *Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references.
 
 Each class that will be auto serialized should be annotated with annotations:
- * `@AutoSerializeble` - a main annotation that marks auto serializable classes. Additional information about this annotation can be found [Documentation#Auto_serializeble_annotation here];
+ * `@AutoSerializable` - a main annotation that marks auto serializable classes. Additional information about this annotation can be found [Documentation#Auto_serializeble_annotation here];
  * `@BeanVersion` - specifies version of the current class via a required property `value`. This version should be positive. For more details about domain class versioning see this [Documentation#Bean_versioning section].
 
 See domain class [Documentation#Domain_class_examples examples] for more details.    
@@ -78,7 +78,7 @@ Introspector contains help methods for class validation during generation of dat
 
 == Auto Serializable Registrar Bean ==
 
-This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
+This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. Icegem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
 == Auto serializable annotation ==
 
@@ -90,7 +90,7 @@ Each class that will be auto serialized should be annotated with `@AutoSerialize
 == Autodetection of circular references ==
 
 If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
-IceGem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.control.methodframes`. This property can be set via JVM parameters: 
+Icegem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.control.methodframes`. This property can be set via JVM parameters: 
 {{{
 -Dicegem.serialization.control.methodframes=true
 }}}
@@ -198,7 +198,7 @@ public class Company {
 
 = Library integration =
 
-There are two ways of integrating the IceGem library into a progect: via spring and manually. Both cases are described below:
+There are two ways of integrating the Icegem library into a progect: via spring and manually. Both cases are described below:
 
 == Library integration using Spring ==
 
@@ -227,7 +227,7 @@ icegem-core.jar contains a class `AutoSerializableRegistrarBean` that can be use
 To use  library without spring:
 
   # add javassist.jar, icegem-core.jar to ClassPath
-  # call `HierarchyRegistry.registerAll` with two arguments: class loader and list of domain classes that meet the [Documentation#Domain_class_requirements requirements] for use in the IceGem library.
+  # call `HierarchyRegistry.registerAll` with two arguments: class loader and list of domain classes that meet the [Documentation#Domain_class_requirements requirements] for use in the Icegem library.
 
 = Build description =
 
@@ -786,16 +786,16 @@ mail.from=alerts@icegem.googlecode.com
 mail.to=john.smith.sendmail@gmail.com
 
 # Subject of the alert email
-com.googlecode.icegem.cacheutils.monitor.email.alert.subject=IceGem monitoring tool alert
+com.googlecode.icegem.cacheutils.monitor.email.alert.subject=Icegem monitoring tool alert
 
 # Content of the alert email
-com.googlecode.icegem.cacheutils.monitor.email.alert.content=<body style="font: 14px Georgia"><p>The system has changed its status. This is the list of last events:</p>{0}<br /><p>IceGem monitoring tool,<br />{1}</p></body>
+com.googlecode.icegem.cacheutils.monitor.email.alert.content=<body style="font: 14px Georgia"><p>The system has changed its status. This is the list of last events:</p>{0}<br /><p>Icegem monitoring tool,<br />{1}</p></body>
 
 # Subject of the exception email
-com.googlecode.icegem.cacheutils.monitor.email.exception.subject=IceGem monitoring tool exception
+com.googlecode.icegem.cacheutils.monitor.email.exception.subject=Icegem monitoring tool exception
 
 # Content of the exception email
-com.googlecode.icegem.cacheutils.monitor.email.exception.content=<body style="font: 14px Georgia"><p>The following exception detected:</p><p>{0}</p><br /><p>IceGem monitoring tool,<br />{1}</p></body>
+com.googlecode.icegem.cacheutils.monitor.email.exception.content=<body style="font: 14px Georgia"><p>The following exception detected:</p><p>{0}</p><br /><p>Icegem monitoring tool,<br />{1}</p></body>
 }}}
 
 
