@@ -80,7 +80,7 @@ Introspector contains help methods for class validation during generation of dat
 
 This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
-== AutoSerializable annotation ==
+== Annotation @AutoSerializable ==
 
 Each class that will be auto serialized should be annotated with `@AutoSerializeble` annotation. This annotations contains the following properties:
  *# `dataSerializerID` - an unique id for generated data serializer (required). This id should be the same for all versions of a class;
