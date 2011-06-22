@@ -21,7 +21,7 @@ Icegem imposes some constraints on a domain class for which serialization is req
 *Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references.
 
 Each class that will be auto serialized should be annotated with annotations:
- * `@AutoSerializeble` - a main annotation that marks auto serializable classes. Additional information about this annotation can be found [Documentation#@AutoSerializeble_Annotation here];
+ * `@AutoSerializeble` - a main annotation that marks auto serializable classes. Additional information about this annotation can be found [Documentation#AutoSerializeble_Annotation here];
  * `@BeanVersion` - specifies version of the current class via a required property `value`. This version should be positive. For more details about domain class versioning see this [Documentation#Bean_versioning section].
 
 See domain class [Documentation#Domain_class_examples examples] for more details.    
@@ -80,11 +80,11 @@ Introspector contains help methods for class validation during generation of dat
 
 This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. IceGem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
-== @AutoSerializable annotation ==
+== AutoSerializable annotation ==
 
 Each class that will be auto serialized should be annotated with `@AutoSerializeble` annotation. This annotations contains the following properties:
  *# `dataSerializerID` - an unique id for generated data serializer (required). This id should be the same for all versions of a class;
- *# `headerVersion' - a version of a class header code. This property value should be positive, by default `headerVersion = 1`;
+ *# `headerVersion` - a version of a class header code. This property value should be positive, by default `headerVersion = 1`;
  *# `versionHistoryLength` - a number of bean versions (except current) for which class model hash codes will be stored in DataSerializer. This property value should be positive, By default `versionHistoryLength = 5`.
 
 == Autodetection of circular references ==
