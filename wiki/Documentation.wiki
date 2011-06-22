@@ -152,7 +152,7 @@ public class Company {
     }
 }
 }}}
-The second version of the class `Company` where a new field `name` has been added:
+The second version of the class `Company` where a new field `name` has been added and `versionHistoryLength` has been set to custom value (default is 5):
 {{{
 package com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv2;
 
@@ -160,7 +160,7 @@ import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
 import com.googlecode.icegem.serialization.FieldVersion;
 
-@AutoSerializable(dataSerializerID = 1412)
+@AutoSerializable(dataSerializerID = 1412, versionHistoryLength = 2)
 @BeanVersion(2)
 public class Company {
     private int id;
