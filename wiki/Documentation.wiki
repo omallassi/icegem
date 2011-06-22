@@ -484,21 +484,22 @@ Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
  # A query string for paginated query can be arbitrarily complex but entry key must be part of projection list.
  # For partitioned regions a query string must meet the requirements described in a GemFire documentation for querying partitioned regions. 
 
-==API==
+==Paginated queries API==
 
 Paginated query support the following methods:
 
 {{{
 public class PaginatedQuery<V> {
 ...
-public List<V> page(int pageNumber){...};
-public List<V> next(){...};
-public List<V> previous(){...};
-public boolean hasNext(){...};
-public boolean hasPrevious(){...};
-public int getPageSize(){...};
-public int getTotalNumberOfPages(){...};
-public int getTotalNumberOfEntries(){...};
+public List<V> page(int pageNumber) throws QueryException {...};
+public List<V> next() throws QueryException {...};
+public List<V> previous() throws QueryException {...};
+public boolean hasNext() throws QueryException {...};
+public boolean hasPrevious() throws QueryException {...};
+public int getPageSize() {...};
+public int getTotalNumberOfPages() throws QueryException {...};
+public int getTotalNumberOfEntries() throws QueryException {...};
+public boolean isLimitExceeded() throws QueryException {...};
 ...
 }
 }}}
@@ -509,12 +510,14 @@ public int getTotalNumberOfEntries(){...};
  * `next()` - returns next to the current page. For the first call of this method it will be a first page;
  * `previous()` - returns previous to the current page;
  * `hasNext()` - checks that the query has the next page;
- * 'hasPrevious()` - checks that query has the previous page;
+ * `hasPrevious()` - checks that query has the previous page;
  * `getPageSize()` - returns size of page (page size is 20 by default);
  * `getTotalNumberOfPages()` - returns a total number of query pages;
- * `getTotalNumberOfEntries()` - returns a total number of query entries.
+ * `getTotalNumberOfEntries()` - returns a total number of query entries;
+ * `isLimitExceeded()` - gets value of a flag that indicates excess of query limit.
 
-==Ordering of results for partitioned regions==
+== Ordering of results for partitioned regions ==
+
 A paginated query supports order by functionality on partitioned regions.
 
 *Restrictions*
@@ -522,9 +525,10 @@ A paginated query supports order by functionality on partitioned regions.
  # Query string with order by clause must contain `distinct` word.
 
 ==Limiting of results==
-Paginated query result can be limited. By default this limit is 1000 entries. You can specify a custom limit value via paginated query constructors argument. If query results exceeds this limit:
+
+Paginated query result can be limited. By default this limit is 1000 entries. You can specify a custom limit value via paginated query constructor argument. If query results exceeds this limit:
  * only a specified limit number of entries will be cached and returned; 
- * flag `limitExceeded` will be set to `true`. 
+ * flag `limitExceeded` will be set to `true` (method `isLimitExceeded()` will return true); 
 
 ==Workflow==
 
