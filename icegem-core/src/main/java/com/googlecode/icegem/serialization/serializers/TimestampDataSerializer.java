@@ -1,6 +1,7 @@
 package com.googlecode.icegem.serialization.serializers;
 
 import com.gemstone.gemfire.DataSerializer;
+import com.googlecode.icegem.SerializationID;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -10,7 +11,7 @@ import java.sql.Timestamp;
 /**
  * User: akondratyev
  */
-public class TimestampDataSerializer extends DataSerializer {
+public class TimestampDataSerializer extends DataSerializer implements SerializationID {
 
     static {
         DataSerializer.register(TimestampDataSerializer.class);
@@ -42,6 +43,6 @@ public class TimestampDataSerializer extends DataSerializer {
 
     @Override
     public int getId() {
-        return 192834234;
+        return TIMESTAMP_DATA_SERIALIZER_ID;
     }
 }
