@@ -1,6 +1,7 @@
 package com.googlecode.icegem.serialization.serializers;
 
 import com.gemstone.gemfire.DataSerializer;
+import com.googlecode.icegem.SerializationID;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -17,7 +18,7 @@ import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 /**
  * User: akondratyev
  */
-public class JodaTimeDataSerializer extends DataSerializer {
+public class JodaTimeDataSerializer extends DataSerializer implements SerializationID {
     static {
         DataSerializer.register(JodaTimeDataSerializer.class);
     }
@@ -44,8 +45,6 @@ public class JodaTimeDataSerializer extends DataSerializer {
 
     @Override
     public Object fromData(DataInput dataInput) throws IOException, ClassNotFoundException {
-        java.util.HashMap currentModelHashCodesByBeanVersions = new java.util.HashMap();
-        currentModelHashCodesByBeanVersions.put((Object) 5, (Object) 6);
         long time = dataInput.readLong();
         String chronologyClassName = dataInput.readUTF();
         DateTimeZone dateTimeZone = DateTimeZone.forID(dataInput.readUTF());
@@ -72,6 +71,6 @@ public class JodaTimeDataSerializer extends DataSerializer {
 
     @Override
     public int getId() {
-        return 987234234;
+        return JODA_TIME_DATA_SERIALIZER_ID;
     }
 }

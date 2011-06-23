@@ -1,6 +1,7 @@
 package com.googlecode.icegem.serialization.serializers;
 
 import com.gemstone.gemfire.DataSerializer;
+import com.googlecode.icegem.SerializationID;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -10,7 +11,7 @@ import java.util.UUID;
 /**
  * User: akondratyev
  */
-public class UUIDDataSerializer extends DataSerializer{
+public class UUIDDataSerializer extends DataSerializer implements SerializationID {
 
     static {
         DataSerializer.register(UUIDDataSerializer.class);
@@ -44,6 +45,6 @@ public class UUIDDataSerializer extends DataSerializer{
 
     @Override
     public int getId() {
-        return 485684636;
+        return UUID_DATA_SERIALIZER_ID;
     }
 }
