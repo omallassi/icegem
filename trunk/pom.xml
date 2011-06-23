@@ -273,7 +273,7 @@
 
         <repository>
             <id>icegem-public-repo</id>
-            <name>IceGem public repo</name>
+            <name>Icegem public repo</name>
             <url>https://nexus.griddynamics.net/nexus/content/repositories/Icegem-pub</url>
         </repository>
     </repositories>

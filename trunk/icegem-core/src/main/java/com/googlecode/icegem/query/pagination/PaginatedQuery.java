@@ -337,6 +337,12 @@ public class PaginatedQuery<V> {
         return pageNumber == 1 || !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
     }
 
+    /**
+     * Gets value of a flag that indicates excess of query limit.
+     *
+     * @return boolean
+     * @throws com.gemstone.gemfire.cache.query.QueryException during query execution
+     */
     public boolean isLimitExceeded() throws QueryException {
         storePaginatedQueryInfoIfNeeded();
         return limitExceeded;
