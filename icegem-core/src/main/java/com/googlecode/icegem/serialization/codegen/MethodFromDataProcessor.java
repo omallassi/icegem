@@ -79,7 +79,7 @@ public class MethodFromDataProcessor {
                 .append(tab(2, "if (currentClassModelHashCode.intValue() != actualClassModelHashCode) {\n"))
                 .append(tab(3, "throw new ClassCastException(\"Model of the current class does not match with the model " +
                         "of the serialized class. Maybe you have forgotten to increase value of @BeanVersion annotation or mark " +
-                        "newly added fields with @FieldVersion annotation. Or you have modified or deleted already existed in previous bean versions fields. " +
+                        "newly added fields with @FieldVersion annotation. Or you have deleted already existed in previous bean versions fields. " +
                         "Inconsistency has been found for bean version '\" + i + \"'\");\n"))
                 .append(tab(2,"}\n"))
                 .append(tab("}\n"))
