@@ -202,12 +202,12 @@ There are two ways of integrating the Icegem library into a progect: via spring 
 
 == Library integration using Spring ==
 
-icegem-core.jar contains a class `AutoSerializableRegistrarBean` that can be used for registration of classes with annotation @AutoSerializable. to use it, you need register it in spring like:
+icegem-core.jar contains a class `AutoSerializableRegistrarBean` that can be used for registration of classes with annotation @AutoSerializable. To use it, you should register this bean in spring like:
 
-  # define bean with class  com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry
+  # define bean with class  com.griddynamics.gemfire.serialization.spring.AutoSerializableRegistrarBean
         e.g. 
 {{{
-<bean id="icegem"  class="com.griddynamics.gemfire.serialization.spring.GemFireBeanRegistry" scope="singleton">
+<bean id="icegem"  class="com.googlecode.icegem.serialization.spring.AutoSerializableRegistrarBean" scope="singleton">
     ...
 </bean>
 }}}
