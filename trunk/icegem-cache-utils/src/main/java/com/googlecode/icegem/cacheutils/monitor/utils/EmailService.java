@@ -1,5 +1,7 @@
 package com.googlecode.icegem.cacheutils.monitor.utils;
 
+import com.googlecode.icegem.utils.PropertiesHelper;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;

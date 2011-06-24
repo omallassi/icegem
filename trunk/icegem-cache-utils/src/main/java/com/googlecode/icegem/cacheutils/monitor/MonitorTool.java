@@ -8,6 +8,7 @@ import java.util.TimerTask;
 
 import javax.mail.MessagingException;
 
+import com.googlecode.icegem.utils.PropertiesHelper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -20,7 +21,6 @@ import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.NodesController;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.cacheutils.monitor.utils.EmailService;
-import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 
 /**
  * Periodically checks the distributed system status and sends mail in case of

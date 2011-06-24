@@ -4,7 +4,7 @@ import java.util.*;
 
 import com.gemstone.gemfire.admin.*;
 import com.gemstone.gemfire.distributed.DistributedSystem;
-import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
+import com.googlecode.icegem.utils.PropertiesHelper;
 
 /**
  * Connects to the distributed system and explore its' structure.

@@ -12,7 +12,7 @@ import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.cacheutils.common.Utils;
-import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
+import com.googlecode.icegem.utils.PropertiesHelper;
 
 /**
  * The client cache which is used for replication test. Connects to the cluster
