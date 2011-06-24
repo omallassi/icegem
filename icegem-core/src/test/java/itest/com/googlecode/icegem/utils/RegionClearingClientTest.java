@@ -67,6 +67,8 @@ public class RegionClearingClientTest {
         Assertions.assertThat(replicatedRegion2.get(1)).as("Region entry has not been saved").isNotNull();
         Assertions.assertThat(replicatedRegion2.get(1)).as("Region entry has not been saved correctly").isEqualTo(2);
         RegionUtils.clearRegion(replicatedRegion2);
+        replicatedRegion2.localClear();
+        Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been deleted").isNull();
         Assertions.assertThat(replicatedRegion1.keySetOnServer().size()).as("Region has not been cleaned").isEqualTo(0);
     }
 
@@ -86,6 +88,7 @@ public class RegionClearingClientTest {
         Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been saved").isNotNull();
         Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been saved correctly").isEqualTo(2);
         RegionUtils.clearRegion(partitionedRegion2);
+        partitionedRegion2.localClear();
         Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been deleted").isNull();
         Assertions.assertThat(partitionedRegion2.keySetOnServer().size()).as("Region has not been cleaned").isEqualTo(0);
     }
@@ -105,14 +108,10 @@ public class RegionClearingClientTest {
                 .create();
 
         replicatedRegion1 = cache.getRegion("replicated_region_1");
-        replicatedRegion1.registerInterestRegex(".*", InterestResultPolicy.KEYS_VALUES, false, true);
         partitionedRegion1 = cache.getRegion("partitioned_region_1");
-        partitionedRegion1.registerInterestRegex(".*", InterestResultPolicy.KEYS_VALUES, false, true);
 
         replicatedRegion2 = cache.getRegion("replicated_region_2");
-        replicatedRegion2.registerInterestRegex(".*", InterestResultPolicy.KEYS_VALUES, false, true);
         partitionedRegion2 = cache.getRegion("partitioned_region_2");
-        partitionedRegion2.registerInterestRegex(".*", InterestResultPolicy.KEYS_VALUES, false, true);
     }
 
     /**
