@@ -3,8 +3,9 @@
  */
 package com.googlecode.icegem;
 
-import com.googlecode.icegem.barrier.MessageHolder;
-import com.googlecode.icegem.serialization.serializers.*;
+import com.googlecode.icegem.serialization.serializers.JodaTimeDataSerializer;
+import com.googlecode.icegem.serialization.serializers.TimestampDataSerializer;
+import com.googlecode.icegem.serialization.serializers.UUIDDataSerializer;
 
 /**
  * is a collection of DataSerializable class IDs used by ICEGEM library.
