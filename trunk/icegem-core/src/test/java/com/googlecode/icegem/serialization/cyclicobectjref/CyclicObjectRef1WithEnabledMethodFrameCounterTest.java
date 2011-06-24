@@ -1,7 +1,5 @@
 package com.googlecode.icegem.serialization.cyclicobectjref;
 
-import com.gemstone.gemfire.ToDataException;
-import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 import com.googlecode.icegem.serialization.primitive.TestParent;
 
@@ -28,7 +26,7 @@ public class CyclicObjectRef1WithEnabledMethodFrameCounterTest extends TestParen
         System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "false");
     }
 
-    @Test(expectedExceptions = ToDataException.class)
+    @Test(expectedExceptions = RuntimeException.class)
     public void test() {
         System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
         // create test bean
