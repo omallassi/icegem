@@ -1,6 +1,5 @@
 package com.googlecode.icegem.serialization.primitive;
 
-import com.gemstone.gemfire.ToDataException;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
 import javassist.CannotCompileException;
@@ -27,7 +26,7 @@ public class ObjectCycleWithEnabledMethodFrameCounterTest extends TestParent {
         System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "false");
     }
 
-    @Test(expectedExceptions = ToDataException.class)
+    @Test(expectedExceptions = RuntimeException.class)
     public void testCycle1() {
         // create test bean
         ObjectBean expected = new ObjectBean();
@@ -37,7 +36,7 @@ public class ObjectCycleWithEnabledMethodFrameCounterTest extends TestParent {
         serializeAndDeserialize(expected);
     }
 
-    @Test(expectedExceptions = ToDataException.class)
+    @Test(expectedExceptions = RuntimeException.class)
     public void testCycle2() {
         // create test bean
         ObjectBean expectedA = new ObjectBean();
