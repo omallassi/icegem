@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
+import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 
 /**

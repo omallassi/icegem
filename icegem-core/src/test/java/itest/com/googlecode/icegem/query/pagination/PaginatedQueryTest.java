@@ -5,6 +5,7 @@ import com.gemstone.gemfire.cache.client.*;
 import com.gemstone.gemfire.cache.query.*;
 import com.googlecode.icegem.query.pagination.PaginatedQuery;
 import com.googlecode.icegem.query.pagination.PaginatedQueryPageKey;
+import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.RegionUtils;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
@@ -13,7 +14,6 @@ import itest.com.googlecode.icegem.query.common.utils.PersonUtils;
 import org.fest.assertions.Assertions;
 import org.testng.annotations.*;
 
-import javax.naming.LimitExceededException;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -38,11 +38,14 @@ public class PaginatedQueryTest {
     private static Process cacheServer2;
     /** Field javaProcessLauncher  */
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
+    private static Region<Object, Object> standy;
 
     @BeforeClass
     public void setUp() throws IOException, InterruptedException, TimeoutException {
         startCacheServers();
         startClient();
+        RegionUtils.clearRegion(data);
+        RegionUtils.clearRegion(standy);
     }
 
     @AfterClass
@@ -53,8 +56,8 @@ public class PaginatedQueryTest {
 
     @BeforeMethod
     public void after() throws InterruptedException, IOException {
-        RegionUtils.clearPartitionedRegion(data);
-        RegionUtils.clearPartitionedRegion(paginatedQueryInfo);
+        RegionUtils.clearRegion(data);
+        RegionUtils.clearRegion(paginatedQueryInfo);
     }
 
     @Test
@@ -105,7 +108,7 @@ public class PaginatedQueryTest {
         Assertions.assertThat(pageKeys.get(0)).as("Total number of entries was not correct").isEqualTo(0);
         Assertions.assertThat(totalNumberOfEntries).as("Total number of entries was not correct").isEqualTo(0);
 
-        RegionUtils.clearPartitionedRegion(paginatedQueryInfo);
+        RegionUtils.clearRegion(paginatedQueryInfo);
 
         PersonUtils.populateRegionByPersons(data, 10);
         query = new PaginatedQuery(cache, "data", queryString);
@@ -127,8 +130,8 @@ public class PaginatedQueryTest {
         Assertions.assertThat(query.getTotalNumberOfPages())
                 .as("Total number of pages was not correct").isEqualTo(100 / 10);
 
-        RegionUtils.clearPartitionedRegion(data);
-        RegionUtils.clearPartitionedRegion(paginatedQueryInfo);
+        RegionUtils.clearRegion(data);
+        RegionUtils.clearRegion(paginatedQueryInfo);
 
         PersonUtils.populateRegionByPersons(data, 101);
         query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet");
@@ -428,13 +431,24 @@ public class PaginatedQueryTest {
 
     /**
      * Starts a client.
+     * @throws java.io.IOException
      */
-    private void startClient() {
+    private void startClient() throws IOException {
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
-        cache = clientCacheFactory.set("log-level", "warning").create();
+
+        PropertiesHelper properties = new PropertiesHelper("/paginatedQueryServerProperties.properties");
+
+        cache = clientCacheFactory
+                .set("log-level", properties.getStringProperty("log-level"))
+                .set("license-file", properties.getStringProperty("license-file"))
+                .set("license-type", properties.getStringProperty("license-type"))
+                .create();
+
         ClientRegionFactory<Object, Object> regionFactory =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
         data = regionFactory.create("data");
+        standy = regionFactory.create("standy");
+
         ClientRegionFactory<PaginatedQueryPageKey, List<Object>> regionFactoryForHelpRegion =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
         paginatedQueryInfo = regionFactoryForHelpRegion.create(PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME);

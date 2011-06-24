@@ -5,12 +5,12 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import com.googlecode.icegem.utils.PropertiesHelper;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.googlecode.icegem.cacheutils.Launcher;
-import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
 

@@ -22,7 +22,7 @@ import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandle
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.NodesContainer;
 import com.googlecode.icegem.cacheutils.monitor.utils.EmailService;
-import com.googlecode.icegem.cacheutils.monitor.utils.PropertiesHelper;
+import com.googlecode.icegem.utils.PropertiesHelper;
 
 public class NodesController {
 

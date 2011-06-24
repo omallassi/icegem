@@ -35,9 +35,14 @@ public class ClearPartitionedRegionFunction extends FunctionAdapter {
             rs.sendException(new RegionNotFoundException("Region '" + regionName + "' does not exist on this member"));
             return;
         }
-        Set<Object> keys = PartitionRegionHelper.getLocalPrimaryData(region).keySet();
-        for (Object key : keys) {
-            region.destroy(key);
+
+        if (region.getAttributes().getDataPolicy().withPartitioning()) {
+            Set<Object> keys = PartitionRegionHelper.getLocalPrimaryData(region).keySet();
+            for (Object key : keys) {
+                region.destroy(key);
+            }
+        } else {
+            region.clear();
         }
         rs.lastResult(true);
     }

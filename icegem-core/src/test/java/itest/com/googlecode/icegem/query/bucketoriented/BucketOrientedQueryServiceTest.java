@@ -10,6 +10,7 @@ import com.gemstone.gemfire.cache.query.SelectResults;
 import com.gemstone.gemfire.cache.query.Struct;
 import com.googlecode.icegem.query.bucketoriented.BucketOrientedQueryService;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.ServerTemplate;
 import itest.com.googlecode.icegem.query.common.model.Person;
 import itest.com.googlecode.icegem.query.common.utils.PersonUtils;
@@ -154,10 +155,19 @@ public class BucketOrientedQueryServiceTest {
 
     /**
      * Starts a client.
+     * @throws java.io.IOException
      */
-    private void startClient() {
+    private void startClient() throws IOException {
         ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
-        cache = clientCacheFactory.set("log-level", "warning").create();
+
+        PropertiesHelper properties = new PropertiesHelper("/bucketOrientedServerProperties.properties");
+
+        cache = clientCacheFactory
+                .set("log-level", properties.getStringProperty("log-level"))
+                .set("license-file", properties.getStringProperty("license-file"))
+                .set("license-type", properties.getStringProperty("license-type"))
+                .create();
+
         ClientRegionFactory<Object, Object> regionFactory =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
         data = regionFactory.create("data");

@@ -1,4 +1,4 @@
-package com.googlecode.icegem.cacheutils.monitor.utils;
+package com.googlecode.icegem.utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

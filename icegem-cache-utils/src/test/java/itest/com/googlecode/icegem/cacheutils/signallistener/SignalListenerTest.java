@@ -5,6 +5,7 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.googlecode.icegem.cacheutils.signallistener.WaitforTool;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.ServerTemplate;
 //import org.junit.Ignore;
 import org.testng.annotations.AfterClass;
@@ -31,10 +32,16 @@ public class SignalListenerTest {
         node = launcher.runWithConfirmation(ServerTemplate.class,
                 new String[] {"-DgemfirePropertyFile=signalListener.properties"},
                 null);
+
+        PropertiesHelper properties = new PropertiesHelper("/signalListener.properties");
+
         clientCache = new ClientCacheFactory()
-                .set("log-level", "none")
                 .set("cache-xml-file", "signal-client.xml")
+                .set("log-level", properties.getStringProperty("log-level"))
+                .set("license-file", properties.getStringProperty("license-file"))
+                .set("license-type", properties.getStringProperty("license-type"))
                 .create();
+
         signalRegion = clientCache.getRegion("signal-region");
         if (signalRegion == null)
             throw new NullPointerException("check your configuration, there is no \'signal-region\'");

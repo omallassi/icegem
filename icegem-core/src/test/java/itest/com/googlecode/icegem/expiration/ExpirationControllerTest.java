@@ -204,10 +204,10 @@ public class ExpirationControllerTest implements Serializable {
 
 		Region<Long, Transaction> transactionsRegion = getRegion(cache,
 			"transactions");
-        RegionUtils.clearPartitionedRegion(transactionsRegion);
+        RegionUtils.clearRegion(transactionsRegion);
 		Region<Long, TransactionProcessingError> errorsRegion = getRegion(
 			cache, "errors");
-        RegionUtils.clearPartitionedRegion(errorsRegion);
+        RegionUtils.clearRegion(errorsRegion);
 
 		for (long i = 1, id = 1; i <= count; i++, id += 5) {
 			if ((i % 1000) == 0) {
