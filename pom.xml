@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.googlecode.icegem</groupId>
     <artifactId>icegem-root</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -25,9 +25,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:http://icegem.googlecode.com/svn/tags/icegem-root-0.8.1</connection>
-        <developerConnection>scm:svn:https://icegem.googlecode.com/svn/tags/icegem-root-0.8.1</developerConnection>
-        <url>http://code.google.com/p/icegem/source/browse/tags/icegem-root-0.8.1</url>
+        <connection>scm:svn:http://icegem.googlecode.com/svn/trunk</connection>
+        <developerConnection>scm:svn:https://icegem.googlecode.com/svn/trunk</developerConnection>
+        <url>http://code.google.com/p/icegem/source/browse/trunk</url>
     </scm>
 
     <developers>
@@ -60,14 +60,10 @@
 
     <modules>
         <module>icegem-core</module>
-        <!--<module>icegem-examples-client</module>
-        <module>icegem-examples-server</module>-->
         <module>icegem-performance</module>
         <module>icegem-cache-utils</module>
 	    <module>icegem-serializer-generator</module>
-        <!--<module>icegem-message-barrier</module>-->
         <!--<module>icegem-message-barrier-example</module>-->
-        <!--<module>icegem-example-mojo</module>-->
     </modules>
 
     <properties>
