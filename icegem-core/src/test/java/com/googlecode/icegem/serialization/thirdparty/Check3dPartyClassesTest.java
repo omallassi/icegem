@@ -6,6 +6,8 @@ import javassist.CannotCompileException;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.BuddhistChronology;
+import org.joda.time.chrono.ISOChronology;
 import org.joda.time.chrono.JulianChronology;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -28,7 +30,19 @@ public class Check3dPartyClassesTest extends TestParent{
     @Test
     public void jodaTime() {
         JodaTime o = new JodaTime();
-        DateTimeZone dateTimeZone = DateTimeZone.getDefault();
+        DateTimeZone dateTimeZone = DateTimeZone.forID("UTC");
+        Chronology chronology = ISOChronology.getInstance(dateTimeZone);
+        DateTime dateTime = new DateTime(System.currentTimeMillis(), chronology);
+        o.setDateTime(dateTime);
+
+        JodaTime stored = serializeAndDeserialize(o);
+        assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
+    }
+    
+    @Test
+    public void jodaTimeNonStandardChrono() {
+        JodaTime o = new JodaTime();
+        DateTimeZone dateTimeZone = DateTimeZone.forID("Europe/Moscow");
         Chronology chronology = JulianChronology.getInstance(dateTimeZone);
         DateTime dateTime = new DateTime(System.currentTimeMillis(), chronology);
         o.setDateTime(dateTime);
@@ -36,4 +50,30 @@ public class Check3dPartyClassesTest extends TestParent{
         JodaTime stored = serializeAndDeserialize(o);
         assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
     }
+
+
+    @Test
+    public void jodaTimeNonStandardTZ() {
+        JodaTime o = new JodaTime();
+        DateTimeZone dateTimeZone = DateTimeZone.forID("Europe/Berlin");
+        Chronology chronology = ISOChronology.getInstance(dateTimeZone);
+        DateTime dateTime = new DateTime(System.currentTimeMillis(), chronology);
+        o.setDateTime(dateTime);
+
+        JodaTime stored = serializeAndDeserialize(o);
+        assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
+    }
+
+    @Test
+    public void jodaTimeNonStandardTZandChrono() {
+        JodaTime o = new JodaTime();
+        DateTimeZone dateTimeZone = DateTimeZone.forID("Europe/Berlin");
+        Chronology chronology = BuddhistChronology.getInstance(dateTimeZone);
+        DateTime dateTime = new DateTime(System.currentTimeMillis(), chronology);
+        o.setDateTime(dateTime);
+
+        JodaTime stored = serializeAndDeserialize(o);
+        assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
+    }
+
 }

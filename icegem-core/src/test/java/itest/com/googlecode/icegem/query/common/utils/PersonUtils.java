@@ -31,10 +31,10 @@ public class PersonUtils {
     /**
      * Populates region by persons.
      *
-     * @param region of type Region<Object, Object>
+     * @param region of type Region
      * @param numberOfEntries number of entries for population
      */   
-    public static void populateRegionByPersons(Region<Object, Object> region, int numberOfEntries) {
+    public static void populateRegionByPersons(Region region, int numberOfEntries) {
         for (int i = 1; i <= numberOfEntries; i++) {
             region.put(i, new Person(i, Arrays.asList(Integer.toString(i), Integer.toString(i*2))));
         }

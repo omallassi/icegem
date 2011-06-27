@@ -29,7 +29,7 @@ public class PaginatedQueryTest {
     /** Field cache  */
     private static ClientCache cache;
     /** Region for querying  */
-    private static Region<Object, Object> data;
+    private static Region data;
     /** Help region for storing information about paginated queries  */
     private static Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfo;
     /** Field cacheServer1  */
@@ -39,6 +39,7 @@ public class PaginatedQueryTest {
     /** Field javaProcessLauncher  */
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
     private static Region<Object, Object> standy;
+	private QueryService queryService;
 
     @BeforeClass
     public void setUp() throws IOException, InterruptedException, TimeoutException {
@@ -63,35 +64,35 @@ public class PaginatedQueryTest {
     @Test
     public void testCreation() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
             NameResolutionException {
-        PaginatedQuery query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet");
+        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
         Assertions.assertThat(query.getPageSize()).as("Paginated query has not been created").isEqualTo(PaginatedQuery.DEFAULT_PAGE_SIZE);
     }
 
-    @Test(expectedExceptions = RegionNotFoundException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void testCreationForNotExistingQueryRegion() throws FunctionDomainException, QueryInvocationTargetException,
             TypeMismatchException, NameResolutionException {
-        new PaginatedQuery(cache, "not_existing", "SELECT * FROM /data.keySet");
+        new PaginatedQuery(queryService, null, "SELECT * FROM /data.keySet");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testCreationWithWrongPageSize() throws FunctionDomainException, QueryInvocationTargetException,
             TypeMismatchException, NameResolutionException {
-        new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet", 0);
+        new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", 0);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testCreationWithWrongQueryLimit() throws FunctionDomainException, QueryInvocationTargetException,
             TypeMismatchException, NameResolutionException {
         int queryLimit = -1;
-        new PaginatedQuery(cache, queryLimit, "data", "SELECT * FROM /data.keySet");
+        new PaginatedQuery(queryService, queryLimit, data, "SELECT * FROM /data.keySet");
     }
 
     @Test
     public void testGetPageSize() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
             NameResolutionException {
-        PaginatedQuery query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet");
+        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
         Assertions.assertThat(query.getPageSize()).as("Default page size was not correct").isEqualTo(PaginatedQuery.DEFAULT_PAGE_SIZE);
-        query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet", 10);
+        query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", 10);
         Assertions.assertThat(query.getPageSize()).as("Custom page size has not been set").isEqualTo(10);
     }
 
@@ -100,7 +101,7 @@ public class PaginatedQueryTest {
         String queryString = "SELECT * FROM /data.keySet";
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{},
                 PaginatedQuery.DEFAULT_PAGE_SIZE, PaginatedQuery.PAGE_NUMBER_FOR_GENERAL_INFO);
-        PaginatedQuery query = new PaginatedQuery(cache, "data", queryString);
+        PaginatedQuery query = new PaginatedQuery(queryService, data, queryString);
         int totalNumberOfEntries = query.getTotalNumberOfEntries();
         List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
         Assertions.assertThat(pageKeys != null).as("Total number of entries has not been stored").isTrue();
@@ -111,7 +112,7 @@ public class PaginatedQueryTest {
         RegionUtils.clearRegion(paginatedQueryInfo);
 
         PersonUtils.populateRegionByPersons(data, 10);
-        query = new PaginatedQuery(cache, "data", queryString);
+        query = new PaginatedQuery(queryService, data, queryString);
         totalNumberOfEntries = query.getTotalNumberOfEntries();
         pageKeys = paginatedQueryInfo.get(pageKey);
         Assertions.assertThat(pageKeys != null).as("Total number of entries has not been stored").isTrue();
@@ -122,11 +123,11 @@ public class PaginatedQueryTest {
 
     @Test
     public void testGetTotalNumberOfPages() throws QueryException {
-        PaginatedQuery query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet");
+        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
         Assertions.assertThat(query.getTotalNumberOfPages()).as("Total number of pages was not correct").isEqualTo(1);
 
         PersonUtils.populateRegionByPersons(data, 100);
-        query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet", 10);
+        query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", 10);
         Assertions.assertThat(query.getTotalNumberOfPages())
                 .as("Total number of pages was not correct").isEqualTo(100 / 10);
 
@@ -134,7 +135,7 @@ public class PaginatedQueryTest {
         RegionUtils.clearRegion(paginatedQueryInfo);
 
         PersonUtils.populateRegionByPersons(data, 101);
-        query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet");
+        query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
         Assertions.assertThat(query.getTotalNumberOfPages()).
                 as("Total number of pages was not correct").isEqualTo(100 / PaginatedQuery.DEFAULT_PAGE_SIZE + 1);
     }
@@ -143,7 +144,7 @@ public class PaginatedQueryTest {
     public void testPageMethodForEmptyResults() throws QueryException {
         String queryString = "SELECT * FROM /data.keySet";
         int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, (Region<Object, Person>)data, queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
 
         int pageNumber = 1;
@@ -164,7 +165,7 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, numberOfEntriesForPopulation);
         String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
         int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, data, queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
 
         int pageNumber = 1;
@@ -193,7 +194,7 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 100);
         String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
         int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data", queryString, pageSize);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, data, queryString, pageSize);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
 
         int pageNumber = 1;
@@ -240,7 +241,7 @@ public class PaginatedQueryTest {
     public void testNextMethod() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 100);
         int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data",
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, data,
                 "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber", pageSize);
 
         int pageNumber = 1;
@@ -267,7 +268,7 @@ public class PaginatedQueryTest {
     public void testHasNextMethod() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 20);
         int pageSize = 10;
-        PaginatedQuery query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet", pageSize);
+        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", pageSize);
 
         Assertions.assertThat(query.hasNext()).as("hasNext method has been worked incorrectly").isTrue();
         Assertions.assertThat(query.next().size()).as("Number of paginated entries for the next page was not correct").isEqualTo(pageSize);
@@ -282,7 +283,7 @@ public class PaginatedQueryTest {
     public void testPreviousMethod() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 100);
         int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, "data",
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, data,
                 "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber", pageSize);
 
         query.next();
@@ -313,7 +314,7 @@ public class PaginatedQueryTest {
     public void testHasPreviousMethod() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 20);
         int pageSize = 10;
-        PaginatedQuery query = new PaginatedQuery(cache, "data", "SELECT * FROM /data.keySet", pageSize);
+        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", pageSize);
 
         query.next();
         query.next();
@@ -328,7 +329,7 @@ public class PaginatedQueryTest {
     public void testGetNotExistedPage() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 10);
         String queryString = "SELECT * FROM /data.keySet";
-        PaginatedQuery query = new PaginatedQuery(cache, "data", queryString);
+        PaginatedQuery query = new PaginatedQuery(queryService, data, queryString);
         PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, PaginatedQuery.DEFAULT_PAGE_SIZE);
 
         int pageNumber = 2;
@@ -340,7 +341,7 @@ public class PaginatedQueryTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testQueryOrderByWithoutKeyInProjection() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query = new PaginatedQuery(cache, "data",
+        PaginatedQuery query = new PaginatedQuery(queryService, data,
                 "SELECT DISTINCT e.value.socialNumber, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
         query.page(1);
     }
@@ -348,7 +349,7 @@ public class PaginatedQueryTest {
     @Test(expectedExceptions = ServerOperationException.class)
     public void testQueryOrderByWithoutOrderByFieldInProjection() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query = new PaginatedQuery(cache, "data",
+        PaginatedQuery query = new PaginatedQuery(queryService, data,
                 "SELECT DISTINCT e.key FROM /data.entrySet e ORDER BY e.value.socialNumber");
         query.page(1);
     }
@@ -356,7 +357,7 @@ public class PaginatedQueryTest {
     @Test
     public void testPaginatedComplexQuering() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query = new PaginatedQuery(cache, "data",
+        PaginatedQuery query = new PaginatedQuery(queryService, data,
                 "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e WHERE e.value.socialNumber = $1 ORDER BY e.value.socialNumber", new Object[]{1});
 
         List pageEntries = query.page(1);
@@ -369,7 +370,7 @@ public class PaginatedQueryTest {
     public void testQueryLimit() throws QueryException {
         PersonUtils.populateRegionByPersons(data, 100);
         int queryLimit = 50;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, queryLimit, "data", "SELECT * FROM /data.keySet");
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet");
 
         List<Person> results = query.next();
         Assertions.assertThat(query.getTotalNumberOfPages()).as("Wrong number of paginated query pages").isEqualTo(3);
@@ -382,13 +383,13 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 100);
         int queryLimit = 50;
         int initialLimit = 10;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, queryLimit, "data", "SELECT * FROM /data.keySet limit " + initialLimit);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
         List<Person> results = query.next();
         Assertions.assertThat(query.getTotalNumberOfPages()).as("Wrong number of paginated query pages").isEqualTo(1);
         Assertions.assertThat(results.size()).as("Initial limit was not used").isEqualTo(initialLimit);
         Assertions.assertThat(query.isLimitExceeded()).as("Limit flag was set").isEqualTo(false);
 
-        query = new PaginatedQuery<Person>(cache, queryLimit, "data", "SELECT * FROM /data.keySet LIMIT " + initialLimit);
+        query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet LIMIT " + initialLimit);
         results = query.next();
         Assertions.assertThat(query.getTotalNumberOfPages()).as("Wrong number of paginated query pages").isEqualTo(1);
         Assertions.assertThat(results.size()).as("Initial limit was not used").isEqualTo(initialLimit);
@@ -400,7 +401,7 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 100);
         int queryLimit = 60;
         int initialLimit = 70;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, queryLimit, "data", "SELECT * FROM /data.keySet limit " + initialLimit);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
         List<Person> results = query.next();
         Assertions.assertThat(query.getTotalNumberOfPages()).as("Wrong number of paginated query pages").isEqualTo(3);
         Assertions.assertThat(query.getTotalNumberOfEntries()).as("Initial limit was not used").isEqualTo(queryLimit);
@@ -412,7 +413,7 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 100);
         int queryLimit = 10;
         int initialLimit = 10;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, queryLimit, "data", "SELECT * FROM /data.keySet limit " + initialLimit);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
         List<Person> results = query.next();
         Assertions.assertThat(query.getTotalNumberOfPages()).as("Wrong number of paginated query pages").isEqualTo(1);
         Assertions.assertThat(results.size()).as("Initial limit was not used").isEqualTo(initialLimit);
@@ -423,7 +424,7 @@ public class PaginatedQueryTest {
         PersonUtils.populateRegionByPersons(data, 5);
         int queryLimit = 6;
         int initialLimit = 10;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(cache, queryLimit, "data", "SELECT * FROM /data.keySet limit " + initialLimit);
+        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
         List<Person> results = query.next();
         Assertions.assertThat(query.getTotalNumberOfPages()).as("Wrong number of paginated query pages").isEqualTo(1);
         Assertions.assertThat(results.size()).as("Initial limit was not used").isEqualTo(5);
@@ -449,6 +450,8 @@ public class PaginatedQueryTest {
         data = regionFactory.create("data");
         standy = regionFactory.create("standy");
 
+        queryService = cache.getQueryService();
+        
         ClientRegionFactory<PaginatedQueryPageKey, List<Object>> regionFactoryForHelpRegion =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
         paginatedQueryInfo = regionFactoryForHelpRegion.create(PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME);
