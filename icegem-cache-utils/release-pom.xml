@@ -59,13 +59,13 @@
     <testOutputDirectory>target/test-classes</testOutputDirectory>
     <resources>
       <resource>
-        <targetPath>/Users/aih1013/Documents/NewEdge/workspace/icegem/icegem-cache-utils/target</targetPath>
+        <targetPath>../</targetPath>
         <filtering>true</filtering>
         <mergeId>resource-8</mergeId>
         <directory>../icegem-common-resources/test/scripts</directory>
       </resource>
       <resource>
-        <targetPath>/Users/aih1013/Documents/NewEdge/workspace/icegem/icegem-cache-utils/target</targetPath>
+        <targetPath>../</targetPath>
         <mergeId>resource-9</mergeId>
         <directory>../icegem-common-resources/test</directory>
         <includes>
@@ -481,7 +481,7 @@
     <slf4j.version>1.6.1</slf4j.version>
     <org.testng.version>5.14.6</org.testng.version>
     <org.ehoffman.version>0.5</org.ehoffman.version>
-    <gemfire.license.file>/Users/aih1013/java/GemFire65117/gemfireLicense.zip</gemfire.license.file>
+    <gemfire.license.file>${env.GEMFIRE}/gemfireLicense.zip</gemfire.license.file>
     <com.gemstone.gemfire.version>6.5.1.17</com.gemstone.gemfire.version>
     <commons-logging.version>1.1.1</commons-logging.version>
     <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
