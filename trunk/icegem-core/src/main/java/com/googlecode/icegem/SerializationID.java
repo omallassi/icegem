@@ -19,23 +19,18 @@ public interface SerializationID {
 	 */
 	int BASE = 16000;
 	
-	/**
-	 * {@link MessageHolder}
-	 */
-	int MESSAGE_HOLDER_ID = BASE + 1;
-
     /**
 	 * {@link JodaTimeDataSerializer}
 	 */
-    int JODA_TIME_DATA_SERIALIZER_ID = BASE + 2;
+    int JODA_TIME_DATA_SERIALIZER_ID = BASE + 1;
 
     /**
 	 * {@link TimestampDataSerializer}
 	 */
-    int TIMESTAMP_DATA_SERIALIZER_ID = BASE + 3;
+    int TIMESTAMP_DATA_SERIALIZER_ID = BASE + 2;
 
     /**
 	 * {@link UUIDDataSerializer}
 	 */
-    int UUID_DATA_SERIALIZER_ID = BASE + 4;
+    int UUID_DATA_SERIALIZER_ID = BASE + 3;
 }

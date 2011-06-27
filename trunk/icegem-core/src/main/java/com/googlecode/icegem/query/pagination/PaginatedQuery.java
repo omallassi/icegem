@@ -1,16 +1,25 @@
 package com.googlecode.icegem.query.pagination;
 
-import com.gemstone.gemfire.cache.GemFireCache;
-import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.execute.FunctionException;
-import com.gemstone.gemfire.cache.execute.ResultSender;
-import com.gemstone.gemfire.cache.query.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.LimitExceededException;
-import java.io.Serializable;
-import java.util.*;
+import com.gemstone.gemfire.cache.Region;
+import com.gemstone.gemfire.cache.RegionService;
+import com.gemstone.gemfire.cache.query.FunctionDomainException;
+import com.gemstone.gemfire.cache.query.NameResolutionException;
+import com.gemstone.gemfire.cache.query.Query;
+import com.gemstone.gemfire.cache.query.QueryException;
+import com.gemstone.gemfire.cache.query.QueryInvocationTargetException;
+import com.gemstone.gemfire.cache.query.QueryService;
+import com.gemstone.gemfire.cache.query.RegionNotFoundException;
+import com.gemstone.gemfire.cache.query.SelectResults;
+import com.gemstone.gemfire.cache.query.Struct;
+import com.gemstone.gemfire.cache.query.TypeMismatchException;
 
 /**
  * This component allows to execute paginated queries both from client and peer/server sides.
@@ -73,126 +82,125 @@ public class PaginatedQuery<V> {
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryService The service to run the query.
      * @param regionName name of region for querying
      * @param queryString query string that must return entry keys
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, String regionName, String queryString) throws RegionNotFoundException {
-        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, DEFAULT_PAGE_SIZE);
+    public PaginatedQuery(QueryService queryService, Region<Object, V> region, String queryString) throws RegionNotFoundException {
+        this(queryService, DEFAULT_QUERY_LIMIT, region, queryString, DEFAULT_PAGE_SIZE);
     }
 
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryService The service to run the query.
      * @param queryLimit limit on query result
-     * @param regionName name of region for querying
+     * @param region The region for querying.
      * @param queryString query string that must return entry keys
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString)
+    public PaginatedQuery(QueryService queryService, int queryLimit, Region<Object, V> region, String queryString)
             throws RegionNotFoundException {
-        this(cache, queryLimit, regionName, queryString, DEFAULT_PAGE_SIZE);
+        this(queryService, queryLimit, region, queryString, DEFAULT_PAGE_SIZE);
     }
 
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
-     * @param regionName name of region for querying
+     * @param queryService The service to run the query.
+     * @param region The region for querying.
      * @param queryString query string that must return entry keys
      * @param pageSize size of page
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, int pageSize)
+    public PaginatedQuery(QueryService queryService, Region<Object, V> queryRegion, String queryString, int pageSize)
             throws RegionNotFoundException {
-        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, new Object[]{}, pageSize);
+        this(queryService, DEFAULT_QUERY_LIMIT, queryRegion, queryString, new Object[]{}, pageSize);
     }
 
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryService The service to run the query.
      * @param queryLimit limit on query result
-     * @param regionName name of region for querying
+     * @param region The region for querying.
      * @param queryString query string that must return entry keys
      * @param pageSize size of page
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, int pageSize)
+    public PaginatedQuery(QueryService queryService, int queryLimit, Region<Object, V> region, String queryString, int pageSize)
             throws RegionNotFoundException {
-        this(cache, queryLimit, regionName, queryString, new Object[]{}, pageSize);
+        this(queryService, queryLimit, region, queryString, new Object[]{}, pageSize);
     }
 
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
-     * @param regionName name of region for querying
+     * @param queryService The service to run the query.
+     * @param region The region for querying.
      * @param queryString query string that must return entry keys
      * @param queryParameters parameters for query execution
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters)
+    public PaginatedQuery(QueryService queryService, Region<Object, V> region, String queryString, Object[] queryParameters)
             throws RegionNotFoundException {
-        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, queryParameters, DEFAULT_PAGE_SIZE);
+        this(queryService, DEFAULT_QUERY_LIMIT, region, queryString, queryParameters, DEFAULT_PAGE_SIZE);
     }
 
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryService The service to run the query.
      * @param queryLimit limit on query result
-     * @param regionName name of region for querying
+     * @param region The region for querying.
      * @param queryString query string that must return entry keys
      * @param queryParameters parameters for query execution
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString,
+    public PaginatedQuery(QueryService queryService, int queryLimit, Region<Object, V> region, String queryString,
                           Object[] queryParameters) throws RegionNotFoundException {
-        this(cache, queryLimit, regionName, queryString, queryParameters, DEFAULT_PAGE_SIZE);
+        this(queryService, queryLimit, region, queryString, queryParameters, DEFAULT_PAGE_SIZE);
     }
 
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
-     * @param regionName name of region for querying
+     * @param queryService The service to run the query.
+     * @param region The region for querying.
      * @param queryString query string that must return entry keys
      * @param queryParameters parameters for query execution
      * @param pageSize size of page
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters,
+    public PaginatedQuery(QueryService queryService, Region<Object, V> region, String queryString, Object[] queryParameters,
                           int pageSize) throws RegionNotFoundException {
-        this(cache, DEFAULT_QUERY_LIMIT, regionName, queryString, queryParameters, pageSize);
+        this(queryService, DEFAULT_QUERY_LIMIT, region, queryString, queryParameters, pageSize);
     }
 
     /**
      * Creates a new PaginatedQuery instance.
      *
-     * @param cache peer/server (Cache) or client cache (ClientCache)
+     * @param queryService The service to run the query.
      * @param queryLimit limit on query result
-     * @param regionName name of region for querying
+     * @param region The region for querying.
      * @param queryString query string that must return entry keys
      * @param queryParameters parameters for query execution
      * @param pageSize size of page
      * @throws RegionNotFoundException when query region or help region were not founded
      */
-    public PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString,
+    public PaginatedQuery(QueryService queryService, int queryLimit, Region<Object, V> queriedRegion, String queryString,
                           Object[] queryParameters, int pageSize) throws RegionNotFoundException {
-        queryService = cache.getQueryService();
+        this.queryService = queryService;
 
-        queryRegion = cache.getRegion(regionName);
+        this.queryRegion = queriedRegion;
         if (queryRegion == null) {
-            RegionNotFoundException e = new RegionNotFoundException("Region for querying [" +
-                    regionName + "] has not been found");
-            logger.warn(e.getMessage());
-            throw e;
+        	throw new NullPointerException("Query region have to be provided");
         }
 
-        paginatedQueryInfoRegion = cache.getRegion(PAGINATED_QUERY_INFO_REGION_NAME);
+        RegionService regionService = queryRegion.getRegionService();
+        paginatedQueryInfoRegion = regionService.getRegion(PAGINATED_QUERY_INFO_REGION_NAME);
+        
         if (paginatedQueryInfoRegion == null) {
             RegionNotFoundException e =  new RegionNotFoundException("Help region [" +
                     PAGINATED_QUERY_INFO_REGION_NAME + "] for storing " +
@@ -202,15 +210,11 @@ public class PaginatedQuery<V> {
         }
 
         if (pageSize < 1) {
-            IllegalArgumentException e = new IllegalArgumentException("Page size must be positive");
-            logger.warn(e.getMessage());
-            throw e;
+            throw new IllegalArgumentException("Page size must be positive");
         }
 
         if (queryLimit < 1) {
-            IllegalArgumentException e = new IllegalArgumentException("Query limit must be positive");
-            logger.warn(e.getMessage());
-            throw e;
+            throw new IllegalArgumentException("Query limit must be positive");
         }
         this.queryLimit = queryLimit;
 
@@ -499,11 +503,8 @@ public class PaginatedQuery<V> {
      * @param e of type Throwable
      * @throws com.gemstone.gemfire.cache.query.QueryException checked exception
      */
-    @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
-    private void handleException(Throwable e) throws QueryException {
-        QueryException exception = new QueryException("Exception has been thrown during query execution. " +
+    private void handleException(Exception e) throws QueryException {
+        throw new QueryException("Exception has been thrown during query execution. " +
                 "Cause exception message: " + e.getMessage(), e);
-        logger.warn(exception.getMessage());
-        throw exception;
     }
 }

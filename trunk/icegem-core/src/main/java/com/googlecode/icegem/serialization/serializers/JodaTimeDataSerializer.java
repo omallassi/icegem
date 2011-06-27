@@ -1,76 +1,135 @@
 package com.googlecode.icegem.serialization.serializers;
 
-import com.gemstone.gemfire.DataSerializer;
-import com.googlecode.icegem.SerializationID;
-import org.joda.time.Chronology;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.chrono.*;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
 
-import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
+import org.joda.time.Chronology;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.ISOChronology;
+
+import com.gemstone.gemfire.DataSerializer;
+import com.googlecode.icegem.SerializationID;
 
 /**
  * User: akondratyev
  */
-public class JodaTimeDataSerializer extends DataSerializer implements SerializationID {
-    static {
-        DataSerializer.register(JodaTimeDataSerializer.class);
-    }
+public class JodaTimeDataSerializer extends DataSerializer implements
+		SerializationID {
+	private static final int CUSTOM_TZ_ID = 63;
+	private static final String[] TIMEZONE_IDS = new String[] { "UTC",
+			"Europe/London", "America/New_York", "America/Chicago",
+			"America/Los_Angeles", "Europe/Moscow", "Asia/Novosibirsk",
+			"Asia/Tokyo", "GMT", "EST" };
 
-    public JodaTimeDataSerializer() {
-    }
+	static {
+		DataSerializer.register(JodaTimeDataSerializer.class);
+	}
 
-    @Override
-    public Class<?>[] getSupportedClasses() {
-        return new Class<?>[] {DateTime.class};
-    }
+	public JodaTimeDataSerializer() {
+	}
 
-    @Override
-    public boolean toData(Object o, DataOutput dataOutput) throws IOException {
-        if (o instanceof DateTime) {
-            DateTime dt = (DateTime) o;
-            dataOutput.writeLong(dt.getMillis());
-            dataOutput.writeUTF(dt.getChronology().getClass().getName());
-            dataOutput.writeUTF(dt.getChronology().getZone().getID());
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public Class<?>[] getSupportedClasses() {
+		return new Class<?>[] { DateTime.class };
+	}
 
-    @Override
-    public Object fromData(DataInput dataInput) throws IOException, ClassNotFoundException {
-        long time = dataInput.readLong();
-        String chronologyClassName = dataInput.readUTF();
-        DateTimeZone dateTimeZone = DateTimeZone.forID(dataInput.readUTF());
-        Chronology chronology;
-        if (ISOChronology.class.getName().equals(chronologyClassName)) {
-            chronology = ISOChronology.getInstance(dateTimeZone);
-        } else if (GJChronology.class.getName().equals(chronologyClassName)) {
-            chronology = GJChronology.getInstance(dateTimeZone);
-        } else if (GregorianChronology.class.getName().equals(chronologyClassName)) {
-            chronology = GregorianChronology.getInstance(dateTimeZone);
-        } else if (JulianChronology.class.getName().equals(chronologyClassName)) {
-            chronology = JulianChronology.getInstance(dateTimeZone);
-        } else if (CopticChronology.class.getName().equals(chronologyClassName)) {
-            chronology = CopticChronology.getInstance(dateTimeZone);
-        } else if (BuddhistChronology.class.getName().equals(chronologyClassName)) {
-            chronology = BuddhistChronology.getInstance(dateTimeZone);
-        } else if (EthiopicChronology.class.getName().equals(chronologyClassName)) {
-            chronology = EthiopicChronology.getInstance(dateTimeZone);
-        } else {
-            throw new RuntimeException("Chronology class '" + chronologyClassName + "' is not supported");
-        }
-        return new DateTime(time, chronology);
-    }
+	@Override
+	public boolean toData(Object o, DataOutput dataOutput) throws IOException {
+		if (o instanceof DateTime) {
+			DateTime dt = (DateTime) o;
+			dataOutput.writeLong(dt.getMillis());
+			Chronology chronology = dt.getChronology();
 
-    @Override
-    public int getId() {
-        return JODA_TIME_DATA_SERIALIZER_ID;
-    }
+			boolean customChronology = false;
+			if (!chronology.getClass().getName()
+					.equals(ISOChronology.class.getName())) {
+				customChronology = true;
+			}
+
+			byte flags = 0;
+			boolean customTimeZone = true;
+
+			String timeZoneId = chronology.getZone().getID();
+			for (byte i = 0; i < TIMEZONE_IDS.length; i++) {
+				if (timeZoneId.equals(TIMEZONE_IDS[i])) {
+					flags = i;
+					customTimeZone = false;
+					break;
+				}
+			}
+
+			if (customTimeZone) {
+				flags = CUSTOM_TZ_ID;
+			}
+
+			flags |= customChronology ? (1 << 7) : 0;
+			dataOutput.write(flags);
+
+			if (customChronology) {
+				dataOutput.writeUTF(chronology.getClass().getName());
+			}
+			if (customTimeZone) {
+				dataOutput.writeUTF(chronology.getZone().getID());
+			}
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public Object fromData(DataInput dataInput) throws IOException,
+			ClassNotFoundException {
+		long time = dataInput.readLong();
+		byte flags = dataInput.readByte();
+
+		boolean customChornology = ((flags & 0x80) != 0);
+		byte timeZoneIndex = (byte) (flags & 0x7F);
+		boolean customTimeZone = (timeZoneIndex == CUSTOM_TZ_ID);
+
+		String chronologyClassName = null;
+		DateTimeZone dateTimeZone;
+
+		Chronology chronology;
+		if (customChornology) {
+			chronologyClassName = dataInput.readUTF();
+		}
+		
+		if (customTimeZone) {
+			dateTimeZone = DateTimeZone.forID(dataInput.readUTF());
+		} else {
+			if(timeZoneIndex >= TIMEZONE_IDS.length) {
+				throw new IOException("Serialized form contains unknown TZ index");
+			}
+			
+			String tzId = TIMEZONE_IDS[timeZoneIndex];
+			dateTimeZone = DateTimeZone.forID(tzId);
+		}
+
+		if(chronologyClassName != null) {	
+			Class<?> chronologyCls = Class.forName(chronologyClassName);
+			try {
+				
+				
+				Method factory = chronologyCls.getMethod("getInstance",
+						new Class[] { DateTimeZone.class });
+
+				chronology = (Chronology) factory.invoke(null,
+						dateTimeZone);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to instantiate Joda Chronology");
+			}
+		} else {
+			chronology = ISOChronology.getInstance(dateTimeZone);
+		}
+
+		return new DateTime(time, chronology);
+	}
+
+	@Override
+	public int getId() {
+		return JODA_TIME_DATA_SERIALIZER_ID;
+	}
 }
