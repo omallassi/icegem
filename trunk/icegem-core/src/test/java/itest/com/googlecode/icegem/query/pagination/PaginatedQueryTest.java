@@ -38,7 +38,6 @@ public class PaginatedQueryTest {
     private static Process cacheServer2;
     /** Field javaProcessLauncher  */
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
-    private static Region<Object, Object> standy;
 	private QueryService queryService;
 
     @BeforeClass
@@ -46,7 +45,6 @@ public class PaginatedQueryTest {
         startCacheServers();
         startClient();
         RegionUtils.clearRegion(data);
-        RegionUtils.clearRegion(standy);
     }
 
     @AfterClass
@@ -448,7 +446,6 @@ public class PaginatedQueryTest {
         ClientRegionFactory<Object, Object> regionFactory =
                 cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
         data = regionFactory.create("data");
-        standy = regionFactory.create("standy");
 
         queryService = cache.getQueryService();
         
