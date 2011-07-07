@@ -16,7 +16,7 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.PropertiesHelper;
-import com.googlecode.icegem.utils.RegionUtils;
+import com.googlecode.icegem.utils.CacheUtils;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 /**
@@ -59,7 +59,7 @@ public class RegionClearingClientTest {
         replicatedRegion1.create(1, 2);
         assertNotNull(replicatedRegion1.get(1));
         assertEquals(replicatedRegion1.get(1), 2);
-        RegionUtils.clearRegion(replicatedRegion1);
+        CacheUtils.clearRegion(replicatedRegion1);
         assertNull(replicatedRegion1.get(1));
         assertEquals(replicatedRegion1.keySetOnServer().size(), 0);
     }
@@ -69,7 +69,7 @@ public class RegionClearingClientTest {
         replicatedRegion2.create(1, 2);
         assertNotNull(replicatedRegion2.get(1));
         assertEquals(replicatedRegion2.get(1), 2);
-        RegionUtils.clearRegion(replicatedRegion2);
+        CacheUtils.clearRegion(replicatedRegion2);
         replicatedRegion2.localClear();
         assertNull(partitionedRegion2.get(1));
         assertEquals(replicatedRegion1.keySetOnServer().size(), 0);
@@ -80,7 +80,7 @@ public class RegionClearingClientTest {
         partitionedRegion1.create(1, 2);
         assertNotNull(partitionedRegion1.get(1));
         assertEquals(partitionedRegion1.get(1), 2);
-        RegionUtils.clearRegion(partitionedRegion1);
+        CacheUtils.clearRegion(partitionedRegion1);
         assertNull(partitionedRegion1.get(1));
         assertEquals(partitionedRegion1.keySetOnServer().size(), 0);
     }
@@ -90,7 +90,7 @@ public class RegionClearingClientTest {
         partitionedRegion2.create(1, 2);
         assertNotNull(partitionedRegion2.get(1));
         assertEquals(partitionedRegion2.get(1), 2);
-        RegionUtils.clearRegion(partitionedRegion2);
+        CacheUtils.clearRegion(partitionedRegion2);
         partitionedRegion2.localClear();
         assertNull(partitionedRegion2.get(1));
         assertEquals(partitionedRegion2.keySetOnServer().size(), 0);
