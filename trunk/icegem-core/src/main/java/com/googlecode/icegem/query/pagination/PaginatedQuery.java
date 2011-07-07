@@ -64,25 +64,25 @@ public class PaginatedQuery<V> {
 	public static final int PAGE_NUMBER_FOR_GENERAL_INFO = -1;
 	/** name of a help region for storing information about paginated queries */
 	public static final String PAGINATED_QUERY_INFO_REGION_NAME = "paginated_query_info";
-	/** common key for query pages */
-	private PaginatedQueryPageKey pageKey;
-	/** Field totalNumberOfEntries */
-	private int totalNumberOfEntries;
-	/** Field currentPageNumber */
-	private int currentPageNumber = 0;
+	/** Field logger */
+	private static final Logger logger = LoggerFactory.getLogger(PaginatedQuery.class);
+
 	/** Field queryService */
 	private QueryService queryService;
-	/** limit on query result */
-	private int queryLimit;
-	/** flag that indicates that limit has been exceeded */
-	private boolean limitExceeded;
 	/** region for querying */
 	private Region<Object, V> queryRegion;
 	/** help region for storing information about paginated queries */
 	private Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
-	/** Field logger */
-	private Logger logger = LoggerFactory.getLogger(PaginatedQuery.class);
 
+	/** limit on query result */
+	private int queryLimit;
+	/** flag that indicates that limit has been exceeded */
+	private boolean limitExceeded;
+	/** Field totalNumberOfEntries */
+	private int totalNumberOfEntries;
+	/** Field currentPageNumber */
+	private int currentPageNumber = 0;
+	private PaginatedQueryPageKey pageKey;
 	/**
 	 * Creates a new PaginatedQuery instance.
 	 * 
@@ -304,7 +304,7 @@ public class PaginatedQuery<V> {
 		boolean firstTry = true;
 		while (pageKeys == null) {
 			storePaginatedQueryInfoIfNeeded(!firstTry);;
-			if (!pageNumberExists(pageNumber)) {
+			if (!pageExists(pageNumber)) {
 				IndexOutOfBoundsException e = new IndexOutOfBoundsException(
 						"A page number {" + pageNumber + "} "
 								+ "was out of bounds: [1, "
@@ -326,31 +326,6 @@ public class PaginatedQuery<V> {
 	}
 
 	/**
-	 * Return the next to the current page. For the first call of this method it
-	 * will be the first page. Use hasNext() method to check that the query has
-	 * the next page.
-	 * 
-	 * @return List<V> list of entries
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             during query execution
-	 */
-	public List<V> next() throws QueryException {
-		return page(++currentPageNumber);
-	}
-
-	/**
-	 * Returns the previous to the current page. Use hasPrevious() method to
-	 * check that the query has a previous page.
-	 * 
-	 * @return List<Object> list of entries
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             during query execution
-	 */
-	public List<V> previous() throws QueryException {
-		return page(--currentPageNumber);
-	}
-
-	/**
 	 * Checks that query has the next page.
 	 * 
 	 * @return boolean
@@ -358,7 +333,7 @@ public class PaginatedQuery<V> {
 	 *             during query execution
 	 */
 	public boolean hasNext() throws QueryException {
-		return pageNumberExists(currentPageNumber + 1);
+		return pageExists(currentPageNumber + 1);
 	}
 
 	/**
@@ -369,7 +344,7 @@ public class PaginatedQuery<V> {
 	 *             during query execution
 	 */
 	public boolean hasPrevious() throws QueryException {
-		return pageNumberExists(currentPageNumber - 1);
+		return pageExists(currentPageNumber - 1);
 	}
 
 	/**
@@ -421,7 +396,7 @@ public class PaginatedQuery<V> {
 	 * @throws com.gemstone.gemfire.cache.query.QueryException
 	 *             during query execution
 	 */
-	public boolean pageNumberExists(int pageNumber) throws QueryException {
+	public boolean pageExists(int pageNumber) throws QueryException {
 		return pageNumber == 1
 				|| !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
 	}
