@@ -22,7 +22,7 @@ import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.expiration.ExpirationController;
 import com.googlecode.icegem.expiration.ExpirationPolicy;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
-import com.googlecode.icegem.utils.RegionUtils;
+import com.googlecode.icegem.utils.CacheUtils;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 /**
@@ -206,10 +206,10 @@ public class ExpirationControllerTest implements Serializable {
 
 		Region<Long, Transaction> transactionsRegion = getRegion(cache,
 			"transactions");
-        RegionUtils.clearRegion(transactionsRegion);
+        CacheUtils.clearRegion(transactionsRegion);
 		Region<Long, TransactionProcessingError> errorsRegion = getRegion(
 			cache, "errors");
-        RegionUtils.clearRegion(errorsRegion);
+        CacheUtils.clearRegion(errorsRegion);
 
 		for (long i = 1, id = 1; i <= count; i++, id += 5) {
 			if ((i % 1000) == 0) {

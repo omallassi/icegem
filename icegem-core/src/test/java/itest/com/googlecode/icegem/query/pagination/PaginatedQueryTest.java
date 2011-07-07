@@ -26,441 +26,491 @@ import com.gemstone.gemfire.cache.query.QueryService;
 import com.gemstone.gemfire.cache.query.RegionNotFoundException;
 import com.gemstone.gemfire.cache.query.TypeMismatchException;
 import com.googlecode.icegem.query.pagination.PaginatedQuery;
-import com.googlecode.icegem.query.pagination.PaginatedQueryPageKey;
+import com.googlecode.icegem.query.pagination.PageKey;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.PropertiesHelper;
-import com.googlecode.icegem.utils.RegionUtils;
+import com.googlecode.icegem.utils.CacheUtils;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 import static org.junit.Assert.*;
 
 /**
  * Tests for paginated query.
- *
+ * 
  * @author Andrey Stepanov aka standy
  */
 public class PaginatedQueryTest {
-    /** Field LOCATOR_PORT  */
-    private static final int LOCATOR_PORT = 10355;
-    /** Field cache  */
-    private static ClientCache cache;
-    /** Region for querying  */
-    private static Region data;
-    /** Help region for storing information about paginated queries  */
-    private static Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfo;
-    /** Field cacheServer1  */
-    private static Process cacheServer1;
-    /** Field cacheServer2  */
-    private static Process cacheServer2;
-    /** Field javaProcessLauncher  */
-    private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
+	/** Field LOCATOR_PORT */
+	private static final int LOCATOR_PORT = 10355;
+	/** Field cache */
+	private static ClientCache cache;
+	/** Region for querying */
+	private static Region data;
+	/** Help region for storing information about paginated queries */
+	private static Region<PageKey, List<Object>> paginatedQueryInfo;
+	/** Field cacheServer1 */
+	private static Process cacheServer1;
+	/** Field cacheServer2 */
+	private static Process cacheServer2;
+	/** Field javaProcessLauncher */
+	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 	private static QueryService queryService;
 
-    @BeforeClass
-    public static void setUp() throws IOException, InterruptedException, TimeoutException {
-        startCacheServers();
-        startClient();
-        RegionUtils.clearRegion(data);
-    }
+	@BeforeClass
+	public static void setUp() throws IOException, InterruptedException,
+			TimeoutException {
+		startCacheServers();
+		startClient();
+		CacheUtils.clearRegion(data);
+	}
 
-    @AfterClass
-    public static void tearDown() throws IOException, InterruptedException {
-        cache.close();
-        stopCacheServers();
-    }
+	@AfterClass
+	public static void tearDown() throws IOException, InterruptedException {
+		cache.close();
+		stopCacheServers();
+	}
 
-    @Before
-    public void after() throws InterruptedException, IOException {
-        RegionUtils.clearRegion(data);
-        RegionUtils.clearRegion(paginatedQueryInfo);
-    }
+	@Before
+	public void after() throws InterruptedException, IOException {
+		CacheUtils.clearRegion(data);
+		CacheUtils.clearRegion(paginatedQueryInfo);
+	}
 
-    @Test
-    public void testLoadNthPageBySeparateQuery() throws Exception {
-        PersonUtils.populateRegionByPersons(data, 100);
+	@Test
+	public void testLoadNthPageBySeparateQuery() throws Exception {
+		PersonUtils.populateRegionByPersons(data, 100);
 
-        int queryLimit = 10;
-        PaginatedQuery<Person> query;
-        
-        query = new PaginatedQuery<Person>(queryService, data, "SELECT * FROM /data.keySet", 10);
-        assertEquals(10, query.getTotalNumberOfPages());
-        
-        query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet", 10);
-        List<Person> result = query.page(7);
-    }
-    
-    @Test
-    public void testCreation() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
-            NameResolutionException {
-        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
-        assertEquals(query.getPageSize(), PaginatedQuery.DEFAULT_PAGE_SIZE);
-    }
+		PaginatedQuery<Person> query;
 
-    @Test(expected = NullPointerException.class)
-    public void testCreationForNotExistingQueryRegion() throws FunctionDomainException, QueryInvocationTargetException,
-            TypeMismatchException, NameResolutionException {
-        new PaginatedQuery(queryService, null, "SELECT * FROM /data.keySet");
-    }
+		query = new PaginatedQuery<Person>(queryService, data,
+				"SELECT * FROM /data.keySet", 10);
+		assertEquals(10, query.getTotalNumberOfPages());
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreationWithWrongPageSize() throws FunctionDomainException, QueryInvocationTargetException,
-            TypeMismatchException, NameResolutionException {
-        new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", 0);
-    }
+		query = new PaginatedQuery<Person>(queryService, data,
+				"SELECT * FROM /data.keySet", 10);
+		List<Person> result = query.page(7);
+	}
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreationWithWrongQueryLimit() throws FunctionDomainException, QueryInvocationTargetException,
-            TypeMismatchException, NameResolutionException {
-        int queryLimit = -1;
-        new PaginatedQuery(queryService, queryLimit, data, "SELECT * FROM /data.keySet");
-    }
+	@Test
+	public void testCreation() throws FunctionDomainException,
+			QueryInvocationTargetException, TypeMismatchException,
+			NameResolutionException {
+		PaginatedQuery query = new PaginatedQuery(queryService, data,
+				"SELECT * FROM /data.keySet");
+		assertEquals(query.getPageSize(), PaginatedQuery.DEFAULT_PAGE_SIZE);
+	}
 
-    @Test
-    public void testGetPageSize() throws FunctionDomainException, QueryInvocationTargetException, TypeMismatchException,
-            NameResolutionException {
-        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
-        assertEquals(query.getPageSize(), PaginatedQuery.DEFAULT_PAGE_SIZE);
-        query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", 10);
-        assertEquals(query.getPageSize(), 10);
-    }
+	@Test(expected = NullPointerException.class)
+	public void testCreationForNotExistingQueryRegion()
+			throws FunctionDomainException, QueryInvocationTargetException,
+			TypeMismatchException, NameResolutionException {
+		new PaginatedQuery(queryService, null, "SELECT * FROM /data.keySet");
+	}
 
-    @Test
-    public void testGetTotalNumberOfEntries() throws QueryException {
-        String queryString = "SELECT * FROM /data.keySet";
-        PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{},
-                PaginatedQuery.DEFAULT_PAGE_SIZE, PaginatedQuery.PAGE_NUMBER_FOR_GENERAL_INFO);
-        PaginatedQuery query = new PaginatedQuery(queryService, data, queryString);
-        int totalNumberOfEntries = query.getTotalNumberOfEntries();
-        
-        List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
-        assertNotNull(pageKeys != null);
-        assert pageKeys != null;
-        assertEquals(pageKeys.get(0), 0);
-        assertEquals(totalNumberOfEntries, 0);
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreationWithWrongPageSize() throws FunctionDomainException,
+			QueryInvocationTargetException, TypeMismatchException,
+			NameResolutionException {
+		new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", 0);
+	}
 
-        RegionUtils.clearRegion(paginatedQueryInfo);
-        PersonUtils.populateRegionByPersons(data, 10);
-        
-        query = new PaginatedQuery(queryService, data, queryString);
-        totalNumberOfEntries = query.getTotalNumberOfEntries();
-        
-        pageKeys = paginatedQueryInfo.get(pageKey);
-        assertNotNull(pageKeys);
-        assert pageKeys != null;
-        assertEquals(pageKeys.get(0), 10);
-        assertEquals(totalNumberOfEntries, 10);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreationWithWrongQueryLimit()
+			throws FunctionDomainException, QueryInvocationTargetException,
+			TypeMismatchException, NameResolutionException {
+		int queryLimit = -1;
+		new PaginatedQuery(queryService, queryLimit, data,
+				"SELECT * FROM /data.keySet");
+	}
 
-    @Test
-    public void testGetTotalNumberOfPages() throws QueryException {
-        PaginatedQuery query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
-        assertEquals(query.getTotalNumberOfPages(), 1);
+	@Test
+	public void testGetPageSize() throws FunctionDomainException,
+			QueryInvocationTargetException, TypeMismatchException,
+			NameResolutionException {
+		PaginatedQuery query = new PaginatedQuery(queryService, data,
+				"SELECT * FROM /data.keySet");
+		assertEquals(query.getPageSize(), PaginatedQuery.DEFAULT_PAGE_SIZE);
+		query = new PaginatedQuery(queryService, data,
+				"SELECT * FROM /data.keySet", 10);
+		assertEquals(query.getPageSize(), 10);
+	}
 
-        PersonUtils.populateRegionByPersons(data, 100);
-        query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet", 10);
-        assertEquals(query.getTotalNumberOfPages(), 100 / 10);
+	@Test
+	public void testGetTotalNumberOfEntries() throws QueryException {
+		String queryString = "SELECT * FROM /data.keySet";
+		PageKey pageKey = new PageKey(
+				CacheUtils.addQueryLimit(queryString, PaginatedQuery.DEFAULT_QUERY_LIMIT), 
+				new Object[0],
+				PaginatedQuery.DEFAULT_QUERY_LIMIT,
+				PaginatedQuery.DEFAULT_PAGE_SIZE,
+				PaginatedQuery.PAGE_NUMBER_FOR_GENERAL_INFO);
+		PaginatedQuery query = new PaginatedQuery(queryService, data,
+				queryString);
+		int totalNumberOfEntries = query.getTotalNumberOfEntries();
+		assertEquals(0, totalNumberOfEntries);
 
-        RegionUtils.clearRegion(data);
-        RegionUtils.clearRegion(paginatedQueryInfo);
+		List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
+		assertNotNull(pageKeys);
+		assertEquals(pageKeys.get(0), 0);
 
-        PersonUtils.populateRegionByPersons(data, 101);
-        query = new PaginatedQuery(queryService, data, "SELECT * FROM /data.keySet");
-        assertEquals(query.getTotalNumberOfPages(), 100 / PaginatedQuery.DEFAULT_PAGE_SIZE + 1);
-    }
+		CacheUtils.clearRegion(paginatedQueryInfo);
+		PersonUtils.populateRegionByPersons(data, 10);
 
-    @Test
-    public void testPageMethodForEmptyResults() throws QueryException {
-        String queryString = "SELECT * FROM /data.keySet";
-        int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, (Region<Object, Person>)data, queryString, pageSize);
-        PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
+		query = new PaginatedQuery(queryService, data, queryString);
+		totalNumberOfEntries = query.getTotalNumberOfEntries();
+		assertEquals(totalNumberOfEntries, 10);
 
-        int pageNumber = 1;
-        pageKey.setPageNumber(pageNumber);
+		pageKeys = paginatedQueryInfo.get(pageKey);
+		assertNotNull(pageKeys);
+		assertEquals(totalNumberOfEntries, pageKeys.get(0));
+	}
 
-        List<Person> pageEntries = query.page(pageNumber);
+	@Test
+	public void testGetTotalNumberOfPages() throws QueryException {
+		PaginatedQuery query = new PaginatedQuery(queryService, data,
+				"SELECT * FROM /data.keySet");
+		assertEquals(query.getTotalNumberOfPages(), 1);
 
-        List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
-        assertNotNull(pageKeys);
-        assert pageKeys != null;
-        assertEquals(pageKeys.size(), 0);
-        assertEquals(pageEntries.size(), 0);
-    }
+		PersonUtils.populateRegionByPersons(data, 100);
+		query = new PaginatedQuery(queryService, data,
+				"SELECT * FROM /data.keySet", 10);
+		assertEquals(query.getTotalNumberOfPages(), 100 / 10);
 
-    @Test
-    public void testPageMethodForNotFullPage() throws QueryException {
-        int numberOfEntriesForPopulation = 10;
-        PersonUtils.populateRegionByPersons(data, numberOfEntriesForPopulation);
-        String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
-        int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, data, queryString, pageSize);
-        PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
+		CacheUtils.clearRegion(data);
+		CacheUtils.clearRegion(paginatedQueryInfo);
 
-        int pageNumber = 1;
-        pageKey.setPageNumber(pageNumber);
+		PersonUtils.populateRegionByPersons(data, 101);
+		query = new PaginatedQuery(queryService, data,
+				"SELECT * FROM /data.keySet");
+		assertEquals(query.getTotalNumberOfPages(),
+				100 / PaginatedQuery.DEFAULT_PAGE_SIZE + 1);
+	}
 
-        List<Person> pageEntries = query.page(pageNumber);
+	@Test
+	public void testPageMethodForEmptyResults() throws QueryException {
+		String queryString = "SELECT * FROM /data.keySet";
+		int pageSize = 20;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				(Region<Object, Person>) data, queryString, pageSize);
 
-        List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
-        assertNotNull(pageKeys);
-        assert pageKeys != null;
-        assertEquals(pageKeys.size(), numberOfEntriesForPopulation);
-        assertTrue(pageKeys.contains(1));
-        assertTrue(pageKeys.contains(10));
-        assertEquals(pageKeys.get(0), 1);
-        assertEquals(pageKeys.get(9), 10);
+		int pageNumber = 1;
+		PageKey pageKey = new PageKey(
+				CacheUtils.addQueryLimit(queryString, PaginatedQuery.DEFAULT_QUERY_LIMIT),
+				new Object[] {},
+				PaginatedQuery.DEFAULT_QUERY_LIMIT, 
+				pageSize, 
+				pageNumber);
 
-        assertEquals(pageEntries.size(), numberOfEntriesForPopulation);
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 10));
-        assertEquals(pageEntries.get(0).getSocialNumber(), 1);
-        assertEquals(pageEntries.get(9).getSocialNumber(), 10);
-    }
+		List<Person> pageEntries = query.page(pageNumber);
 
-    @Test
-    public void testPageMethod() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
-        int pageSize = 20;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, data, queryString, pageSize);
-        PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, pageSize);
+		List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
+		assertNotNull(pageKeys);
+		assertEquals(pageKeys.size(), 0);
+		assertEquals(pageEntries.size(), 0);
+	}
 
-        int pageNumber = 1;
-        pageKey.setPageNumber(pageNumber);
+	@Test
+	public void testPageMethodForNotFullPage() throws QueryException {
+		int numberOfEntriesForPopulation = 10;
+		PersonUtils.populateRegionByPersons(data, numberOfEntriesForPopulation);
+		String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
+		int pageSize = 20;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				data, queryString, pageSize);
 
-        List<Person> pageEntries = query.page(pageNumber);
+		int pageNumber = 1;
+		PageKey pageKey = new PageKey(
+				CacheUtils.addQueryLimit(queryString, PaginatedQuery.DEFAULT_QUERY_LIMIT),
+				new Object[] {},
+				PaginatedQuery.DEFAULT_QUERY_LIMIT, 
+				pageSize, 
+				pageNumber);
 
-        List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
-        assertNotNull(pageKeys );
-        assert pageKeys != null;
-        assertEquals(pageKeys.size(), pageSize);
-        assertTrue(pageKeys.contains(1));
-        assertTrue(pageKeys.contains(20));
-        assertEquals(pageKeys.get(0), 1);
-        assertEquals(pageKeys.get(19), 20);
+		List<Person> pageEntries = query.page(pageNumber);
 
-        assertEquals(pageEntries.size(), pageSize);
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 20));
-        assertEquals(pageEntries.get(0).getSocialNumber(), 1);
-        assertEquals(pageEntries.get(19).getSocialNumber(), 20);
+		List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
+		assertNotNull(pageKeys);
+		assert pageKeys != null;
+		assertEquals(pageKeys.size(), numberOfEntriesForPopulation);
+		assertTrue(pageKeys.contains(1));
+		assertTrue(pageKeys.contains(10));
+		assertEquals(pageKeys.get(0), 1);
+		assertEquals(pageKeys.get(9), 10);
 
-        pageNumber = 5;
-        pageKey.setPageNumber(pageNumber);
-        pageEntries = query.page(pageNumber);
+		assertEquals(pageEntries.size(), numberOfEntriesForPopulation);
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 10));
+		assertEquals(pageEntries.get(0).getSocialNumber(), 1);
+		assertEquals(pageEntries.get(9).getSocialNumber(), 10);
+	}
 
-        pageKeys = paginatedQueryInfo.get(pageKey);
-        assertNotNull(pageKeys );
-        assert pageKeys != null;
-        assertEquals(pageKeys.size(), pageSize);
-        assertTrue(pageKeys.contains(81));
-        assertTrue(pageKeys.contains(100));
-        assertEquals(pageKeys.get(0), 81);
-        assertEquals(pageKeys.get(19), 100);
+	@Test
+	public void testPageMethod() throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		String queryString = "SELECT DISTINCT d.key, d.value.socialNumber FROM /data.entrySet d ORDER BY d.value.socialNumber";
+		int pageSize = 20;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				data, queryString, pageSize);
 
-        assertEquals(pageEntries.size(), pageSize);
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 81));
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 100));
-        assertEquals(pageEntries.get(0).getSocialNumber(), 81);
-        assertEquals(pageEntries.get(19).getSocialNumber(), 100);
-    }
+		int pageNumber = 1;
+		PageKey pageKey = new PageKey(
+				CacheUtils.addQueryLimit(queryString, PaginatedQuery.DEFAULT_QUERY_LIMIT),
+				new Object[] {},
+				PaginatedQuery.DEFAULT_QUERY_LIMIT, 
+				pageSize, 
+				pageNumber);
 
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void testGetNotExistedPage() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 10);
-        String queryString = "SELECT * FROM /data.keySet";
-        PaginatedQuery query = new PaginatedQuery(queryService, data, queryString);
-        PaginatedQueryPageKey pageKey = new PaginatedQueryPageKey(queryString, new Object[]{}, PaginatedQuery.DEFAULT_PAGE_SIZE);
+		List<Person> pageEntries = query.page(pageNumber);
 
-        int pageNumber = 2;
-        pageKey.setPageNumber(pageNumber);
+		List<Object> pageKeys = paginatedQueryInfo.get(pageKey);
+		assertNotNull(pageKeys);
+		assert pageKeys != null;
+		assertEquals(pageKeys.size(), pageSize);
+		assertTrue(pageKeys.contains(1));
+		assertTrue(pageKeys.contains(20));
+		assertEquals(pageKeys.get(0), 1);
+		assertEquals(pageKeys.get(19), 20);
 
-        query.page(pageNumber);
-    }
+		assertEquals(pageEntries.size(), pageSize);
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 20));
+		assertEquals(pageEntries.get(0).getSocialNumber(), 1);
+		assertEquals(pageEntries.get(19).getSocialNumber(), 20);
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testQueryOrderByWithoutKeyInProjection() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query = new PaginatedQuery(queryService, data,
-                "SELECT DISTINCT e.value.socialNumber, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
-        query.page(1);
-    }
+		pageNumber = 5;
+		pageKey.setPageNumber(pageNumber);
+		pageEntries = query.page(pageNumber);
 
-    @Test(expected = ServerOperationException.class)
-    public void testQueryOrderByWithoutOrderByFieldInProjection() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query = new PaginatedQuery(queryService, data,
-                "SELECT DISTINCT e.key FROM /data.entrySet e ORDER BY e.value.socialNumber");
-        query.page(1);
-    }
+		pageKeys = paginatedQueryInfo.get(pageKey);
+		assertNotNull(pageKeys);
+		assert pageKeys != null;
+		assertEquals(pageKeys.size(), pageSize);
+		assertTrue(pageKeys.contains(81));
+		assertTrue(pageKeys.contains(100));
+		assertEquals(pageKeys.get(0), 81);
+		assertEquals(pageKeys.get(19), 100);
 
-    @Test
-    public void testPaginatedComplexQuering() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query = new PaginatedQuery(queryService, data,
-                "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e WHERE e.value.socialNumber = $1 ORDER BY e.value.socialNumber", new Object[]{1});
+		assertEquals(pageEntries.size(), pageSize);
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 81));
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 100));
+		assertEquals(pageEntries.get(0).getSocialNumber(), 81);
+		assertEquals(pageEntries.get(19).getSocialNumber(), 100);
+	}
 
-        List pageEntries = query.page(1);
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void testGetNotExistedPage() throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 10);
+		String queryString = "SELECT * FROM /data.keySet";
+		PaginatedQuery query = new PaginatedQuery(queryService, data,
+				queryString);
 
-        assertEquals(pageEntries.size(), 1);
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
-    }
+		int pageNumber = 2;
+		PageKey pageKey = new PageKey(queryString, new Object[] {},
+				PaginatedQuery.DEFAULT_QUERY_LIMIT,
+				PaginatedQuery.DEFAULT_PAGE_SIZE, pageNumber);
 
-    @Test
-    public void testQueryLimit() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        int queryLimit = 50;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet");
+		query.page(pageNumber);
+	}
 
-        List<Person> results = query.page(1);
-        assertEquals(query.getTotalNumberOfPages(), 3);
-        assertEquals(query.getTotalNumberOfEntries(), queryLimit);
-        assertEquals(query.isLimitExceeded(), true);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void testQueryOrderByWithoutKeyInProjection() throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		PaginatedQuery query = new PaginatedQuery(
+				queryService,
+				data,
+				"SELECT DISTINCT e.value.socialNumber, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
+		query.page(1);
+	}
 
-    @Test
-    public void testInitialQueryLimitThatLowerThanPaginatedQueryLimit() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        int queryLimit = 50;
-        int initialLimit = 10;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
-        List<Person> results = query.page(1);
-        assertEquals(query.getTotalNumberOfPages(), 1);
-        assertEquals(results.size(), initialLimit);
-        assertEquals(query.isLimitExceeded(), false);
+	@Test(expected = ServerOperationException.class)
+	public void testQueryOrderByWithoutOrderByFieldInProjection()
+			throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		PaginatedQuery query = new PaginatedQuery(queryService, data,
+				"SELECT DISTINCT e.key FROM /data.entrySet e ORDER BY e.value.socialNumber");
+		query.page(1);
+	}
 
-        query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet LIMIT " + initialLimit);
-        results = query.page(1);
-        assertEquals(query.getTotalNumberOfPages(), 1);
-        assertEquals(results.size(), initialLimit);
-        assertEquals(query.isLimitExceeded(), false);
-    }
+	@Test
+	public void testPaginatedComplexQuering() throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		PaginatedQuery query = new PaginatedQuery(
+				queryService,
+				data,
+				"SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e WHERE e.value.socialNumber = $1 ORDER BY e.value.socialNumber",
+				new Object[] { 1 });
 
-    @Test
-    public void testInitialQueryLimitThatHigherThanPaginatedQueryLimit() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        int queryLimit = 60;
-        int initialLimit = 70;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
-        List<Person> results = query.page(1);
-        assertEquals(query.getTotalNumberOfPages(), 3);
-        assertEquals(query.getTotalNumberOfEntries(), queryLimit);
-        assertEquals(query.isLimitExceeded(), true);
-    }
+		List pageEntries = query.page(1);
 
-    @Test
-    public void testInitialQueryLimitThatEqualToPaginatedQueryLimit() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 100);
-        int queryLimit = 10;
-        int initialLimit = 10;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
-        List<Person> results = query.page(1);
-        assertEquals(query.getTotalNumberOfPages(), 1);
-        assertEquals(results.size(), initialLimit);
-    }
+		assertEquals(pageEntries.size(), 1);
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
+	}
 
-    @Test
-    public void testInitialQueryLimitThatEqualToPaginatedQueryLimitForSmallSizeOfEntries() throws QueryException {
-        PersonUtils.populateRegionByPersons(data, 5);
-        int queryLimit = 6;
-        int initialLimit = 10;
-        PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService, queryLimit, data, "SELECT * FROM /data.keySet limit " + initialLimit);
-        List<Person> results = query.page(1);
-        assertEquals(query.getTotalNumberOfPages(), 1);
-        assertEquals(results.size(), 5);
-    }
-    
-    @Test
-    public void testExpiredPageLoad() throws Exception {
-        PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query;
-        query = new PaginatedQuery(queryService, data,
-                "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
+	@Test
+	public void testQueryLimit() throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		int queryLimit = 50;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				queryLimit, data, "SELECT * FROM /data.keySet");
 
-        List pageEntries = query.page(1);
-        assertEquals(pageEntries.size(), 25);
-        assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
-        
-        Thread.sleep(7000);
-        
-        query = new PaginatedQuery(queryService, data,
-        "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
+		List<Person> results = query.page(1);
+		assertEquals(query.getTotalNumberOfPages(), 3);
+		assertEquals(query.getTotalNumberOfEntries(), queryLimit);
+		assertEquals(query.isLimitExceeded(), true);
+	}
 
-        List refreshedResults = query.page(1);
-        assertEquals(pageEntries, refreshedResults);
-     }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testPageSizeChange() throws Exception {
-        PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query;
-        
-        query = new PaginatedQuery(queryService, data,
-                "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber", 30);
+	@Test
+	public void testInitialQueryLimitThatLowerThanPaginatedQueryLimit()
+			throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		int queryLimit = 50;
+		int initialLimit = 10;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				queryLimit, data, "SELECT * FROM /data.keySet limit "
+						+ initialLimit);
+		List<Person> results = query.page(1);
+		assertEquals(query.getTotalNumberOfPages(), 1);
+		assertEquals(results.size(), initialLimit);
+		assertEquals(query.isLimitExceeded(), false);
 
-        query = new PaginatedQuery(queryService, data,
-        "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber", 20);
-    }
+		query = new PaginatedQuery<Person>(queryService, queryLimit, data,
+				"SELECT * FROM /data.keySet LIMIT " + initialLimit);
+		results = query.page(1);
+		assertEquals(query.getTotalNumberOfPages(), 1);
+		assertEquals(results.size(), initialLimit);
+		assertEquals(query.isLimitExceeded(), false);
+	}
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testLimitChange() throws Exception {
-        PersonUtils.populateRegionByPersons(data, 100);
-        PaginatedQuery query;
-        
-        query = new PaginatedQuery(queryService, 1000, data,
-                "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber", 30);
+	@Test
+	public void testInitialQueryLimitThatHigherThanPaginatedQueryLimit()
+			throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		int queryLimit = 60;
+		int initialLimit = 70;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				queryLimit, data, "SELECT * FROM /data.keySet limit "
+						+ initialLimit);
+		List<Person> results = query.page(1);
+		assertEquals(query.getTotalNumberOfPages(), 3);
+		assertEquals(query.getTotalNumberOfEntries(), queryLimit);
+		assertEquals(query.isLimitExceeded(), true);
+	}
 
-        query = new PaginatedQuery(queryService, 80, data,
-        "SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber", 20);
-    }
-    
-    /**
-     * Starts a client.
-     * @throws java.io.IOException
-     */
-    private static void startClient() throws IOException {
-        ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
+	@Test
+	public void testInitialQueryLimitThatEqualToPaginatedQueryLimit()
+			throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 100);
+		int queryLimit = 10;
+		int initialLimit = 10;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				queryLimit, data, "SELECT * FROM /data.keySet limit "
+						+ initialLimit);
+		List<Person> results = query.page(1);
+		assertEquals(query.getTotalNumberOfPages(), 1);
+		assertEquals(results.size(), initialLimit);
+	}
 
-        PropertiesHelper properties = new PropertiesHelper("/paginatedQueryServerProperties.properties");
+	@Test
+	public void testInitialQueryLimitThatEqualToPaginatedQueryLimitForSmallSizeOfEntries()
+			throws QueryException {
+		PersonUtils.populateRegionByPersons(data, 5);
+		int queryLimit = 6;
+		int initialLimit = 10;
+		PaginatedQuery<Person> query = new PaginatedQuery<Person>(queryService,
+				queryLimit, data, "SELECT * FROM /data.keySet limit "
+						+ initialLimit);
+		List<Person> results = query.page(1);
+		assertEquals(query.getTotalNumberOfPages(), 1);
+		assertEquals(results.size(), 5);
+	}
 
-        cache = clientCacheFactory
-                .set("log-level", properties.getStringProperty("log-level"))
-                .set("license-file", properties.getStringProperty("license-file"))
-                .set("license-type", properties.getStringProperty("license-type"))
-                .create();
+	@Test
+	public void testExpiredPageLoad() throws Exception {
+		PersonUtils.populateRegionByPersons(data, 100);
+		PaginatedQuery query;
+		query = new PaginatedQuery(
+				queryService,
+				data,
+				"SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
 
-        ClientRegionFactory<Object, Object> regionFactory =
-                cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
-        data = regionFactory.create("data");
+		List pageEntries = query.page(1);
+		assertEquals(pageEntries.size(), 20);
+		assertTrue(PersonUtils.containsPersonWithSocialNumber(pageEntries, 1));
 
-        queryService = cache.getQueryService();
-        
-        ClientRegionFactory<PaginatedQueryPageKey, List<Object>> regionFactoryForHelpRegion =
-                cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
-        paginatedQueryInfo = regionFactoryForHelpRegion.create(PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME);
-    }
+		Thread.sleep(7000);
 
-    /**
-     * Starts two cache servers for tests.
-     *
-     * @throws IOException when
-     * @throws InterruptedException when
-     */
-    private static void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runWithConfirmation(
-                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=paginatedQueryServerProperties.properties"}, null);
-        cacheServer2 = javaProcessLauncher.runWithConfirmation(
-                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=paginatedQueryServerProperties.properties"}, null);
-    }
+		query = new PaginatedQuery(
+				queryService,
+				data,
+				"SELECT DISTINCT e.key, e.value.socialNumber FROM /data.entrySet e ORDER BY e.value.socialNumber");
 
-    /**
-     * Stops cache servers.
-     *
-     * @throws IOException when
-     * @throws InterruptedException
-     */
-    private static void stopCacheServers() throws IOException, InterruptedException {
-        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
-        javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
-    }
+		List refreshedResults = query.page(1);
+		assertEquals(pageEntries, refreshedResults);
+	}
+
+	/**
+	 * Starts a client.
+	 * 
+	 * @throws java.io.IOException
+	 */
+	private static void startClient() throws IOException {
+		ClientCacheFactory clientCacheFactory = new ClientCacheFactory()
+				.addPoolLocator("localhost", LOCATOR_PORT);
+
+		PropertiesHelper properties = new PropertiesHelper(
+				"/paginatedQueryServerProperties.properties");
+
+		cache = clientCacheFactory
+				.set("log-level", properties.getStringProperty("log-level"))
+				.set("license-file",
+						properties.getStringProperty("license-file"))
+				.set("license-type",
+						properties.getStringProperty("license-type")).create();
+
+		ClientRegionFactory<Object, Object> regionFactory = cache
+				.createClientRegionFactory(ClientRegionShortcut.PROXY);
+		data = regionFactory.create("data");
+
+		queryService = cache.getQueryService();
+
+		ClientRegionFactory<PageKey, List<Object>> regionFactoryForHelpRegion = cache
+				.createClientRegionFactory(ClientRegionShortcut.PROXY);
+		paginatedQueryInfo = regionFactoryForHelpRegion
+				.create(PaginatedQuery.PAGINATED_QUERY_INFO_REGION_NAME);
+	}
+
+	/**
+	 * Starts two cache servers for tests.
+	 * 
+	 * @throws IOException
+	 *             when
+	 * @throws InterruptedException
+	 *             when
+	 */
+	private static void startCacheServers() throws IOException,
+			InterruptedException {
+		cacheServer1 = javaProcessLauncher
+				.runWithConfirmation(
+						ServerTemplate.class,
+						new String[] { "-DgemfirePropertyFile=paginatedQueryServerProperties.properties" },
+						null);
+		cacheServer2 = javaProcessLauncher
+				.runWithConfirmation(
+						ServerTemplate.class,
+						new String[] { "-DgemfirePropertyFile=paginatedQueryServerProperties.properties" },
+						null);
+	}
+
+	/**
+	 * Stops cache servers.
+	 * 
+	 * @throws IOException
+	 *             when
+	 * @throws InterruptedException
+	 */
+	private static void stopCacheServers() throws IOException,
+			InterruptedException {
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
+		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
+	}
 }

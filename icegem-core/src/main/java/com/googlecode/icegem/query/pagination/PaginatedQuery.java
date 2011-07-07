@@ -21,6 +21,7 @@ import com.gemstone.gemfire.cache.query.RegionNotFoundException;
 import com.gemstone.gemfire.cache.query.SelectResults;
 import com.gemstone.gemfire.cache.query.Struct;
 import com.gemstone.gemfire.cache.query.TypeMismatchException;
+import com.googlecode.icegem.utils.CacheUtils;
 
 /**
  * This component allows to execute paginated queries both from client and
@@ -65,41 +66,28 @@ public class PaginatedQuery<V> {
 	/** name of a help region for storing information about paginated queries */
 	public static final String PAGINATED_QUERY_INFO_REGION_NAME = "paginated_query_info";
 	/** Field logger */
-	private static final Logger logger = LoggerFactory.getLogger(PaginatedQuery.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(PaginatedQuery.class);
 
 	/** Field queryService */
 	private QueryService queryService;
 	/** region for querying */
 	private Region<Object, V> queryRegion;
 	/** help region for storing information about paginated queries */
-	private Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
+	private Region<PageKey, List<Object>> paginatedQueryInfoRegion;
 
+	/** Field currentPageNumber */
+	private int pageSize;
+	private String queryString;
+	private Object[] queryParams;
 	/** limit on query result */
 	private int queryLimit;
+
+	private boolean infoLoaded;
 	/** flag that indicates that limit has been exceeded */
 	private boolean limitExceeded;
 	/** Field totalNumberOfEntries */
 	private int totalNumberOfEntries;
-	/** Field currentPageNumber */
-	private int currentPageNumber = 0;
-	private PaginatedQueryPageKey pageKey;
-	/**
-	 * Creates a new PaginatedQuery instance.
-	 * 
-	 * @param queryService
-	 *            The service to run the query.
-	 * @param regionName
-	 *            name of region for querying
-	 * @param queryString
-	 *            query string that must return entry keys
-	 * @throws RegionNotFoundException
-	 *             when query region or help region were not founded
-	 */
-	public PaginatedQuery(QueryService queryService, Region<Object, V> region,
-			String queryString) throws RegionNotFoundException {
-		this(queryService, DEFAULT_QUERY_LIMIT, region, queryString,
-				DEFAULT_PAGE_SIZE);
-	}
 
 	/**
 	 * Creates a new PaginatedQuery instance.
@@ -119,27 +107,6 @@ public class PaginatedQuery<V> {
 			Region<Object, V> region, String queryString)
 			throws RegionNotFoundException {
 		this(queryService, queryLimit, region, queryString, DEFAULT_PAGE_SIZE);
-	}
-
-	/**
-	 * Creates a new PaginatedQuery instance.
-	 * 
-	 * @param queryService
-	 *            The service to run the query.
-	 * @param region
-	 *            The region for querying.
-	 * @param queryString
-	 *            query string that must return entry keys
-	 * @param pageSize
-	 *            size of page
-	 * @throws RegionNotFoundException
-	 *             when query region or help region were not founded
-	 */
-	public PaginatedQuery(QueryService queryService,
-			Region<Object, V> queryRegion, String queryString, int pageSize)
-			throws RegionNotFoundException {
-		this(queryService, DEFAULT_QUERY_LIMIT, queryRegion, queryString,
-				new Object[] {}, pageSize);
 	}
 
 	/**
@@ -170,27 +137,6 @@ public class PaginatedQuery<V> {
 	 * 
 	 * @param queryService
 	 *            The service to run the query.
-	 * @param region
-	 *            The region for querying.
-	 * @param queryString
-	 *            query string that must return entry keys
-	 * @param queryParameters
-	 *            parameters for query execution
-	 * @throws RegionNotFoundException
-	 *             when query region or help region were not founded
-	 */
-	public PaginatedQuery(QueryService queryService, Region<Object, V> region,
-			String queryString, Object[] queryParameters)
-			throws RegionNotFoundException {
-		this(queryService, DEFAULT_QUERY_LIMIT, region, queryString,
-				queryParameters, DEFAULT_PAGE_SIZE);
-	}
-
-	/**
-	 * Creates a new PaginatedQuery instance.
-	 * 
-	 * @param queryService
-	 *            The service to run the query.
 	 * @param queryLimit
 	 *            limit on query result
 	 * @param region
@@ -207,29 +153,6 @@ public class PaginatedQuery<V> {
 			Object[] queryParameters) throws RegionNotFoundException {
 		this(queryService, queryLimit, region, queryString, queryParameters,
 				DEFAULT_PAGE_SIZE);
-	}
-
-	/**
-	 * Creates a new PaginatedQuery instance.
-	 * 
-	 * @param queryService
-	 *            The service to run the query.
-	 * @param region
-	 *            The region for querying.
-	 * @param queryString
-	 *            query string that must return entry keys
-	 * @param queryParameters
-	 *            parameters for query execution
-	 * @param pageSize
-	 *            size of page
-	 * @throws RegionNotFoundException
-	 *             when query region or help region were not founded
-	 */
-	public PaginatedQuery(QueryService queryService, Region<Object, V> region,
-			String queryString, Object[] queryParameters, int pageSize)
-			throws RegionNotFoundException {
-		this(queryService, DEFAULT_QUERY_LIMIT, region, queryString,
-				queryParameters, pageSize);
 	}
 
 	/**
@@ -275,17 +198,155 @@ public class PaginatedQuery<V> {
 			throw e;
 		}
 
-		if (pageSize < 1) {
-			throw new IllegalArgumentException("Page size must be positive");
+		if (pageSize < 5) {
+			throw new IllegalArgumentException(
+					"Page size must be greater than 4");
 		}
+		this.pageSize = pageSize;
 
 		if (queryLimit < 1) {
 			throw new IllegalArgumentException("Query limit must be positive");
 		}
 		this.queryLimit = queryLimit;
 
-		pageKey = new PaginatedQueryPageKey(queryString, queryParameters,
-				pageSize);
+		this.queryString = CacheUtils.addQueryLimit(queryString,
+				this.queryLimit);
+		this.queryParams = queryParameters;
+	}
+
+	/**
+	 * Creates a new PaginatedQuery instance.
+	 * 
+	 * @param queryService
+	 *            The service to run the query.
+	 * @param regionName
+	 *            name of region for querying
+	 * @param queryString
+	 *            query string that must return entry keys
+	 * @throws RegionNotFoundException
+	 *             when query region or help region were not founded
+	 */
+	public PaginatedQuery(QueryService queryService, Region<Object, V> region,
+			String queryString) throws RegionNotFoundException {
+		this(queryService, DEFAULT_QUERY_LIMIT, region, queryString,
+				DEFAULT_PAGE_SIZE);
+	}
+
+	/**
+	 * Creates a new PaginatedQuery instance.
+	 * 
+	 * @param queryService
+	 *            The service to run the query.
+	 * @param region
+	 *            The region for querying.
+	 * @param queryString
+	 *            query string that must return entry keys
+	 * @param pageSize
+	 *            size of page
+	 * @throws RegionNotFoundException
+	 *             when query region or help region were not founded
+	 */
+	public PaginatedQuery(QueryService queryService,
+			Region<Object, V> queryRegion, String queryString, int pageSize)
+			throws RegionNotFoundException {
+		this(queryService, DEFAULT_QUERY_LIMIT, queryRegion, queryString,
+				new Object[] {}, pageSize);
+	}
+
+	/**
+	 * Creates a new PaginatedQuery instance.
+	 * 
+	 * @param queryService
+	 *            The service to run the query.
+	 * @param region
+	 *            The region for querying.
+	 * @param queryString
+	 *            query string that must return entry keys
+	 * @param queryParameters
+	 *            parameters for query execution
+	 * @throws RegionNotFoundException
+	 *             when query region or help region were not founded
+	 */
+	public PaginatedQuery(QueryService queryService, Region<Object, V> region,
+			String queryString, Object[] queryParameters)
+			throws RegionNotFoundException {
+		this(queryService, DEFAULT_QUERY_LIMIT, region, queryString,
+				queryParameters, DEFAULT_PAGE_SIZE);
+	}
+
+	/**
+	 * Creates a new PaginatedQuery instance.
+	 * 
+	 * @param queryService
+	 *            The service to run the query.
+	 * @param region
+	 *            The region for querying.
+	 * @param queryString
+	 *            query string that must return entry keys
+	 * @param queryParameters
+	 *            parameters for query execution
+	 * @param pageSize
+	 *            size of page
+	 * @throws RegionNotFoundException
+	 *             when query region or help region were not founded
+	 */
+	public PaginatedQuery(QueryService queryService, Region<Object, V> region,
+			String queryString, Object[] queryParameters, int pageSize)
+			throws RegionNotFoundException {
+		this(queryService, DEFAULT_QUERY_LIMIT, region, queryString,
+				queryParameters, pageSize);
+	}
+
+	/**
+	 * Returns size of page.
+	 * 
+	 * @return page size
+	 */
+	public int getPageSize() {
+		return this.pageSize;
+	}
+
+	/**
+	 * Returns a total number of query entries.
+	 * 
+	 * @return total number of entries
+	 * @throws com.gemstone.gemfire.cache.query.QueryException
+	 *             during query execution
+	 */
+	public int getTotalNumberOfEntries() throws QueryException {
+		prepareResultData(false);
+		return totalNumberOfEntries;
+	}
+
+	/**
+	 * Returns a total number of query pages.
+	 * 
+	 * @return total number of pages
+	 * @throws com.gemstone.gemfire.cache.query.QueryException
+	 *             during query execution
+	 */
+	public int getTotalNumberOfPages() throws QueryException {
+		prepareResultData(false);
+		if (isEmpty()) {
+			return 1;
+		}
+		int total = totalNumberOfEntries / this.pageSize;
+		if (totalNumberOfEntries % this.pageSize > 0) {
+			total += 1;
+		}
+		return total;
+	}
+
+	/**
+	 * Gets value of a flag that indicates excess of query limit.
+	 * 
+	 * @return boolean
+	 * @throws com.gemstone.gemfire.cache.query.QueryException
+	 *             during query execution
+	 */
+	public boolean isLimitExceeded() throws QueryException {
+		prepareResultData(false);
+		return limitExceeded;
 	}
 
 	/**
@@ -302,89 +363,33 @@ public class PaginatedQuery<V> {
 	public List<V> page(int pageNumber) throws QueryException {
 		List<Object> pageKeys = null;
 		boolean firstTry = true;
+
 		while (pageKeys == null) {
-			storePaginatedQueryInfoIfNeeded(!firstTry);;
+			prepareResultData(!firstTry);
+
 			if (!pageExists(pageNumber)) {
-				IndexOutOfBoundsException e = new IndexOutOfBoundsException(
-						"A page number {" + pageNumber + "} "
-								+ "was out of bounds: [1, "
-								+ getTotalNumberOfPages() + "]");
-				logger.warn(e.getMessage());
-				throw e;
+				throw new IndexOutOfBoundsException("The page " + pageNumber
+						+ "does not exists. " + +getTotalNumberOfPages()
+						+ " pages available.");
+
 			}
-			pageKey.setPageNumber(pageNumber);
+
+			PageKey pageKey = newKey(pageNumber);
 			pageKeys = paginatedQueryInfoRegion.get(pageKey);
-			
-			if(pageKeys == null && firstTry) {
+
+			if (pageKeys == null && firstTry) {
 				firstTry = false;
 			} else {
 				break;
 			}
 		}
 
-		return getValues(pageKeys);
-	}
-
-	/**
-	 * Checks that query has the next page.
-	 * 
-	 * @return boolean
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             during query execution
-	 */
-	public boolean hasNext() throws QueryException {
-		return pageExists(currentPageNumber + 1);
-	}
-
-	/**
-	 * Checks that query has the previous page.
-	 * 
-	 * @return boolean
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             during query execution
-	 */
-	public boolean hasPrevious() throws QueryException {
-		return pageExists(currentPageNumber - 1);
-	}
-
-	/**
-	 * Returns a total number of query entries.
-	 * 
-	 * @return total number of entries
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             during query execution
-	 */
-	public int getTotalNumberOfEntries() throws QueryException {
-		storePaginatedQueryInfoIfNeeded(false);
-		return totalNumberOfEntries;
-	}
-
-	/**
-	 * Returns a total number of query pages.
-	 * 
-	 * @return total number of pages
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             during query execution
-	 */
-	public int getTotalNumberOfPages() throws QueryException {
-		storePaginatedQueryInfoIfNeeded(false);
-		if (isEmpty()) {
-			return 1;
+		if (pageKeys != null) {
+			return getValues(pageKeys);
+		} else {
+			throw new RuntimeException(
+					"Unable to load keys from cache. Too aggressive expiration policy?");
 		}
-		int total = totalNumberOfEntries / pageKey.getPageSize();
-		if (totalNumberOfEntries % pageKey.getPageSize() > 0) {
-			total += 1;
-		}
-		return total;
-	}
-
-	/**
-	 * Returns size of page.
-	 * 
-	 * @return page size
-	 */
-	public int getPageSize() {
-		return pageKey.getPageSize();
 	}
 
 	/**
@@ -401,16 +406,29 @@ public class PaginatedQuery<V> {
 				|| !(pageNumber < 1 || pageNumber > getTotalNumberOfPages());
 	}
 
-	/**
-	 * Gets value of a flag that indicates excess of query limit.
-	 * 
-	 * @return boolean
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             during query execution
-	 */
-	public boolean isLimitExceeded() throws QueryException {
-		storePaginatedQueryInfoIfNeeded(false);
-		return limitExceeded;
+	protected void storePage(int pageNumber, List<Object> page) {
+		PageKey pageKey = newKey(pageNumber);
+		paginatedQueryInfoRegion.put(pageKey, page);
+	}
+
+	private List<Object> extractKeys(SelectResults<Object> results) {
+		List<Object> keys = new ArrayList<Object>(results.size());
+		if (results.getCollectionType().getElementType().isStructType()) {
+			for (Object result : results) {
+				Object key;
+				try {
+					key = ((Struct) result).get("key");
+				} catch (IllegalArgumentException e) {
+					throw new IllegalArgumentException(
+							e.getMessage()
+									+ " (hint: maybe you forgot to include entry key into query projection list)");
+				}
+				keys.add(key);
+			}
+		} else {
+			keys = results.asList();
+		}
+		return keys;
 	}
 
 	/**
@@ -435,6 +453,35 @@ public class PaginatedQuery<V> {
 	}
 
 	/**
+	 * Handles throwable exceptions during query execution and replaces them by
+	 * checked exception.
+	 * 
+	 * @param e
+	 *            of type Throwable
+	 * @throws com.gemstone.gemfire.cache.query.QueryException
+	 *             checked exception
+	 */
+	private void handleException(Exception e) throws QueryException {
+		throw new QueryException(
+				"Exception has been thrown during query execution. "
+						+ "Cause exception message: " + e.getMessage(), e);
+	}
+
+	/**
+	 * Checks that query doesn't have results.
+	 * 
+	 * @return the empty (type boolean) of this PaginatedQuery object.
+	 */
+	private boolean isEmpty() {
+		return totalNumberOfEntries == 0;
+	}
+
+	private PageKey newKey(int pageNumber) {
+		return new PageKey(this.queryString, this.queryParams, this.queryLimit,
+				this.pageSize, pageNumber);
+	}
+
+	/**
 	 * Stores paginated query info if it has not been stored yet.
 	 * 
 	 * @param force
@@ -443,18 +490,20 @@ public class PaginatedQuery<V> {
 	 *             during query execution
 	 */
 	@SuppressWarnings({ "unchecked" })
-	private void storePaginatedQueryInfoIfNeeded(boolean force)
-			throws QueryException {
-		List<Object> queryInfo = null;
-		pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
+	private void prepareResultData(boolean force) throws QueryException {
+		if (this.infoLoaded && !force) {
+			return;
+		}
 
+		PageKey pageKey = newKey(PAGE_NUMBER_FOR_GENERAL_INFO);
+
+		List<Object> queryInfo = null;
 		if (!force) {
 			queryInfo = paginatedQueryInfoRegion.get(pageKey);
 		}
 
 		if (queryInfo == null) {
-			Query query = queryService.newQuery(addQueryLimit(pageKey
-					.getQueryString()));
+			Query query = queryService.newQuery(this.queryString);
 			SelectResults<Object> results = null;
 			try {
 				results = (SelectResults<Object>) query.execute(pageKey
@@ -468,132 +517,57 @@ public class PaginatedQuery<V> {
 			} catch (QueryInvocationTargetException e) {
 				handleException(e);
 			}
+
 			if (results.size() > queryLimit) {
-				limitExceeded = true;
+				this.limitExceeded = true;
+				this.totalNumberOfEntries = queryLimit;
 				String msg = "Size of query results has exceeded limit ("
-						+ queryLimit + "). Only " + queryLimit
-						+ " objects have been returned";
+						+ queryLimit + "). Truncated.";
 				logger.warn(msg);
 			} else {
 				limitExceeded = false;
+				this.totalNumberOfEntries = results.size();
 			}
+
+			queryInfo = Arrays.asList(new Object[] { results.size(),
+					limitExceeded });
+			storePage(PAGE_NUMBER_FOR_GENERAL_INFO, queryInfo);
+
 			List<Object> keys = extractKeys(results);
-			storePaginatedQueryPagesAndGeneralInfo(keys);
-		}
-	}
-
-	private List<Object> extractKeys(SelectResults<Object> results) {
-		List<Object> keys = new ArrayList<Object>(results.size());
-		if (results.getCollectionType().getElementType().isStructType()) {
-			// List of structures. Should extract keys from it.
-
-			for (Object result : results) {
-				Object key;
-				try {
-					key = ((Struct) result).get("key");
-				} catch (IllegalArgumentException e) {
-					IllegalArgumentException exception = new IllegalArgumentException(
-							e.getMessage()
-									+ " (hint: maybe you forgot to include entry key into query projection list)");
-					logger.warn(exception.getMessage());
-					throw exception;
-				}
-				keys.add(key);
-			}
+			storeResults(keys);
 		} else {
-			// List of keys.
-			keys=results.asList();
+			this.totalNumberOfEntries = (Integer) queryInfo.get(0);
+			this.limitExceeded = (Boolean) queryInfo.get(1);
 		}
-		return keys;
+		this.infoLoaded = true;
 	}
 
 	/**
 	 * Stores paginated query pages and general info.
 	 * 
-	 * @param keys
+	 * @param resultKeys
 	 *            of type List<Object>
 	 */
-	private void storePaginatedQueryPagesAndGeneralInfo(List<Object> keys) {
-		if (limitExceeded) {
-			keys.remove(keys.size() - 1);
+	private void storeResults(List<Object> resultKeys) {
+		if (resultKeys.size() > queryLimit) {
+			resultKeys = resultKeys.subList(0, queryLimit);
 		}
-		storePaginatedQueryGeneralInfo(keys.size());
 
 		int keyNumber = 0;
 		int pageNumber = 0;
-		List<Object> pageKeys = new ArrayList<Object>();
-		for (Object key : keys) {
-			if (keyNumber % pageKey.getPageSize() == 0 && keyNumber != 0) {
-				pageKey.setPageNumber(++pageNumber);
-				paginatedQueryInfoRegion.put(pageKey, pageKeys);
-				pageKeys.clear();
+		List<Object> page = new ArrayList<Object>();
+
+		for (Object key : resultKeys) {
+			if (keyNumber % getPageSize() == 0 && keyNumber != 0) {
+				storePage(++pageNumber, page);
+				page.clear();
 			}
-			pageKeys.add(key);
+			page.add(key);
 			keyNumber++;
 		}
 
-		if (pageKeys.size() > 0 || pageNumber == 0) {
-			pageKey.setPageNumber(++pageNumber);
-			paginatedQueryInfoRegion.put(pageKey, pageKeys);
+		if (page.size() > 0 || pageNumber == 0) {
+			storePage(++pageNumber, page);
 		}
-	}
-
-	/**
-	 * Stores paginated query general info (total number of query entries).
-	 * 
-	 * @param totalNumberOfEntries
-	 *            of type int
-	 */
-	private void storePaginatedQueryGeneralInfo(int totalNumberOfEntries) {
-		pageKey.setPageNumber(PAGE_NUMBER_FOR_GENERAL_INFO);
-		paginatedQueryInfoRegion.put(pageKey,
-				Arrays.asList((Object) totalNumberOfEntries, limitExceeded));
-		this.totalNumberOfEntries = totalNumberOfEntries;
-	}
-
-	/**
-	 * Checks that query doesn't have results.
-	 * 
-	 * @return the empty (type boolean) of this PaginatedQuery object.
-	 */
-	private boolean isEmpty() {
-		return totalNumberOfEntries == 0;
-	}
-
-	/**
-	 * Limits query results.
-	 * 
-	 * @param queryString
-	 *            of type String
-	 * @return String
-	 */
-	private String addQueryLimit(String queryString) {
-		int limitIndex = queryString.lastIndexOf("limit");
-		if (limitIndex == -1) {
-			limitIndex = queryString.lastIndexOf("LIMIT");
-		}
-		if (limitIndex == -1) {
-			return queryString + " LIMIT " + (queryLimit + 1);
-		}
-		int limitNumber = Integer.parseInt(queryString
-				.substring(limitIndex + 5).trim());
-		return (limitNumber > queryLimit) ? queryString
-				.substring(0, limitIndex) + " LIMIT " + (queryLimit + 1)
-				: queryString;
-	}
-
-	/**
-	 * Handles throwable exceptions during query execution and replaces them by
-	 * checked exception.
-	 * 
-	 * @param e
-	 *            of type Throwable
-	 * @throws com.gemstone.gemfire.cache.query.QueryException
-	 *             checked exception
-	 */
-	private void handleException(Exception e) throws QueryException {
-		throw new QueryException(
-				"Exception has been thrown during query execution. "
-						+ "Cause exception message: " + e.getMessage(), e);
 	}
 }
