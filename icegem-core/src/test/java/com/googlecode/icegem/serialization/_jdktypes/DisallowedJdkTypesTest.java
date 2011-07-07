@@ -1,30 +1,43 @@
 package com.googlecode.icegem.serialization._jdktypes;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
-
-import javassist.CannotCompileException;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import java.io.InvalidClassException;
 import java.sql.Date;
+import java.util.Collection;
+
+import javassist.CannotCompileException;
+
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import com.gemstone.bp.edu.emory.mathcs.backport.java.util.Arrays;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
 
 /**
  * @author igolovach
  */
-
+@RunWith(Parameterized.class)
 public class DisallowedJdkTypesTest extends TestParent {
 
-    @DataProvider(name = "data")
-    public Object[][] data() {
-        return new Object[][]{
+	private Class<?> clazz;
+
+	public DisallowedJdkTypesTest(Class<?> clazz) {
+		this.clazz = clazz;
+	}
+	
+	@Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
                 new Object[]{DisallowedSqlDateBean.class},
-        };
+        });
     }
 
-    @Test(dataProvider = "data", enabled = false) //todo: 1)enable 2)compile error not rt
-    public void test(Class<?> clazz) throws InvalidClassException, CannotCompileException {
+    @Test //todo: 1)enable 2)compile error not rt
+    @Ignore
+    public void test() throws InvalidClassException, CannotCompileException {
         // try register
 //        DataSerializerGenerator.registerCodeGenerationListener(new SOUTCodeGenerationListener());
         HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), clazz);

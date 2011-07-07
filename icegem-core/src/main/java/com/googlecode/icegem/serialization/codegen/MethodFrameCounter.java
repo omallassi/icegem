@@ -8,19 +8,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This counter is a build-in mechanism for detecting circular references.
  * By default it is disabled. It can be enabled by using java property.
  * This property can be set via JVM parameters
- * -Dicegem.serialization.control.methodframes=true
+ * -Dicegem.serialization.trace.methodframes=true
  * or from the code using the following command:
  * System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
  *
  * Analog of javassist.runtime.Cflow
  *
  * @author igolovach
- * @author Andrey Stepanov aka standy 
+ * @author Andrey Stepanov
  */
 public class MethodFrameCounter extends ThreadLocal<AtomicInteger> {
+    public final static String SYSTEM_PROPERTY_NAME = "icegem.serialization.trace.methodframes";
+    public static boolean ENABLED = Boolean.getBoolean(SYSTEM_PROPERTY_NAME);
+
     public final static int MAX_STACK_DEPTH = 256;
     public final static String STACK_OVERFLOW_MSG = "Too deep method frame stack - " + MAX_STACK_DEPTH + ". Perhaps cyclic references in serialized object have been found.";
-    public final static String SYSTEM_PROPERTY_NAME = "icegem.serialization.control.methodframes";
 
     private static final ThreadLocal<AtomicInteger> local = new ThreadLocal<AtomicInteger>() {
         protected synchronized AtomicInteger initialValue() {

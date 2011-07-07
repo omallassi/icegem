@@ -1,23 +1,24 @@
 package com.googlecode.icegem.serialization._enum;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
-
-import javassist.CannotCompileException;
-import org.fest.assertions.Assertions;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import java.io.InvalidClassException;
 import java.io.NotSerializableException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javassist.CannotCompileException;
+
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
+import static org.junit.Assert.*;
+
 /**
  * @author igolovach
  */
-
-@Test(enabled = false) //todo: enable
+@Ignore
 public class EnumTest extends TestParent {
 
     @BeforeClass
@@ -25,37 +26,37 @@ public class EnumTest extends TestParent {
         HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), FieldEnumBean.class, SimpleEnumBean.class, ExtendedFinalEnumBean.class, ExtendedMutableEnumBean.class);
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testRootSimple() {
         final SimpleEnumBean expected = SimpleEnumBean.A;
 
         // Serialize / Deserialize
         SimpleEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        assertEquals(actual, expected);
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test
     public void testRootExtendedFinal() {
         final ExtendedFinalEnumBean expected = ExtendedFinalEnumBean.X;
 
         // Serialize / Deserialize
         ExtendedFinalEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        assertEquals(actual,expected);
     }    
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testRootExtendedMutable() {
         final ExtendedMutableEnumBean expected = ExtendedMutableEnumBean.M;
 
         // Serialize / Deserialize
         ExtendedMutableEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual).isEqualTo(expected);
+        assertEquals(actual,expected);
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testField() throws NotSerializableException, CannotCompileException {
         // init
         final FieldEnumBean expected = new FieldEnumBean();
@@ -68,16 +69,16 @@ public class EnumTest extends TestParent {
         // Serialize / Deserialize
         FieldEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getSimpleEnumBean()).isEqualTo(expected.getSimpleEnumBean());
+        assertEquals(actual.getSimpleEnumBean(),expected.getSimpleEnumBean());
 
-        Assertions.assertThat(actual.getExtendedFinalEnumBean()).isEqualTo(expected.getExtendedFinalEnumBean());
-        Assertions.assertThat(actual.getExtendedFinalEnumBean().getFinalName()).isEqualTo(expected.getExtendedFinalEnumBean().getFinalName());
+        assertEquals(actual.getExtendedFinalEnumBean(),expected.getExtendedFinalEnumBean());
+        assertEquals(actual.getExtendedFinalEnumBean().getFinalName(),expected.getExtendedFinalEnumBean().getFinalName());
 
-        Assertions.assertThat(actual.getExtendedMutableEnumBean()).isEqualTo(expected.getExtendedMutableEnumBean());
-        Assertions.assertThat(actual.getExtendedMutableEnumBean().getMutableName()).isEqualTo(expected.getExtendedMutableEnumBean().getMutableName());
+        assertEquals(actual.getExtendedMutableEnumBean(),expected.getExtendedMutableEnumBean());
+        assertEquals(actual.getExtendedMutableEnumBean().getMutableName(),expected.getExtendedMutableEnumBean().getMutableName());
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testEnum() {
         final FieldEnumBean expected = new FieldEnumBean();
         expected.setEnumField(SimpleEnumBean.B);
@@ -85,10 +86,10 @@ public class EnumTest extends TestParent {
         // Serialize / Deserialize
         FieldEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getEnumField()).isEqualTo(expected.getEnumField());
+        assertEquals(actual.getEnumField(),expected.getEnumField());
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testEnumArray() {
         final FieldEnumBean expected = new FieldEnumBean();
         expected.setEnumArray(new Enum[]{SimpleEnumBean.C, null, SimpleEnumBean.B});
@@ -96,10 +97,10 @@ public class EnumTest extends TestParent {
         // Serialize / Deserialize
         FieldEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getEnumField()).isEqualTo(expected.getEnumField());
+        assertEquals(actual.getEnumField(),expected.getEnumField());
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testConcreteEnumArray() {
         final FieldEnumBean expected = new FieldEnumBean();
         expected.setSimpleEnumBeanArray(new SimpleEnumBean[]{SimpleEnumBean.A, null, SimpleEnumBean.C});
@@ -107,10 +108,10 @@ public class EnumTest extends TestParent {
         // Serialize / Deserialize
         FieldEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getEnumField()).isEqualTo(expected.getEnumField());
+        assertEquals(actual.getEnumField(),expected.getEnumField());
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testObject() {
         final FieldEnumBean expected = new FieldEnumBean();
         expected.setObjectField(SimpleEnumBean.B);
@@ -118,10 +119,10 @@ public class EnumTest extends TestParent {
         // Serialize / Deserialize
         FieldEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getObjectField()).isEqualTo(expected.getObjectField());
+        assertEquals(actual.getObjectField(),expected.getObjectField());
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testObjectArray() {
         final FieldEnumBean expected = new FieldEnumBean();
         expected.setObjectArray(new Object[]{null, SimpleEnumBean.B, "Hello!"});
@@ -129,10 +130,10 @@ public class EnumTest extends TestParent {
         // Serialize / Deserialize
         FieldEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getObjectArray()).isEqualTo(expected.getObjectArray());
+        assertEquals(actual.getObjectArray(),expected.getObjectArray());
     }
 
-    @Test(enabled = false) //todo: enable
+    @Test 
     public void testList() {
         final FieldEnumBean expected = new FieldEnumBean();
         expected.setList(new ArrayList());
@@ -141,7 +142,7 @@ public class EnumTest extends TestParent {
         // Serialize / Deserialize
         FieldEnumBean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getList()).isEqualTo(expected.getList());
+        assertEquals(actual.getList(),expected.getList());
     }
 }
 

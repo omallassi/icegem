@@ -1,11 +1,10 @@
 package com.googlecode.icegem.cacheutils.monitor.controller.event;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
-
-import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.*;
 
 public class NodeEventTest {
 
@@ -22,15 +21,15 @@ public class NodeEventTest {
 		Node node = createNode();
 		NodeEvent event = createNodeEvent(node);
 
-		assertThat(event.getNode()).isEqualTo(node);
+		assertEquals(event.getNode(), node);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetNodeNullNode() {
 		new NodeEvent(null, NodeEventType.ADDED);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetNodeNullEventType() {
 		Node node = createNode();
 		new NodeEvent(node, null);
@@ -41,7 +40,7 @@ public class NodeEventTest {
 		Node node = createNode();
 		NodeEvent event = createNodeEvent(node);
 
-		assertThat(event.getType()).isEqualTo(NodeEventType.ADDED);
+		assertEquals(event.getType(), NodeEventType.ADDED);
 	}
 
 	@Test
@@ -51,7 +50,7 @@ public class NodeEventTest {
 		Node node = createNode();
 		NodeEvent event = createNodeEvent(node);
 
-		assertThat(event.getCreatedAt()).isGreaterThanOrEqualTo(testStartTime);
+		assertTrue(event.getCreatedAt()>=testStartTime);
 	}
 
 	@Test
@@ -59,7 +58,7 @@ public class NodeEventTest {
 		Node node = createNode();
 		NodeEvent event = createNodeEvent(node);
 
-		assertThat(event.toString()).isEqualTo(
+		assertEquals(event.toString(),
 			Utils.dateToString(event.getCreatedAt()) + "  " + event.getType()
 				+ "  " + node);
 	}

@@ -1,14 +1,15 @@
 package com.googlecode.icegem.serialization._inheritance.transientgetter;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
+import java.io.InvalidClassException;
 
 import javassist.CannotCompileException;
-import org.fest.assertions.Assertions;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-import java.io.InvalidClassException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
+import static org.junit.Assert.*;
 
 /**
  * @author igolovach
@@ -17,7 +18,7 @@ import java.io.InvalidClassException;
 public class TransientGetterTest extends TestParent {
 
     @BeforeClass
-    public void beforeClass() throws InvalidClassException, CannotCompileException {
+    public static void beforeClass() throws InvalidClassException, CannotCompileException {
         HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), Bean.class, MarkedChildOfMarkedParent.class, MarkedChildOfNotMarkedParent.class, NotMarkedChildOfMarkedParent.class, NotMarkedChildOfNotMarkedParent.class);
     }
 
@@ -39,9 +40,9 @@ public class TransientGetterTest extends TestParent {
         Bean actual = serializeAndDeserialize(expected);
 
         // assert: type
-        Assertions.assertThat(actual.getMarkedParent()).isInstanceOf(MarkedChildOfMarkedParent.class);
+        assertTrue(actual.getMarkedParent() instanceof MarkedChildOfMarkedParent);
         // assert: data
-        Assertions.assertThat((actual.getMarkedParent().getData())).isEqualTo(0);
+        assertEquals((actual.getMarkedParent().getData()), 0);
     }
 
     @Test
@@ -54,9 +55,9 @@ public class TransientGetterTest extends TestParent {
         Bean actual = serializeAndDeserialize(expected);
 
         // assert: type
-        Assertions.assertThat(actual.getMarkedParent()).isInstanceOf(NotMarkedChildOfMarkedParent.class);
+        assertTrue(actual.getMarkedParent() instanceof NotMarkedChildOfMarkedParent);
         // assert: data
-        Assertions.assertThat((actual.getMarkedParent().getData())).isEqualTo(expected.getMarkedParent().getData());
+        assertEquals(actual.getMarkedParent().getData(), expected.getMarkedParent().getData());
     }
 
     @Test
@@ -69,9 +70,9 @@ public class TransientGetterTest extends TestParent {
         Bean actual = serializeAndDeserialize(expected);
 
         // assert: type
-        Assertions.assertThat(actual.getNotMarkedParent()).isInstanceOf(MarkedChildOfNotMarkedParent.class);
+        assertTrue(actual.getNotMarkedParent() instanceof MarkedChildOfNotMarkedParent);
         // assert: data
-        Assertions.assertThat((actual.getNotMarkedParent().getData())).isEqualTo(0);
+        assertEquals(actual.getNotMarkedParent().getData(), 0);
     }
 
     @Test
@@ -84,9 +85,9 @@ public class TransientGetterTest extends TestParent {
         Bean actual = serializeAndDeserialize(expected);
 
         // assert: type
-        Assertions.assertThat(actual.getNotMarkedParent()).isInstanceOf(NotMarkedChildOfNotMarkedParent.class);
+        assertTrue(actual.getNotMarkedParent() instanceof NotMarkedChildOfNotMarkedParent);
         // assert: data
-        Assertions.assertThat((actual.getNotMarkedParent().getData())).isEqualTo(expected.getNotMarkedParent().getData());
+        assertEquals(actual.getNotMarkedParent().getData(),expected.getNotMarkedParent().getData());
     }
 
 

@@ -1,37 +1,64 @@
 package com.googlecode.icegem.serialization._jdktypes;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
-
-import javassist.CannotCompileException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import java.io.InvalidClassException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.Vector;
+
+import javassist.CannotCompileException;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import com.gemstone.bp.edu.emory.mathcs.backport.java.util.Arrays;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
 
 /**
  * @author igolovach
  */
-
+@RunWith(Parameterized.class)
 public class JdkTypesTest extends TestParent {
 
+	private JdkTypesBean expected;
+
+	public JdkTypesTest(JdkTypesBean expected) {
+		this.expected  = expected;
+	}
+	
     @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
+    public static void before() throws InvalidClassException, CannotCompileException {
         // register
-        HierarchyRegistry.registerAll(getContextClassLoader(), JdkTypesBean.class);
+        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), JdkTypesBean.class);
     }
 
-    @DataProvider(name = "data")
-    public Object[][] data() throws UnknownHostException {
-        return new Object[][]{
-                // null fields
+    @Parameters
+    public static Collection<Object[]> data() throws UnknownHostException {
+        return Arrays.asList(new Object[][]{
+                // null fieldsJdkTypesTest.java
                // new Object[]{new JdkTypesBean()},
                 // initialize diff field groups of bean
                 new Object[]{produceCommon()},
@@ -39,11 +66,11 @@ public class JdkTypesTest extends TestParent {
                 new Object[]{produceCollectionsAPILists()},
                 new Object[]{produceCollectionsAPIMaps()},
                 new Object[]{produceCollectionsAPISets()},
-        };
+        });
     }
 
-    @Test(dataProvider = "data")
-    public void test(JdkTypesBean expected) {
+    @Test
+    public void test() {
 
         // Serialize / Deserialize
         JdkTypesBean actual = serializeAndDeserialize(expected);
@@ -52,7 +79,7 @@ public class JdkTypesTest extends TestParent {
         assert actual.equals(expected);
     }
 
-    private JdkTypesBean produceCommon() throws UnknownHostException {
+    private static JdkTypesBean produceCommon() throws UnknownHostException {
         final JdkTypesBean result = new JdkTypesBean();
 
         result.setTimestamp(new Timestamp(new Date().getTime()));
@@ -75,7 +102,7 @@ public class JdkTypesTest extends TestParent {
         return result;
     }
 
-    private JdkTypesBean produceOldCollections() {
+    private static JdkTypesBean produceOldCollections() {
         final JdkTypesBean result = new JdkTypesBean();
 
         // Hashtable
@@ -94,7 +121,7 @@ public class JdkTypesTest extends TestParent {
         return result;
     }
 
-    private JdkTypesBean produceCollectionsAPILists() {
+    private static JdkTypesBean produceCollectionsAPILists() {
         final JdkTypesBean result = new JdkTypesBean();
 
         // List
@@ -113,7 +140,7 @@ public class JdkTypesTest extends TestParent {
         return result;
     }
 
-    private JdkTypesBean produceCollectionsAPIMaps() {
+    private static JdkTypesBean produceCollectionsAPIMaps() {
         final JdkTypesBean result = new JdkTypesBean();
 
         // Map
@@ -136,7 +163,7 @@ public class JdkTypesTest extends TestParent {
         return result;
     }
 
-    private JdkTypesBean produceCollectionsAPISets() {
+    private static JdkTypesBean produceCollectionsAPISets() {
         final JdkTypesBean result = new JdkTypesBean();
 
         // Set

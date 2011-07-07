@@ -1,16 +1,18 @@
 package com.googlecode.icegem.serialization.primitive;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-
-import javassist.CannotCompileException;
-import javassist.NotFoundException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.InvalidClassException;
 
-import static org.fest.assertions.Assertions.assertThat;
+import javassist.CannotCompileException;
+import javassist.NotFoundException;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.HierarchyRegistry;
 
 /**
  * @author igolovach
@@ -19,9 +21,9 @@ import static org.fest.assertions.Assertions.assertThat;
 public class WrapperTest extends TestParent {
 
     @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
+    public static void before() throws InvalidClassException, CannotCompileException {
         // register
-        HierarchyRegistry.registerAll(getContextClassLoader(), WrapperBean.class);
+        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), WrapperBean.class);
     }
 
     @Test
@@ -33,14 +35,14 @@ public class WrapperTest extends TestParent {
         WrapperBean actual = (WrapperBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getBoolean_()).isEqualTo(expected.getBoolean_());
-        assertThat(actual.getByte_()).isEqualTo(expected.getByte_());
-        assertThat(actual.getShort_()).isEqualTo(expected.getShort_());
-        assertThat(actual.getCharacter_()).isEqualTo(expected.getCharacter_());
-        assertThat(actual.getInteger_()).isEqualTo(expected.getInteger_());
-        assertThat(actual.getLong_()).isEqualTo(expected.getLong_());
-        assertThat(actual.getFloat_()).isEqualTo(expected.getFloat_());
-        assertThat(actual.getDouble_()).isEqualTo(expected.getDouble_());
+        assertEquals(actual.getBoolean_(),expected.getBoolean_());
+        assertEquals(actual.getByte_(),expected.getByte_());
+        assertEquals(actual.getShort_(),expected.getShort_());
+        assertEquals(actual.getCharacter_(),expected.getCharacter_());
+        assertEquals(actual.getInteger_(),expected.getInteger_());
+        assertEquals(actual.getLong_(),expected.getLong_());
+        assertEquals(actual.getFloat_(),expected.getFloat_());
+        assertEquals(actual.getDouble_(),expected.getDouble_());
     }
 
     @Test
@@ -52,14 +54,14 @@ public class WrapperTest extends TestParent {
         WrapperBean actual = (WrapperBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat((Object) actual.getBoolean_()).isNull();
-        assertThat((Object) actual.getByte_()).isNull();
-        assertThat((Object) actual.getShort_()).isNull();
-        assertThat((Object) actual.getCharacter_()).isNull();
-        assertThat((Object) actual.getInteger_()).isNull();
-        assertThat((Object) actual.getLong_()).isNull();
-        assertThat((Object) actual.getFloat_()).isNull();
-        assertThat((Object) actual.getDouble_()).isNull();
+        assertNull((Object) actual.getBoolean_());
+        assertNull((Object) actual.getByte_());
+        assertNull((Object) actual.getShort_());
+        assertNull((Object) actual.getCharacter_());
+        assertNull((Object) actual.getInteger_());
+        assertNull((Object) actual.getLong_());
+        assertNull((Object) actual.getFloat_());
+        assertNull((Object) actual.getDouble_());
     }
 
     private WrapperBean produceWrapperBean() {

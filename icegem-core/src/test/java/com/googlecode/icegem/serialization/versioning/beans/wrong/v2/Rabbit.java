@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.versioning.beans.wrong.v2;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 /**
  * @author Andrey Stepanov aka standy

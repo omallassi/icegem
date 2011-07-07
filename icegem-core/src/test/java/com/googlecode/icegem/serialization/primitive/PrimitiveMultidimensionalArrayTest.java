@@ -1,55 +1,63 @@
 package com.googlecode.icegem.serialization.primitive;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
+import java.io.IOException;
+import java.io.InvalidClassException;
+import java.util.Collection;
 
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
-import org.fest.assertions.Assertions;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.io.InvalidClassException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import com.gemstone.bp.edu.emory.mathcs.backport.java.util.Arrays;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import static org.junit.Assert.*;
 
 /**
  * @author igolovach
  */
-
+@RunWith(Parameterized.class)
 public class PrimitiveMultidimensionalArrayTest extends TestParent {
 
     // ----------------------- SYSTEM
     @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
-//        DataSerializerGenerator.registerCodeGenerationListener(new SOUTCodeGenerationListener());
-        // register
-        HierarchyRegistry.registerAll(getContextClassLoader(), PrimitiveMultidimensionalArrayBean.class);
+    public static void before() throws InvalidClassException, CannotCompileException {
+        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), PrimitiveMultidimensionalArrayBean.class);
     }
 
-    @DataProvider(name = "data")
-    public Object[][] date() {
-        return new Object[][]{
+	private PrimitiveMultidimensionalArrayBean expected;
+
+    public PrimitiveMultidimensionalArrayTest(PrimitiveMultidimensionalArrayBean expected) {
+    	this.expected = expected;
+    }
+    
+    @Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
                 new Object[]{produceEmpty()},
                 new Object[]{produceFullStructureButEmptyData()},
                 new Object[]{producePrimitiveArrayBean()},
-        };
+        });
     }
 
     // ----------------------- TESTS
-    @Test(dataProvider = "data")
-    public void testPrimitiveArrayBean(PrimitiveMultidimensionalArrayBean expected) throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
+    public void testPrimitiveArrayBean() throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
         // Serialize / Deserialize
         PrimitiveMultidimensionalArrayBean actual = serializeAndDeserialize(expected);
 
         // assert
-        Assertions.assertThat(actual.getBooleanArray()).isEqualTo(expected.getBooleanArray());
-        Assertions.assertThat(actual.getByteArray()).isEqualTo(expected.getByteArray());
-        Assertions.assertThat(actual.getShortArray()).isEqualTo(expected.getShortArray());
-        Assertions.assertThat(actual.getCharArray()).isEqualTo(expected.getCharArray());
-        Assertions.assertThat(actual.getIntArray()).isEqualTo(expected.getIntArray());
-        Assertions.assertThat(actual.getLongArray()).isEqualTo(expected.getLongArray());
-        Assertions.assertThat(actual.getFloatArray()).isEqualTo(expected.getFloatArray());
-        Assertions.assertThat(actual.getDoubleArray()).isEqualTo(expected.getDoubleArray());
+        assertEquals(actual.getBooleanArray(), expected.getBooleanArray());
+        assertEquals(actual.getByteArray(),expected.getByteArray());
+        assertEquals(actual.getShortArray(),expected.getShortArray());
+        assertEquals(actual.getCharArray(),expected.getCharArray());
+        assertEquals(actual.getIntArray(),expected.getIntArray());
+        assertEquals(actual.getLongArray(),expected.getLongArray());
+        assertEquals(actual.getFloatArray(),expected.getFloatArray());
+        assertEquals(actual.getDoubleArray(),expected.getDoubleArray());
     }
 
     @Test
@@ -61,34 +69,26 @@ public class PrimitiveMultidimensionalArrayTest extends TestParent {
         PrimitiveMultidimensionalArrayBean actual = serializeAndDeserialize(expected);
 
         // assert
-        Assertions.assertThat(actual.getBooleanArray()).isNull();
-        Assertions.assertThat(actual.getByteArray()).isNull();
-        Assertions.assertThat(actual.getShortArray()).isNull();
-        Assertions.assertThat(actual.getCharArray()).isNull();
-        Assertions.assertThat(actual.getIntArray()).isNull();
-        Assertions.assertThat(actual.getLongArray()).isNull();
-        Assertions.assertThat(actual.getFloatArray()).isNull();
-        Assertions.assertThat(actual.getDoubleArray()).isNull();
+        assertNull(actual.getBooleanArray());
+        assertNull(actual.getByteArray());
+        assertNull(actual.getShortArray());
+        assertNull(actual.getCharArray());
+        assertNull(actual.getIntArray());
+        assertNull(actual.getLongArray());
+        assertNull(actual.getFloatArray());
+        assertNull(actual.getDoubleArray());
     }
 
     // ----------------------- PRODUCERS
-    private PrimitiveMultidimensionalArrayBean producePrimitiveArrayBean() {
+    private static PrimitiveMultidimensionalArrayBean producePrimitiveArrayBean() {
         final PrimitiveMultidimensionalArrayBean result = new PrimitiveMultidimensionalArrayBean();
 
-        //todo: uncomment
-//        result.setBooleanArray(new boolean[]{true, false});
-//        result.setByteArray(new byte[]{0, -1, +2, -3, +4, -5, +6, -7, +8, -9});
-//        result.setShortArray(new short[][][]{null, new char[][]{}, new char[][]{null, new char[]{}, new char[]{'a', '\u0000', '\uFFFF'}}});
         result.setCharArray(new char[][][]{null, new char[][]{}, new char[][]{null, new char[]{}, new char[]{'a', '\u0000', '\uFFFF'}}});
-//        result.setIntArray(new int[]{0, -1, +2, -3, +4, -5, +6, -7, +8, -9});
-//        result.setLongArray(new long[]{0, -1, +2, -3, +4, -5, +6, -7, +8, -9});
-//        result.setFloatArray(new float[]{0, -1.1f, +2.2f, -3.3f, +4.4f, -5.5f, +6.6f, -7.7f, +8.8f, -9.9f});
-//        result.setDoubleArray(new double[]{0, -1.11d, +2.22d, -3.33d, +4.44d, -5.55d, +6.66d, -7.77d, +8.88d, -9.99d});
 
         return result;
     }
 
-    private PrimitiveMultidimensionalArrayBean produceEmpty() {
+    private static PrimitiveMultidimensionalArrayBean produceEmpty() {
         final PrimitiveMultidimensionalArrayBean result = new PrimitiveMultidimensionalArrayBean();
 
         result.setBooleanArray(new boolean[][][]{});
@@ -103,7 +103,7 @@ public class PrimitiveMultidimensionalArrayTest extends TestParent {
         return result;
     }
 
-    private PrimitiveMultidimensionalArrayBean produceFullStructureButEmptyData() {
+    private static PrimitiveMultidimensionalArrayBean produceFullStructureButEmptyData() {
         final PrimitiveMultidimensionalArrayBean result = new PrimitiveMultidimensionalArrayBean();
 
         //todo: all strings the same?

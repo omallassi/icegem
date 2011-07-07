@@ -1,38 +1,40 @@
 package com.googlecode.icegem.serialization.cyclicobectjref;
 
-import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
-import com.googlecode.icegem.serialization.primitive.TestParent;
+import java.io.InvalidClassException;
 
 import javassist.CannotCompileException;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-import java.io.InvalidClassException;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
+import com.googlecode.icegem.serialization.primitive.TestParent;
 
 /**
  * @author igolovach
  */
 
-public class CyclicObjectRef1WithEnabledMethodFrameCounterTest extends TestParent {
-    @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
-        // enable method frame counter by setting property
-        System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
-    }
+public class CyclicObjectRef1WithEnabledMethodFrameCounterTest extends
+		TestParent {
+	@BeforeClass
+	public static void before() throws InvalidClassException,
+			CannotCompileException {
+		// enable method frame counter by setting property
+		MethodFrameCounter.ENABLED = true;
+	}
 
-    @AfterClass
-    public void after() {
-        System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "false");
-    }
+	@AfterClass
+	public static void after() {
+		MethodFrameCounter.ENABLED = false;
+	}
 
-    @Test(expectedExceptions = RuntimeException.class)
-    public void test() {
-        System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
-        // create test bean
-        CyclicObjectRef1Bean expected = new CyclicObjectRef1Bean();
-        expected.setNext(expected);
-        // Register / Serialize / Deserialize
-        registerSerializeAndDeserialize(expected);
-    }
+	@Test(expected = RuntimeException.class)
+	public void test() {
+		// create test bean
+		CyclicObjectRef1Bean expected = new CyclicObjectRef1Bean();
+		expected.setNext(expected);
+		// Register / Serialize / Deserialize
+		registerSerializeAndDeserialize(expected);
+	}
 }

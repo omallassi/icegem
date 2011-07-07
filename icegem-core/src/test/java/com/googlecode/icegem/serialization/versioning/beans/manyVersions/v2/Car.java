@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.versioning.beans.manyVersions.v2;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 /**
  * User: akondratyev
@@ -35,6 +35,7 @@ public class Car {
         this.version = version;
     }
 
+    @SinceVersion(2)
     public int getSeatCount() {
         return seatCount;
     }
@@ -54,7 +55,6 @@ public class Car {
 
     private String model;
     private String version;
-    @FieldVersion(since = 2)
     private int seatCount = 2;
 }
 

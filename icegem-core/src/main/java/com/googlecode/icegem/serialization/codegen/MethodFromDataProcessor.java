@@ -1,12 +1,10 @@
 package com.googlecode.icegem.serialization.codegen;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.codegen.impl.FromDataFieldProcessor;
+import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 
 import java.util.List;
 
-import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
+import com.googlecode.icegem.serialization.codegen.impl.FromDataFieldProcessor;
 
 /**
  * Code generator for DataSerializer method fromData()
@@ -28,69 +26,44 @@ public class MethodFromDataProcessor {
         }
     }
 
-    private String processNotEnum(XClass element) {
+    private String processNotEnum(XClass xClass) {
         StringBuilder builder = new StringBuilder();
 
-        List<XField> fields = element.getSerialisedSortedFields();
-        final String className = element.getType().getName();
-        int currentBeanVersion = element.getType().getAnnotation(BeanVersion.class).value();
-        byte currentVersionHistoryLength = (byte) (element.getType().getAnnotation(AutoSerializable.class).versionHistoryLength() + 1);
+        List<XProperty> fields = xClass.getOrderedProperties();
+        final String className = xClass.getType().getName();
+        int currentBeanVersion = xClass.getBeanVersion();
+        
         // method header
-        builder.append("public Object fromData(java.io.DataInput in) throws java.io.IOException, ClassNotFoundException {\n")
-                .append(tab("// checks bean version\n"))
-                .append(tab("int currentVersion = " + currentBeanVersion + "; \n"))
-                .append(tab("int actualVersion = in.readInt();\n"))
+        builder.append("public Object fromData(java.io.DataInput in) throws java.io.IOException, ClassNotFoundException {\n");
+        
+        builder.append(tab("// checks header version\n"))
+        		.append(tab("byte header = in.readByte();\n"))
+        		.append(tab("byte actualHeaderVersion = (header & 0xF0) >> 4;\n"))
+        		.append(tab("byte versionHistoryLength = (header & 0x0F);\n"))
+                .append(tab("if (actualHeaderVersion !=" + CONST.HEADER_VERSION + ") {\n"))
+                .append(tab(2, "throw new ClassCastException(\"Unknown binary header version: \" + actualHeaderVersion);\n"))
+                .append(tab("}\n"))
+                .append("\n");
+
+        builder.append(tab("// checks bean version\n"))
+                .append(tab("byte currentVersion = " + currentBeanVersion + "; \n"))
+                .append(tab("byte actualVersion = in.readByte();\n"))
                 .append(tab("if (currentVersion < actualVersion) {\n"))
                 .append(tab(2, "throw new ClassCastException(\"Current bean version is less than serialized: "))
                 .append("current is '\" + currentVersion + \"', actual is '\" + actualVersion + \"'\");\n")
                 .append(tab("}\n"))
                 .append("\n");
-        // TODO: header version will be used in future to implement different serialization/deserialization strategies
-        builder.append(tab("// checks header version\n"))
-                .append(tab("byte currentHeaderVersion = " + element.getType().getAnnotation(AutoSerializable.class).headerVersion() +"; \n"))
-                .append(tab("byte actualHeaderVersion = in.readByte();\n"))
-                .append(tab("if (currentHeaderVersion != actualHeaderVersion) {\n"))
-                .append(tab(2, "throw new ClassCastException(\"Current header version of the class differs with serialized: "))
-                .append("current is '\" + currentHeaderVersion + \"', actual is '\" + actualHeaderVersion + \"'\");\n")
-                .append(tab("}\n"))
-                .append("\n");
 
-        int currentStartFromVersion = (currentBeanVersion - currentVersionHistoryLength + 1) > 1
-                ? (currentBeanVersion - currentVersionHistoryLength + 1) : 1;
-
-        builder.append(tab("// stores current class model cache codes for bean versions [" +
-                currentStartFromVersion + ", " + currentBeanVersion + "]\n"))
-                .append(tab("java.util.Map currentModelHashCodesByBeanVersions = new java.util.HashMap(" +
-                        (currentBeanVersion - currentStartFromVersion + 1) + ");\n"));
-
-        for (int i = currentStartFromVersion; i <= currentBeanVersion; i++) {
-            builder.append(tab("currentModelHashCodesByBeanVersions.put(new Integer("
-                    + i + "), new Integer(" + CodeGenUtils.getClassModelHashCodeBasedOnClassFields(fields, i) + "));\n"));
-        }
-        builder.append("\n");
-
-        builder.append(tab("// checks class model hash codes\n"))
-                .append(tab("byte actualVersionHistoryLength = in.readByte();\n"))
-                .append(tab("int actualStartFromVersion = (actualVersion - actualVersionHistoryLength + 1) > 1 ? (actualVersion - actualVersionHistoryLength + 1) : 1;\n"))
-                .append(tab("for (int i = actualStartFromVersion; i <= actualVersion; i++) {\n"))
-                .append(tab(2, "Integer currentClassModelHashCode = (Integer) currentModelHashCodesByBeanVersions.get(new Integer(i));\n"))
-                .append(tab(2, "if (currentClassModelHashCode == null) continue;\n"))
-                .append(tab(2, "int actualClassModelHashCode = in.readInt();\n"))
-                .append(tab(2, "if (currentClassModelHashCode.intValue() != actualClassModelHashCode) {\n"))
-                .append(tab(3, "throw new ClassCastException(\"Model of the current class does not match with the model " +
-                        "of the serialized class. Maybe you have forgotten to increase value of @BeanVersion annotation or mark " +
-                        "newly added fields with @FieldVersion annotation. Or you have deleted already existed in previous bean versions fields. " +
-                        "Inconsistency has been found for bean version '\" + i + \"'\");\n"))
-                .append(tab(2,"}\n"))
-                .append(tab("}\n"))
-                .append("\n");
+        
+        builder.append(tab("VERSION_METADATA.readAndCheck(in, actualVersion, versionHistoryLength);\n"))
+        		.append(tab("\n"));
 
         builder.append(tab("// create 'empty' bean\n"))
-                .append(tab(className + " result = new " + className + "();\n")); //todo: no-arg constructor
+                .append(tab(className + " result = new " + className + "();\n")); 
 
-        for (XField field : fields) {
-            if (field.getFieldVersion() > 1) {
-                builder.append(tab("if (actualVersion == currentVersion || actualVersion >= " + field.getFieldVersion() + ") {"));
+        for (XProperty field : fields) {
+            if (field.getPropertyVersion() > 1) {
+                builder.append(tab("if (actualVersion == currentVersion || actualVersion >= " + field.getPropertyVersion() + ") {"));
                 attachFieldReader(builder, field);
                 builder.append(tab("}"));
             }   else {
@@ -106,7 +79,7 @@ public class MethodFromDataProcessor {
         return builder.toString();
     }
 
-    private static void attachFieldReader(StringBuilder builder, XField field) {
+    private static void attachFieldReader(StringBuilder builder, XProperty field) {
         builder.append("\n");
         builder.append(tab("// byte[] -> this." + field.getName() + "\n")); //todo: can be collision between parent/child field names
         builder.append(tab(new FromDataFieldProcessor().process(field)));

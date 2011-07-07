@@ -1,13 +1,13 @@
 package com.googlecode.icegem.cacheutils.monitor.controller.model;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import java.util.Set;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEvent;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
+
+import static org.junit.Assert.*;
 
 public class NodesContainerTest {
 
@@ -35,9 +35,9 @@ public class NodesContainerTest {
 
 		Node node = container.find(host, port);
 
-		assertThat(node).isNotNull();
-		assertThat(node.getHost()).isEqualTo(host);
-		assertThat(node.getPort()).isEqualTo(port);
+		assertNotNull(node);
+		assertEquals(node.getHost(), host);
+		assertEquals(node.getPort(), port);
 	}
 
 	@Test
@@ -48,10 +48,10 @@ public class NodesContainerTest {
 
 		Set<Node> nodesSet = container.find(host);
 
-		assertThat(nodesSet).isNotNull();
-		assertThat(nodesSet.size()).isEqualTo(2);
+		assertNotNull(nodesSet);
+		assertEquals(nodesSet.size(), 2);
 		for (Node node : nodesSet) {
-			assertThat(node.getHost()).isEqualTo(host);
+			assertEquals(node.getHost(), host);
 		}
 	}
 
@@ -61,8 +61,8 @@ public class NodesContainerTest {
 
 		Set<Node> allNodesSet = container.getAll();
 
-		assertThat(allNodesSet).isNotNull();
-		assertThat(allNodesSet.size()).isEqualTo(3);
+		assertNotNull(allNodesSet);
+		assertEquals(allNodesSet.size(), 3);
 	}
 
 	@Test
@@ -71,10 +71,10 @@ public class NodesContainerTest {
 
 		Set<Node> notDeadNodesSet = container.getAllNotDead();
 
-		assertThat(notDeadNodesSet).isNotNull(); 
-		assertThat(notDeadNodesSet.size()).isEqualTo(2);
+		assertNotNull(notDeadNodesSet); 
+		assertEquals(notDeadNodesSet.size(), 2);
 		for (Node node : notDeadNodesSet) {
-			assertThat(node.getStatus()).isNotEqualTo(NodeStatus.DEAD);
+			assertFalse(node.getStatus() == NodeStatus.DEAD);
 		}
 	}
 
@@ -84,10 +84,10 @@ public class NodesContainerTest {
 
 		Set<Node> deadNodesSet = container.getAllDead();
 
-		assertThat(deadNodesSet).isNotNull(); 
-		assertThat(deadNodesSet.size()).isEqualTo(1);
+		assertNotNull(deadNodesSet); 
+		assertEquals(deadNodesSet.size(), 1);
 		for (Node node : deadNodesSet) {
-			assertThat(node.getStatus()).isEqualTo(NodeStatus.DEAD);
+			assertEquals(node.getStatus(), NodeStatus.DEAD);
 		}
 	}
 
@@ -99,8 +99,8 @@ public class NodesContainerTest {
 
 		Set<Node> allNodesSet = container.getAll();
 
-		assertThat(allNodesSet).isNotNull(); 
-		assertThat(allNodesSet.size()).isEqualTo(4);
+		assertNotNull(allNodesSet); 
+		assertEquals(allNodesSet.size(), 4);
 	}
 
 	@Test
@@ -112,8 +112,8 @@ public class NodesContainerTest {
 
 		Set<Node> allNodesSet = container.getAll();
 
-		assertThat(allNodesSet).isNotNull();
-		assertThat(allNodesSet.size()).isEqualTo(2);
+		assertNotNull(allNodesSet);
+		assertEquals(allNodesSet.size(), 2);
 	}
 
 	@Test
@@ -126,10 +126,10 @@ public class NodesContainerTest {
 
 		Set<Node> allNodesSet = container.getAll();
 
-		assertThat(allNodesSet).isNotNull();
-		assertThat(allNodesSet.size()).isEqualTo(3);
+		assertNotNull(allNodesSet);
+		assertEquals(allNodesSet.size(), 3);
 		for (Node node : allNodesSet) {
-			assertThat(node.getStatus()).isEqualTo(NodeStatus.ALIVE);
+			assertEquals(node.getStatus(), NodeStatus.ALIVE);
 		}
 	}
 
@@ -143,10 +143,10 @@ public class NodesContainerTest {
 
 		Set<Node> allNodesSet = container.getAll();
 
-		assertThat(allNodesSet).isNotNull();
-		assertThat(allNodesSet.size()).isEqualTo(3);
+		assertNotNull(allNodesSet);
+		assertEquals(allNodesSet.size(), 3);
 		for (Node node : allNodesSet) {
-			assertThat(node.getStatus()).isEqualTo(NodeStatus.DEAD);
+			assertEquals(node.getStatus(), NodeStatus.DEAD);
 		}
 	}
 
@@ -177,7 +177,7 @@ public class NodesContainerTest {
 		container.markAsDead(node);
 		container.remove(node);
 
-		assertThat(handler.getHandledEventsCount()).isEqualTo(4);
+		assertEquals(handler.getHandledEventsCount(), 4);
 	}
 
 }

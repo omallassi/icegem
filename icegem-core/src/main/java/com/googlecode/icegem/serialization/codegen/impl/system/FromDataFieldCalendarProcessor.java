@@ -1,6 +1,6 @@
 package com.googlecode.icegem.serialization.codegen.impl.system;
 
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 import com.googlecode.icegem.serialization.codegen.impl.FromDataProcessor;
 
 import java.util.GregorianCalendar;
@@ -20,7 +20,7 @@ import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 
 // todo: what about other calendars (Yulian)?
 public class FromDataFieldCalendarProcessor implements FromDataProcessor {
-    public String process(XField field) {
+    public String process(XProperty field) {
         String fieldName = field.getName();
         return "if (in.readByte() != 0) {\n" +
                 tab("String calendarClassName = in.readUTF();\n") +

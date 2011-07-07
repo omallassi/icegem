@@ -13,6 +13,7 @@ import javassist.ClassClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.LoaderClassPath;
@@ -44,18 +45,10 @@ public class DataSerializerGenerator {
     private static final Map<Integer, String> dataSerializerID2ClassNameMap = new HashMap<Integer, String>();
     private static CodeGenerationListener listener;
 
-    private static ClassPool newClassPool() {
-        ClassPool result = new ClassPool(null); // arg - parent ClassPool
-        result.appendClassPath(new ClassClassPath(java.lang.Object.class)); // its equivalent of appendSystemPath();
-        result.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader())); // todo: ok?
-
-        return result;
-    }
-
     private static ClassPool newClassPool(ClassLoader loader) {
         ClassPool result = new ClassPool(null); // arg - parent ClassPool
         result.appendClassPath(new ClassClassPath(java.lang.Object.class)); // its equivalent of appendSystemPath();
-        result.appendClassPath(new LoaderClassPath(loader)); // todo: ok?
+        result.appendClassPath(new LoaderClassPath(loader)); 
 
         return result;
     }
@@ -92,7 +85,7 @@ public class DataSerializerGenerator {
             String serializerClsName = createDataSerializerClassNameForClass(clazz);
 
             if (existsClass(serializerClsName, classLoader)) {
-                logger.warn("Serializer for class {} exists. Skipping generation", clazz.getName());
+                logger.debug("Serializer for class {} exists. Skipping generation", clazz.getName());
                 break;
             }
 
@@ -100,8 +93,9 @@ public class DataSerializerGenerator {
             CtClass cc = createClass(classPool, clazz, serializerClsName);
 
             dataSerializerClassList.add(cc);
+            
             // add static Register
-            addStaticRegister(clazz, cc);
+            addStaticConstruct(clazz, cc, serializerClsName);
             // add methods
             addMethodGetId(clazz, cc);
             addMethodGetSupportedClasses(clazz, cc);
@@ -133,7 +127,7 @@ public class DataSerializerGenerator {
             addMethodToData(clazz, cc);
             addMethodFromData(clazz, cc);
             // generate result
-            final Class resultClass;
+            final Class<?> resultClass;
             try {
                 resultClass = cc.toClass(classLoader, null); // ProtectionDomain == null
                 logger.info("compiled data serializer for class: {}; id: {}; version: {}",
@@ -155,7 +149,7 @@ public class DataSerializerGenerator {
 
             // dump code to listener
             if (listener != null) {
-                listener.generated(clazz.getName(), cc.getName(), new ClassProcessor().process(new XClass(clazz)));
+                listener.generated(clazz.getName(), cc.getName(), new ClassProcessor().process(new XClass(clazz), cc.getName()));
             }
 
             result.add(resultClass);
@@ -237,11 +231,14 @@ public class DataSerializerGenerator {
         }
     }
 
-    private static void addStaticRegister(Class<?> baseClass, CtClass cc) throws CannotCompileException {
-        final String src = "com.gemstone.gemfire.DataSerializer.register(" + cc.getName() + ".class);";
+    private static void addStaticConstruct(Class<?> baseClass, CtClass cc, String serializerClsName) throws CannotCompileException {
+        final String src = new StaticConstructorGenerator().process(new XClass(baseClass), serializerClsName);
         CtConstructor staticConstructor;
         try {
-            staticConstructor = cc.makeClassInitializer();
+        	CtField metaInfoField= CtField.make("public static final com.googlecode.icegem.serialization.codegen.VersionMap VERSION_METADATA;", cc);
+        	cc.addField(metaInfoField);
+
+        	staticConstructor = cc.makeClassInitializer();
             staticConstructor.insertBefore(src);
         } catch (CannotCompileException e) {
             throw new CannotCompileException(formatMsg("Cann't add static block for class ", src, baseClass, cc), e);

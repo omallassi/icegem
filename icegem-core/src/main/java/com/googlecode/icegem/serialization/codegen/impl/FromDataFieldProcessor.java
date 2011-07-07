@@ -1,6 +1,6 @@
 package com.googlecode.icegem.serialization.codegen.impl;
 
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 import com.googlecode.icegem.serialization.codegen.impl.primitive.*;
 import com.googlecode.icegem.serialization.codegen.impl.primitivearray.*;
 import com.googlecode.icegem.serialization.codegen.impl.system.*;
@@ -53,7 +53,7 @@ public class FromDataFieldProcessor {
         map.put(Calendar.class, new FromDataFieldCalendarProcessor());
     }
 
-    public String process(XField field) {
+    public String process(XProperty field) {
         final Class<?> fieldClass = field.getType();
 
         // predefined

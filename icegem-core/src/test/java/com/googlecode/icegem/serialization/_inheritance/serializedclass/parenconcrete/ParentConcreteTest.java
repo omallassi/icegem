@@ -1,28 +1,30 @@
 package com.googlecode.icegem.serialization._inheritance.serializedclass.parenconcrete;
 
-import com.gemstone.gemfire.DataSerializer;
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
-
-import javassist.CannotCompileException;
-import org.fest.assertions.Assertions;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.NotSerializableException;
 
+import javassist.CannotCompileException;
+
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.gemstone.gemfire.DataSerializer;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
+
+import static org.junit.Assert.*;
 /**
  * @author igolovach
  */
 public class ParentConcreteTest extends TestParent {
 
     @BeforeClass
-    public void beforeClass() throws InvalidClassException, CannotCompileException {
-        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), Bean.class, ParentMarked.class, MarkedChildOfMarkedParent.class, MarkedChildOfNotMarkedParent.class);
+    public static void beforeClass() throws InvalidClassException, CannotCompileException {
+        HierarchyRegistry.registerAll(getContextClassLoader(), Bean.class, ParentMarked.class, MarkedChildOfMarkedParent.class, MarkedChildOfNotMarkedParent.class);
     }
 
     @Test
@@ -42,8 +44,8 @@ public class ParentConcreteTest extends TestParent {
         // Serialize / Deserialize
         Bean actual = serializeAndDeserialize(expected);
 
-        Assertions.assertThat(actual.getParentMarked()).isInstanceOf(ParentMarked.class);
-        Assertions.assertThat(actual.getParentMarked().getParentData()).isEqualTo(expected.getParentMarked().getParentData());
+        assertTrue(actual.getParentMarked() instanceof ParentMarked);
+        assertEquals(actual.getParentMarked().getParentData(),expected.getParentMarked().getParentData());
     }
 
     @Test
@@ -57,14 +59,14 @@ public class ParentConcreteTest extends TestParent {
         Bean actual = serializeAndDeserialize(expected);
 
         // assert: type
-        Assertions.assertThat(actual.getParentMarked()).isInstanceOf(MarkedChildOfMarkedParent.class);
+        assertTrue(actual.getParentMarked() instanceof MarkedChildOfMarkedParent);
         // assert: parent data
-        Assertions.assertThat((actual.getParentMarked().getParentData())).isEqualTo(expected.getParentMarked().getParentData());
+        assertEquals((actual.getParentMarked().getParentData()),expected.getParentMarked().getParentData());
         // assert: child data
-        Assertions.assertThat(((MarkedChildOfMarkedParent) actual.getParentMarked()).getChildData()).isEqualTo(((MarkedChildOfMarkedParent) expected.getParentMarked()).getChildData());
+        assertEquals(((MarkedChildOfMarkedParent) actual.getParentMarked()).getChildData(),((MarkedChildOfMarkedParent) expected.getParentMarked()).getChildData());
     }
 
-    @Test(expectedExceptions = NotSerializableException.class)
+    @Test(expected = NotSerializableException.class)
     public void testParentMarked_ValueNotMarkedChild() throws IOException {
         final Bean expected = new Bean();
         expected.setParentMarked(new NotMarkedChildOfMarkedParent());
@@ -74,7 +76,7 @@ public class ParentConcreteTest extends TestParent {
         DataSerializer.writeObject(expected, new DataOutputStream(buff));
     }
 
-    @Test(expectedExceptions = NotSerializableException.class, enabled = false) //todo: uncomment
+    @Test(expected = NotSerializableException.class)
     public void testParentNotMarked_ValueParent() throws IOException {
         final Bean expected = new Bean();
         expected.setParentNotMarked(new ParentNotMarked());
@@ -89,7 +91,7 @@ public class ParentConcreteTest extends TestParent {
 //        int x = 0;
     }
 
-    @Test(enabled = false) //todo: uncomment
+    @Test
     public void testParentNotMarked_ValueMarkedChild() {
         final Bean expected = new Bean();
         expected.setParentNotMarked(new MarkedChildOfNotMarkedParent());
@@ -100,11 +102,11 @@ public class ParentConcreteTest extends TestParent {
         Bean actual = serializeAndDeserialize(expected);
 
         // assert: type
-        Assertions.assertThat(actual.getParentNotMarked()).isInstanceOf(MarkedChildOfNotMarkedParent.class);
+        assertTrue(actual.getParentNotMarked() instanceof MarkedChildOfNotMarkedParent);
         // assert: parent data
-        Assertions.assertThat((actual.getParentNotMarked().getParentData())).isEqualTo(expected.getParentNotMarked().getParentData());
+        assertEquals((actual.getParentNotMarked().getParentData()),expected.getParentNotMarked().getParentData());
         // assert: child data
-        Assertions.assertThat(((MarkedChildOfNotMarkedParent) actual.getParentNotMarked()).getChildData()).isEqualTo(((MarkedChildOfNotMarkedParent) expected.getParentNotMarked()).getChildData());
+        assertEquals(((MarkedChildOfNotMarkedParent) actual.getParentNotMarked()).getChildData(),((MarkedChildOfNotMarkedParent) expected.getParentNotMarked()).getChildData());
     }
 }
 

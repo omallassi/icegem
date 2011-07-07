@@ -1,19 +1,21 @@
 package com.googlecode.icegem.serialization.thirdparty;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
+import java.io.InvalidClassException;
+
 import javassist.CannotCompileException;
+
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.chrono.BuddhistChronology;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.chrono.JulianChronology;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-import static org.fest.assertions.Assertions.assertThat;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.io.InvalidClassException;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
+import static org.junit.Assert.*;
 
 /**
  * Test for checking serialization of DateTime class
@@ -22,9 +24,9 @@ import java.io.InvalidClassException;
  * @author Andrey Stepanov aka standy
  */
 public class Check3dPartyClassesTest extends TestParent{
-    @BeforeTest
-    public void setUp() throws InvalidClassException, CannotCompileException {
-        HierarchyRegistry.registerAll(getContextClassLoader(), JodaTime.class);
+    @BeforeClass
+    public static void register() throws InvalidClassException, CannotCompileException {
+        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), JodaTime.class);
     }
 
     @Test
@@ -36,7 +38,7 @@ public class Check3dPartyClassesTest extends TestParent{
         o.setDateTime(dateTime);
 
         JodaTime stored = serializeAndDeserialize(o);
-        assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
+        assertEquals(stored.getDateTime(), o.getDateTime());
     }
     
     @Test
@@ -48,7 +50,7 @@ public class Check3dPartyClassesTest extends TestParent{
         o.setDateTime(dateTime);
 
         JodaTime stored = serializeAndDeserialize(o);
-        assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
+        assertEquals(stored.getDateTime(), o.getDateTime());
     }
 
 
@@ -61,7 +63,7 @@ public class Check3dPartyClassesTest extends TestParent{
         o.setDateTime(dateTime);
 
         JodaTime stored = serializeAndDeserialize(o);
-        assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
+        assertEquals(stored.getDateTime(), o.getDateTime());
     }
 
     @Test
@@ -73,7 +75,7 @@ public class Check3dPartyClassesTest extends TestParent{
         o.setDateTime(dateTime);
 
         JodaTime stored = serializeAndDeserialize(o);
-        assertThat(stored.getDateTime()).as("Date time object was not stored correctly").isEqualTo(o.getDateTime());
+        assertEquals(stored.getDateTime(), o.getDateTime());
     }
 
 }

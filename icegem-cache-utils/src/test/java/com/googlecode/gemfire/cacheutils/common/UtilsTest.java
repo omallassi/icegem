@@ -1,13 +1,13 @@
 package com.googlecode.gemfire.cacheutils.common;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import com.googlecode.icegem.cacheutils.common.Utils;
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
@@ -22,16 +22,16 @@ public class UtilsTest {
 		Node node = new Node(HOST, PORT, null);
 		String key = Utils.toKey(node);
 
-		assertThat(key).isNotNull();
-		assertThat(key).isEqualTo(HOST + ":" + PORT);
+		assertNotNull(key);
+		assertEquals(key, HOST + ":" + PORT);
 	}
 
 	@Test
 	public void testToKeyByHostAndPort() {
 		String key = Utils.toKey(HOST, PORT);
 
-		assertThat(key).isNotNull();
-		assertThat(key).isEqualTo(HOST + ":" + PORT);
+		assertNotNull(key);
+		assertEquals(key, HOST + ":" + PORT);
 	}
 
 	@Test
@@ -39,17 +39,17 @@ public class UtilsTest {
 		final int port = 54321;
 
 		boolean socketAlive = Utils.isSocketAlive("127.0.0.1", port);
-		assertThat(socketAlive).isFalse();
+		assertFalse(socketAlive);
 
 		ServerSocket serverSocket = new ServerSocket(port);
 
 		socketAlive = Utils.isSocketAlive("127.0.0.1", port);
-		assertThat(socketAlive).isTrue();
+		assertTrue(socketAlive);
 
 		serverSocket.close();
 
 		socketAlive = Utils.isSocketAlive("127.0.0.1", port);
-		assertThat(socketAlive).isFalse();
+		assertFalse(socketAlive);
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class UtilsTest {
 		long testFinishTime = System.currentTimeMillis();
 		long delta = testFinishTime - testStartTime;
 
-		assertThat(delta).isLessThan(delay);
+		assertTrue(delta < delay);
 	}
 
 	@Test
@@ -82,11 +82,11 @@ public class UtilsTest {
 
 		String actual = Utils.dateToString(date);
 
-		assertThat(actual).isNotNull();
+		assertNotNull(actual);
 
 		String expected = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 			.format(date);
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(actual, expected);
 	}
 
 	@Test
@@ -96,16 +96,16 @@ public class UtilsTest {
 		String actual = Utils.dateToString(time);
 
 		
-		assertThat(actual).isNotNull();
+		assertNotNull(actual);
 
 		String expected = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 			.format(new Date(time));
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(actual, expected);
 	}
 
 	@Test
 	public void testCurrentDate() {
 		String currentDate = Utils.currentDate();
-		assertThat(currentDate).isNotNull();
+		assertNotNull(currentDate);
 	}
 }

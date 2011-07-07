@@ -1,6 +1,16 @@
 package itest.com.googlecode.icegem.utils;
 
-import com.gemstone.gemfire.cache.InterestResultPolicy;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
@@ -8,13 +18,6 @@ import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.RegionUtils;
 import com.googlecode.icegem.utils.ServerTemplate;
-import org.fest.assertions.Assertions;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Tests for checking region clearing from client side.
@@ -40,13 +43,13 @@ public class RegionClearingClientTest {
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 
     @BeforeClass
-    public void setUp() throws IOException, InterruptedException, TimeoutException {
+    public static void setUp() throws IOException, InterruptedException, TimeoutException {
         startCacheServers();
         startClient();
     }
 
     @AfterClass
-    public void tearDown() throws IOException, InterruptedException {
+    public static void tearDown() throws IOException, InterruptedException {
         cache.close();
         stopCacheServers();
     }
@@ -54,50 +57,50 @@ public class RegionClearingClientTest {
     @Test
     public void testRegionClearingForReplicatedRegionViaClientProxy() {
         replicatedRegion1.create(1, 2);
-        Assertions.assertThat(replicatedRegion1.get(1)).as("Region entry has not been saved").isNotNull();
-        Assertions.assertThat(replicatedRegion1.get(1)).as("Region entry has not been saved correctly").isEqualTo(2);
+        assertNotNull(replicatedRegion1.get(1));
+        assertEquals(replicatedRegion1.get(1), 2);
         RegionUtils.clearRegion(replicatedRegion1);
-        Assertions.assertThat(replicatedRegion1.get(1)).as("Region entry has not been deleted").isNull();
-        Assertions.assertThat(replicatedRegion1.keySetOnServer().size()).as("Region has not been cleaned").isEqualTo(0);
+        assertNull(replicatedRegion1.get(1));
+        assertEquals(replicatedRegion1.keySetOnServer().size(), 0);
     }
 
     @Test
     public void testRegionClearingForReplicatedRegionViaClientCachingProxy() {
         replicatedRegion2.create(1, 2);
-        Assertions.assertThat(replicatedRegion2.get(1)).as("Region entry has not been saved").isNotNull();
-        Assertions.assertThat(replicatedRegion2.get(1)).as("Region entry has not been saved correctly").isEqualTo(2);
+        assertNotNull(replicatedRegion2.get(1));
+        assertEquals(replicatedRegion2.get(1), 2);
         RegionUtils.clearRegion(replicatedRegion2);
         replicatedRegion2.localClear();
-        Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been deleted").isNull();
-        Assertions.assertThat(replicatedRegion1.keySetOnServer().size()).as("Region has not been cleaned").isEqualTo(0);
+        assertNull(partitionedRegion2.get(1));
+        assertEquals(replicatedRegion1.keySetOnServer().size(), 0);
     }
 
     @Test
     public void testRegionClearingForPartitionedRegionViaClientProxy() {
         partitionedRegion1.create(1, 2);
-        Assertions.assertThat(partitionedRegion1.get(1)).as("Region entry has not been saved").isNotNull();
-        Assertions.assertThat(partitionedRegion1.get(1)).as("Region entry has not been saved correctly").isEqualTo(2);
+        assertNotNull(partitionedRegion1.get(1));
+        assertEquals(partitionedRegion1.get(1), 2);
         RegionUtils.clearRegion(partitionedRegion1);
-        Assertions.assertThat(partitionedRegion1.get(1)).as("Region entry has not been deleted").isNull();
-        Assertions.assertThat(partitionedRegion1.keySetOnServer().size()).as("Region has not been cleaned").isEqualTo(0);
+        assertNull(partitionedRegion1.get(1));
+        assertEquals(partitionedRegion1.keySetOnServer().size(), 0);
     }
 
     @Test
     public void testRegionClearingForPartitionedRegionViaClientCachingProxy() {
         partitionedRegion2.create(1, 2);
-        Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been saved").isNotNull();
-        Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been saved correctly").isEqualTo(2);
+        assertNotNull(partitionedRegion2.get(1));
+        assertEquals(partitionedRegion2.get(1), 2);
         RegionUtils.clearRegion(partitionedRegion2);
         partitionedRegion2.localClear();
-        Assertions.assertThat(partitionedRegion2.get(1)).as("Region entry has not been deleted").isNull();
-        Assertions.assertThat(partitionedRegion2.keySetOnServer().size()).as("Region has not been cleaned").isEqualTo(0);
+        assertNull(partitionedRegion2.get(1));
+        assertEquals(partitionedRegion2.keySetOnServer().size(), 0);
     }
 
     /**
      * Starts a client.
      * @throws java.io.IOException
      */
-    private void startClient() throws IOException {
+    private static void startClient() throws IOException {
         PropertiesHelper properties = new PropertiesHelper("/regionClearingProperties.properties");
 
         cache = new ClientCacheFactory()
@@ -120,7 +123,7 @@ public class RegionClearingClientTest {
      * @throws IOException when
      * @throws InterruptedException when
      */
-    private void startCacheServers() throws IOException, InterruptedException {
+    private static void startCacheServers() throws IOException, InterruptedException {
         cacheServer1 = javaProcessLauncher.runWithConfirmation(
                 ServerTemplate.class,
                 new String[]{"-DgemfirePropertyFile=regionClearingProperties.properties"},
@@ -137,7 +140,7 @@ public class RegionClearingClientTest {
      * @throws IOException when
      * @throws InterruptedException
      */
-    private void stopCacheServers() throws IOException, InterruptedException {
+    private static void stopCacheServers() throws IOException, InterruptedException {
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
         javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }

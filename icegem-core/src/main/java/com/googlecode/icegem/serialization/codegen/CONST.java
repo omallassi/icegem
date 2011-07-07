@@ -23,6 +23,8 @@ import java.util.UUID;
 public class CONST {
     public static final Set<Class<?>> CLASSES;
 
+    public static final byte HEADER_VERSION = 0;
+    
     static {
         CLASSES = new HashSet<Class<?>>();
         //

@@ -32,16 +32,16 @@ public class WaitforTool extends Tool {
 
 	/**
 	 * @param regionToListen
-	 *            region that will contain key
+	 *            region that will contain key.
 	 * @param key
-	 *            key for listening
+	 *            key for listening.
 	 * @param timeout
-	 *            how long util waits for key's appearance
+	 *            how long util waits for key's appearance.
 	 * @param checkInterval
-	 *            how often util checks region
-	 * @return 0 if key was founded, otherwise 1
+	 *            how often util checks region.
+	 * @return true if key was found, false otherwise.
 	 * */
-	public static int waitSignal(Region regionToListen, Object key,
+	public static boolean waitSignal(Region regionToListen, Object key,
 		long timeout, long checkInterval) throws InterruptedException {
 		if (regionToListen == null)
 			throw new NullPointerException("region is null");
@@ -53,11 +53,11 @@ public class WaitforTool extends Tool {
 		// todo: diff time (sec, millisec, etc)
 		while ((System.currentTimeMillis() - fromTime) <= timeout) {
 			if (regionToListen.containsKeyOnServer(key)) {
-				return 0;
+				return true;
 			}
 			TimeUnit.MILLISECONDS.sleep(checkInterval);
 		}
-		return 1;
+		return false;
 	}
 
 	protected Options constructGnuOptions() {
@@ -135,12 +135,13 @@ public class WaitforTool extends Tool {
 		int result = 0;
 		try {
 			result = waitSignal(signalRegion, keyToListen, timeout,
-				checkInterval);
+				checkInterval) ? 0 : 1;
 		} catch (InterruptedException e) {
 			throw new RuntimeException("error waiting key", e);
 		}
 		System.out.println("status is " + result);
-
 		client.close();
+		
+		System.exit(result);
 	}
 }

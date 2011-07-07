@@ -63,21 +63,9 @@
 
         <!-- TEST -->
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.ehoffman</groupId>
-            <artifactId>TestNG-Extensions</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
-            <scope>test</scope>
+        	<groupId>junit</groupId>
+        	<artifactId>junit</artifactId>
+        	<scope>test</scope>
         </dependency>
 
         <dependency>

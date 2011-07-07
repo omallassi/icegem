@@ -41,17 +41,19 @@ public class HierarchyRegistry {
 
         // solve problem when one class is registered two or more times
         List<Class<?>> classListToGenerate = new LinkedList<Class<?>>();
-        for (Class clazz : classList) {
+        for (Class<?> clazz : classList) {
             if (!uniqueClass.contains(clazz)) {
                 classListToGenerate.add(clazz);
                 uniqueClass.add(clazz);
             } else {
-                logger.warn("try to register class \'{}\' once more", clazz);
+                logger.debug("Duplicate registration of class {}. Skipping...", clazz);
             }
         }
         // generate classes of DataSerializers
-        List<Class<?>> serializerClassList = DataSerializerGenerator.generateDataSerializerClasses(classLoader, /* filteredClassList */
-                classListToGenerate, outputDir);
+        List<Class<?>> serializerClassList = DataSerializerGenerator.generateDataSerializerClasses(
+        		classLoader,
+                classListToGenerate, 
+                outputDir);
 
         // register classes of DataSerializers in GemFire
         for (Class<?> clazz : serializerClassList) {

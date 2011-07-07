@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * User: akondratyev
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface FieldVersion {
-    int since();
+@Target(ElementType.METHOD)
+public @interface SinceVersion {
+    int value();
 }

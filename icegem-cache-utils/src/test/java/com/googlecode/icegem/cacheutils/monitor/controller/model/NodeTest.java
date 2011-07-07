@@ -1,11 +1,11 @@
 package com.googlecode.icegem.cacheutils.monitor.controller.model;
 
-import static org.fest.assertions.Assertions.assertThat;
-
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import com.gemstone.gemfire.cache.client.Pool;
 import com.googlecode.icegem.cacheutils.common.Utils;
+import static org.junit.Assert.*;
+
 
 public class NodeTest {
 
@@ -23,7 +23,7 @@ public class NodeTest {
 
 		node.markAsAlive();
 
-		assertThat(node.getStatus()).isEqualTo(NodeStatus.ALIVE);
+		assertEquals(node.getStatus(), NodeStatus.ALIVE);
 	}
 
 	@Test
@@ -32,40 +32,40 @@ public class NodeTest {
 
 		node.markAsDead();
 
-		assertThat(node.getStatus()).isEqualTo(NodeStatus.DEAD);
+		assertEquals(node.getStatus(), NodeStatus.DEAD);
 	}
 
 	@Test
 	public void testGetHost() {
 		Node node = createNode();
 
-		assertThat(node.getHost()).isEqualTo(HOST);
+		assertEquals(node.getHost(), HOST);
 	}
 
 	@Test
 	public void testGetPort() {
 		Node node = createNode();
 
-		assertThat(node.getPort()).isEqualTo(PORT);
+		assertEquals(node.getPort(), PORT);
 	}
 
 	@Test
 	public void testGetPool() {
 		Node node = createNode();
 
-		assertThat(node.getPool()).isNull();
+		assertNull(node.getPool());
 	}
 
 	@Test
 	public void testGetStatus() {
 		Node node = createNode();
-		assertThat(node.getStatus()).isEqualTo(NodeStatus.NEW);
+		assertEquals(node.getStatus(), NodeStatus.NEW);
 
 		node.markAsAlive();
-		assertThat(node.getStatus()).isEqualTo(NodeStatus.ALIVE);
+		assertEquals(node.getStatus(), NodeStatus.ALIVE);
 
 		node.markAsDead();
-		assertThat(node.getStatus()).isEqualTo(NodeStatus.DEAD);
+		assertEquals(node.getStatus(), NodeStatus.DEAD);
 	}
 
 	@Test
@@ -78,9 +78,9 @@ public class NodeTest {
 		node.markAsAlive();
 		long secondStatusChangedAt = node.getStatusChangedAt();
 
-		assertThat(firstStatusChangedAt).isGreaterThan(-1);
-		assertThat(secondStatusChangedAt).isGreaterThan(-1);
-		assertThat(secondStatusChangedAt).isEqualTo(firstStatusChangedAt);
+		assertTrue(firstStatusChangedAt>-1);
+		assertTrue(secondStatusChangedAt>-1);
+		assertEquals(secondStatusChangedAt, firstStatusChangedAt);
 
 		node.markAsDead();
 		firstStatusChangedAt = node.getStatusChangedAt();
@@ -88,16 +88,16 @@ public class NodeTest {
 		node.markAsDead();
 		secondStatusChangedAt = node.getStatusChangedAt();
 
-		assertThat(firstStatusChangedAt).isGreaterThan(-1);
-		assertThat(secondStatusChangedAt).isGreaterThan(-1);
-		assertThat(secondStatusChangedAt).isEqualTo(firstStatusChangedAt);
+		assertTrue(firstStatusChangedAt>-1);
+		assertTrue(secondStatusChangedAt>-1);
+		assertEquals(secondStatusChangedAt, firstStatusChangedAt);
 	}
 
 	@Test
 	public void testToString() {
 		Node node = createNode();
 
-		assertThat(node.toString()).isEqualTo(
+		assertEquals(node.toString(), 
 			"[" + node.getHost() + ":" + node.getPort() + ", "
 				+ node.getStatus() + ", "
 				+ Utils.dateToString(node.getStatusChangedAt()) + "]");

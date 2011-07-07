@@ -1,51 +1,62 @@
 package com.googlecode.icegem.serialization.primitive;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
+import java.io.IOException;
+import java.io.InvalidClassException;
+import java.util.Collection;
 
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
-import org.fest.assertions.Assertions;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.io.InvalidClassException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import com.gemstone.bp.edu.emory.mathcs.backport.java.util.Arrays;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import static org.junit.Assert.*;
 
 /**
  * @author igolovach
  */
-
+@RunWith(Parameterized.class)
 public class PrimitiveArrayTest extends TestParent {
 
     @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
+    public static void before() throws InvalidClassException, CannotCompileException {
         // register
         HierarchyRegistry.registerAll(getContextClassLoader(), PrimitiveArrayBean.class);
     }
-
-    @DataProvider(name = "data")
-    public Object[][] date() {
-        return new Object[][] {
-                new Object[] {producePrimitiveArrayBean()},
-                new Object[] {producePrimitiveArrayBeanFieldsZeroLength()},
-        };
+    
+    PrimitiveArrayBean expected;
+    
+    public PrimitiveArrayTest(PrimitiveArrayBean expected) {
+    	this.expected = expected;
     }
 
-    @Test(dataProvider = "data")
-    public void testPrimitiveArrayBean(PrimitiveArrayBean expected ) throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
+    @Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                new Object[] {producePrimitiveArrayBean()},
+                new Object[] {producePrimitiveArrayBeanFieldsZeroLength()},
+        });
+    }
+
+    @Test
+    public void testPrimitiveArrayBean() throws NotFoundException, CannotCompileException, IOException, ClassNotFoundException {
         // Serialize / Deserialize
         PrimitiveArrayBean actual = serializeAndDeserialize(expected);
 
         // assert
-        Assertions.assertThat(actual.getBooleanArray()).isEqualTo(expected.getBooleanArray());
-        Assertions.assertThat(actual.getByteArray()).isEqualTo(expected.getByteArray());
-        Assertions.assertThat(actual.getShortArray()).isEqualTo(expected.getShortArray());
-        Assertions.assertThat(actual.getCharArray()).isEqualTo(expected.getCharArray());
-        Assertions.assertThat(actual.getIntArray()).isEqualTo(expected.getIntArray());
-        Assertions.assertThat(actual.getLongArray()).isEqualTo(expected.getLongArray());
-        Assertions.assertThat(actual.getFloatArray()).isEqualTo(expected.getFloatArray());
-        Assertions.assertThat(actual.getDoubleArray()).isEqualTo(expected.getDoubleArray());
+        assertTrue(Arrays.equals(actual.getBooleanArray(),expected.getBooleanArray()));
+        assertTrue(Arrays.equals(actual.getByteArray(),expected.getByteArray()));
+        assertTrue(Arrays.equals(actual.getShortArray(),expected.getShortArray()));
+        assertTrue(Arrays.equals(actual.getCharArray(),expected.getCharArray()));
+        assertTrue(Arrays.equals(actual.getIntArray(),expected.getIntArray()));
+        assertTrue(Arrays.equals(actual.getLongArray(),expected.getLongArray()));
+        assertTrue(Arrays.equals(actual.getFloatArray(),expected.getFloatArray()));
+        assertTrue(Arrays.equals(actual.getDoubleArray(),expected.getDoubleArray()));
     }
 
     @Test
@@ -57,17 +68,17 @@ public class PrimitiveArrayTest extends TestParent {
         PrimitiveArrayBean actual = serializeAndDeserialize(expected);
 
         // assert
-        Assertions.assertThat(actual.getBooleanArray()).isNull();
-        Assertions.assertThat(actual.getByteArray()).isNull();
-        Assertions.assertThat(actual.getShortArray()).isNull();
-        Assertions.assertThat(actual.getCharArray()).isNull();
-        Assertions.assertThat(actual.getIntArray()).isNull();
-        Assertions.assertThat(actual.getLongArray()).isNull();
-        Assertions.assertThat(actual.getFloatArray()).isNull();
-        Assertions.assertThat(actual.getDoubleArray()).isNull();
+        assertNull(actual.getBooleanArray());
+        assertNull(actual.getByteArray());
+        assertNull(actual.getShortArray());
+        assertNull(actual.getCharArray());
+        assertNull(actual.getIntArray());
+        assertNull(actual.getLongArray());
+        assertNull(actual.getFloatArray());
+        assertNull(actual.getDoubleArray());
     }
 
-    private PrimitiveArrayBean producePrimitiveArrayBean() {
+    private static PrimitiveArrayBean producePrimitiveArrayBean() {
         final PrimitiveArrayBean result = new PrimitiveArrayBean();
 
         result.setBooleanArray(new boolean[]{true, false});
@@ -82,7 +93,7 @@ public class PrimitiveArrayTest extends TestParent {
         return result;
     }
 
-    private PrimitiveArrayBean producePrimitiveArrayBeanFieldsZeroLength() {
+    private static PrimitiveArrayBean producePrimitiveArrayBeanFieldsZeroLength() {
         final PrimitiveArrayBean result = new PrimitiveArrayBean();
 
         result.setBooleanArray(new boolean[]{});

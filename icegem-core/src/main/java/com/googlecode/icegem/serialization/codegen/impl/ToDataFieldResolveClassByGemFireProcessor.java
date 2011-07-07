@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.codegen.impl;
 
 import com.googlecode.icegem.serialization.Configuration;
 import com.googlecode.icegem.serialization.codegen.CodeGenUtils;
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 
 import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 
@@ -18,7 +18,7 @@ import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 
 class ToDataFieldResolveClassByGemFireProcessor {
 
-//    public String process(XField field) {
+//    public String process(XProperty field) {
 //        String fieldName = field.getField().getName();
 //        String shortClassName = field.getField().getType().getSimpleName();
 //        String getter = "get" + CodeGenUtils.firstLetterToUpperCase(fieldName) + "()";
@@ -34,7 +34,7 @@ class ToDataFieldResolveClassByGemFireProcessor {
 //                "}\n";
 //    }
 
-    public String process(XField field) {
+    public String process(XProperty field) {
         String fieldName = field.getName();
         String getter = "get" + CodeGenUtils.firstLetterToUpperCase(fieldName) + "()";
 

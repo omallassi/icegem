@@ -1,8 +1,5 @@
 package com.googlecode.icegem.serialization._jdktypes;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.BeanVersion;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -17,6 +14,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 import java.util.UUID;
+
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
 
 /**
  * @author igolovach

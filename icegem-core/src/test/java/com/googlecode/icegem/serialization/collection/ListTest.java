@@ -1,19 +1,20 @@
 package com.googlecode.icegem.serialization.collection;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
-
-import javassist.CannotCompileException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
+import static org.junit.Assert.*;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
-import static org.fest.assertions.Assertions.assertThat;
+import javassist.CannotCompileException;
+
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
 
 /**
  * @author igolovach
@@ -22,7 +23,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class ListTest extends TestParent {
 
     @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
+    public static void before() throws InvalidClassException, CannotCompileException {
         // register
         HierarchyRegistry.registerAll(getContextClassLoader(), ListBean.class);
     }
@@ -36,9 +37,9 @@ public class ListTest extends TestParent {
         ListBean actual = (ListBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getArrayList()).isNull();
-        assertThat(actual.getLinkedList()).isNull();
-        assertThat(actual.getList()).isNull();
+        assertNull(actual.getArrayList());
+        assertNull(actual.getLinkedList());
+        assertNull(actual.getList());
     }
 
     @Test
@@ -53,11 +54,11 @@ public class ListTest extends TestParent {
         ListBean actual = (ListBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getArrayList()).hasSize(0);
-        assertThat(actual.getLinkedList()).hasSize(0);
+        assertEquals(actual.getArrayList().size(), 0);
+        assertEquals(actual.getLinkedList().size(), 0);
 
-        assertThat((Object) actual.getList()).isInstanceOf(expected.getList().getClass());
-        assertThat(actual.getList()).hasSize(0);
+        assertTrue(expected.getList().getClass().isAssignableFrom(actual.getList().getClass()));
+        assertEquals(actual.getList().size(), 0);
     }
 
     @Test
@@ -78,12 +79,13 @@ public class ListTest extends TestParent {
         ListBean actual = (ListBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getArrayList()).isEqualTo(expected.getArrayList());
-        assertThat(actual.getLinkedList()).isEqualTo(expected.getLinkedList());
-        assertThat(actual.getList()).isEqualTo(expected.getList());
+        assertEquals(actual.getArrayList(), expected.getArrayList());
+        assertEquals(actual.getLinkedList(), expected.getLinkedList());
+        assertEquals(actual.getList(), expected.getList());
     }
 
-    @Test(enabled = false)
+    @Test
+    @Ignore
     //todo: test "new ArrayList/LinkedList/List() {}"
     //todo: test Locale
     public void testArrayListSubclass() {
@@ -105,9 +107,9 @@ public class ListTest extends TestParent {
         // Serialize / Deserialize
         ListBean actual = (ListBean) serializeAndDeserialize(expected);
 
-        // assert
-        assertThat((Object) actual.getArrayList()).isInstanceOf(ArrayList.class);
-        assertThat(actual.getArrayList()).isEqualTo(expected.getArrayList());
+        // as)sert
+        assertTrue(actual.getArrayList() instanceof ArrayList);
+        assertEquals(actual.getArrayList(), expected.getArrayList());
     }
 }
 

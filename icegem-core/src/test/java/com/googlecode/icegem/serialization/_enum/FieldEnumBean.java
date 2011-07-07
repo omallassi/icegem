@@ -1,8 +1,8 @@
 package com.googlecode.icegem.serialization._enum;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-
 import java.util.List;
+
+import com.googlecode.icegem.serialization.AutoSerializable;
 
 /**
  * @author igolovach

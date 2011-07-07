@@ -1,6 +1,6 @@
 package itest.com.googlecode.icegem.expiration;
 
-import com.googlecode.icegem.utils.RegionUtils;
+import static org.junit.Assert.assertEquals;
 import itest.com.googlecode.icegem.expiration.model.Transaction;
 import itest.com.googlecode.icegem.expiration.model.TransactionProcessingError;
 
@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.TimeoutException;
 
-import org.fest.assertions.Assertions;
-import org.testng.annotations.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.Region.Entry;
@@ -21,6 +22,7 @@ import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.expiration.ExpirationController;
 import com.googlecode.icegem.expiration.ExpirationPolicy;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.RegionUtils;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 /**
@@ -127,13 +129,13 @@ public class ExpirationControllerTest implements Serializable {
 	}
 
 	@BeforeClass
-	public void setUp() throws IOException, InterruptedException,
+	public static void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 		startCacheServers();
 	}
 
 	@AfterClass
-	public void tearDown() throws IOException, InterruptedException {
+	public static void tearDown() throws IOException, InterruptedException {
 		stopCacheServers();
 	}
 
@@ -143,7 +145,7 @@ public class ExpirationControllerTest implements Serializable {
 		assertThat(5, 2);
 		Thread.sleep(3 * 1000);
 		long destroyedEntriesNumber = expire(false);
-		Assertions.assertThat(destroyedEntriesNumber).isEqualTo(2);
+		assertEquals(destroyedEntriesNumber, 2);
 		assertThat(3, 2);
 	}
 
@@ -154,7 +156,7 @@ public class ExpirationControllerTest implements Serializable {
 		Thread.sleep(3 * 1000);
 
 		long destroyedEntriesNumber = expire(true);
-		Assertions.assertThat(destroyedEntriesNumber).isEqualTo(2);
+		assertEquals(destroyedEntriesNumber, 2);
 		assertThat(3, 1);
 	}
 
@@ -175,7 +177,7 @@ public class ExpirationControllerTest implements Serializable {
 		long destroyedEntriesNumber = expire(false, 1000, 1000);
 		finishTime = System.currentTimeMillis();
 		System.out.println("Expired in " + (finishTime - startTime) + "ms");
-		Assertions.assertThat(destroyedEntriesNumber).isEqualTo(2 * count);
+		assertEquals(destroyedEntriesNumber, 2 * count);
 		assertThat(3 * count, 2 * count);
 		System.out.println("Smart expiration load test finish");
 	}
@@ -260,10 +262,8 @@ public class ExpirationControllerTest implements Serializable {
 		Region<Long, TransactionProcessingError> errorsRegion = getRegion(
 			cache, "errors");
 
-		Assertions.assertThat(transactionsRegion.keySetOnServer().size())
-			.isEqualTo(transactionsNumber);
-		Assertions.assertThat(errorsRegion.keySetOnServer().size()).isEqualTo(
-			errorsNumber);
+		assertEquals(transactionsRegion.keySetOnServer().size(), transactionsNumber);
+		assertEquals(errorsRegion.keySetOnServer().size(), errorsNumber);
 
 		cache.close();
 	}
@@ -285,14 +285,14 @@ public class ExpirationControllerTest implements Serializable {
 		return expire(recursively, 1, 0);
 	}
 
-	private void startCacheServers() throws IOException, InterruptedException {
+	private static void startCacheServers() throws IOException, InterruptedException {
         cacheServer1 = javaProcessLauncher.runWithConfirmation(
                 ServerTemplate.class, new String[]{"-DgemfirePropertyFile=expirationServerProperties.properties"}, null);
         cacheServer2 = javaProcessLauncher.runWithConfirmation(
                 ServerTemplate.class, new String[]{"-DgemfirePropertyFile=expirationServerProperties.properties"}, null);
 	}
 
-	private void stopCacheServers() throws IOException, InterruptedException {
+	private static void stopCacheServers() throws IOException, InterruptedException {
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
 	}

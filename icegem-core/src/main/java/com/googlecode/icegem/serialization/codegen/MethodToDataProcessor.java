@@ -1,14 +1,10 @@
 package com.googlecode.icegem.serialization.codegen;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.codegen.impl.ToDataFieldProcessor;
-import sun.awt.image.OffScreenImage;
-import sun.rmi.runtime.NewThreadAction;
+import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
 
 import java.util.List;
 
-import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
+import com.googlecode.icegem.serialization.codegen.impl.ToDataFieldProcessor;
 
 /**
  * Code generator for DataSerializer method toData()
@@ -30,73 +26,49 @@ public class MethodToDataProcessor {
         }
     }
 
-    private String processNotEnum(XClass element) {
+    private String processNotEnum(XClass xClass) {
 
         StringBuilder builder = new StringBuilder();
 
-        List<XField> fields = element.getSerialisedSortedFields();
-        final String className = element.getType().getName();
+        List<XProperty> props = xClass.getOrderedProperties();
+        final String className = xClass.getType().getName();
         // method header
         builder.append("public boolean toData(Object obj, java.io.DataOutput out) throws java.io.IOException {\n")
                 .append(tab("try {\n"))
                 .append(tab(2, "// check arg is of correct type\n"))
                 .append(tab(2, "if (obj.getClass() != " + className + ".class) {return false;}\n"));
-        // add check for cycles using method frame counter
-        builder.append(tab(2, "// increment thread-local method-frame counter\n"))
-                // todo: not call if fields - not beans! for example - primitives
-                // todo: analyze - if exception - we clean counter?
-                .append(tab(2, "if (Boolean.getBoolean(com.googlecode.icegem.serialization.codegen.MethodFrameCounter.SYSTEM_PROPERTY_NAME)) {\n"))
-                .append(tab(3, "com.googlecode.icegem.serialization.codegen.MethodFrameCounter.enterFrame(\"" + className + "\");\n")) //todo: analize exist MethodFrameCounter.class in runtime
-                .append(tab(2, "}\n"))
 
-                .append(tab(2, "// convert to concrete type\n"))
+        builder.append(tab(2, "// increment thread-local method-frame counter\n"))
+                .append(tab(2, "if (com.googlecode.icegem.serialization.codegen.MethodFrameCounter.ENABLED) {\n"))
+                .append(tab(3, "com.googlecode.icegem.serialization.codegen.MethodFrameCounter.enterFrame(\"" + className + "\");\n"))
+                .append(tab(2, "}\n"));
+
+        builder.append(tab(2, "// convert to concrete type\n"))
                 .append(tab(2, className)).append(" concrete = (").append(className).append(") obj;\n");
 
         builder.append("\n");
 
-        int beanVersion;
-
-        if (element.getType().getAnnotation(BeanVersion.class) != null) {
-            beanVersion = element.getType().getAnnotation(BeanVersion.class).value();
-            // checks on positive value
-            if (beanVersion < 1) {
-                throw new RuntimeException("Value of annotation @BeanVersion must be positive, current value = " + beanVersion + " (class '" + className + "')");
-            }
-
-            builder.append(tab(2, "// write bean version\n"))
-                    .append(tab(2, "out.writeInt(" + element.getType().getAnnotation(BeanVersion.class).value() + ");\n"));  //todo: value is hardcoded in result code
-        } else {
-            throw new RuntimeException("Class must be annotated with @BeanVersion: " + element.getType().getCanonicalName());
-        }
-        builder.append("\n");
-
         // write header version and version history lenght
-        byte headerVersion = element.getType().getAnnotation(AutoSerializable.class).headerVersion();
-        byte versionHistoryLength = element.getType().getAnnotation(AutoSerializable.class).versionHistoryLength();
-
-        if (headerVersion < 1) {
-            throw new RuntimeException("Class header version of annotation @AutoSerializable must be positive, current value = " + headerVersion + " (class '" + className + "')");
-        }
-        if (versionHistoryLength < 1) {
-            throw new RuntimeException("Version history length of annotation @AutoSerializable must be positive, current value = " + versionHistoryLength + " (class '" + className + "')");
-        }
-        versionHistoryLength = (byte) (versionHistoryLength + 1);
-
+        byte versionHistoryLength = xClass.getVersionHistoryLength();
+        
+        byte header = (byte) ((CONST.HEADER_VERSION << 4) | versionHistoryLength);
+        
         builder.append(tab(2, "// write header version and version history lenght\n"));
-        // TODO: header version will be used in future to implement different serialization/deserialization strategies
-        builder.append(tab(2, "out.writeByte(" + headerVersion + ");\n"))
-                .append(tab(2, "out.writeByte(" + versionHistoryLength + ");\n"));
+        builder.append(tab(2, "out.writeByte(" + header + ");\n"));
 
-        int startFromVersion = (beanVersion - versionHistoryLength + 1) > 1 ? (beanVersion - versionHistoryLength + 1) : 1;
-        builder.append(tab(2, "// write class model hash codes for bean versions [" + startFromVersion + ", " + beanVersion + "]\n"));
-        for (int i = startFromVersion; i <= beanVersion; i++) {
-            builder.append(tab(2, "out.writeInt(" + CodeGenUtils.getClassModelHashCodeBasedOnClassFields(fields, i) +");\n"));
-        }
+        int beanVersion = xClass.getBeanVersion();
+        
+        builder.append(tab(2, "// bean version\n"))
+        	.append(tab(2, "out.writeByte(" + beanVersion + ");\n"))
+        	.append("\n");
+        
+        builder.append(tab(2, "// write class model control hash codes\n"));
+        builder.append(tab(2, "VERSION_METADATA.writeAll(out);\n"));
 
-        for (XField field : fields) {
+        for (XProperty prop : props) {
             builder.append("\n");
-            builder.append(tab(2, "// this." + field.getName() + " -> byte[]\n")); //todo: can be name collision between parent/child fields
-            builder.append(tab(2, new ToDataFieldProcessor().process(field)));
+            builder.append(tab(2, "// this." + prop.getName() + " -> byte[]\n")); //todo: can be name collision between parent/child fields
+            builder.append(tab(2, new ToDataFieldProcessor().process(prop)));
         }
         builder.append("\n");
 
@@ -104,7 +76,7 @@ public class MethodToDataProcessor {
         builder.append(tab(2, "return true;\n"))
                 // ensure that exit frame will be called
                 .append(tab("} finally {\n"))
-                .append(tab(2, "if (Boolean.getBoolean(com.googlecode.icegem.serialization.codegen.MethodFrameCounter.SYSTEM_PROPERTY_NAME)) {\n"))
+                .append(tab(2, "if (com.googlecode.icegem.serialization.codegen.MethodFrameCounter.ENABLED) {\n"))
                 .append(tab(3, "// decrement thread-local method-frame counter\n"))
                 .append(tab(3, "com.googlecode.icegem.serialization.codegen.MethodFrameCounter.exitFrame(\"" + className + "\");\n"))
                 .append(tab(2, "}\n"))

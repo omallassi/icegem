@@ -1,8 +1,10 @@
 package com.googlecode.icegem.serialization.codegen;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
 
 /**
  * Wrapper class for java.lang.Class + useful methods for code generation
@@ -12,28 +14,81 @@ import java.util.List;
 
 public class XClass {
     private final Class<?> clazz;
+	private byte beanVersion;
 
     public XClass(Class<?> clazz) {
         this.clazz = clazz;
+        
+        BeanVersion annotation = getType().getAnnotation(BeanVersion.class);
+        if (annotation != null) {
+			beanVersion = annotation.value();
+            // checks on positive value
+            if (beanVersion < 1) {
+                throw new RuntimeException("Value of annotation @BeanVersion must be positive, current value = " + beanVersion + " (class '" + clazz + "')");
+            }
+        } else {
+            throw new RuntimeException("Class must be annotated with @BeanVersion: " + getType().getCanonicalName());
+        }
     }
 
     public Class<?> getType() {
         return clazz;
     }
 
-    public List<XField> getSerialisedSortedFields() {
-
-        final List<XField> result = Introspector.getFields(clazz);
-
-        // all fields ser/deser in predefined order
-        Collections.sort(result, new Comparator<XField>() { //todo: probably use Lexicographic order: <parentHeight, fieldName> NOT <parentClassName, fieldName> ?
-
-            public int compare(XField field0, XField field1) {
-                return (field0.getDeclaringClass() + ":" + field0.getName()).compareTo(field1.getDeclaringClass() + ":" + field1.getName()); //todo: is it unique name?
-            }
-        });
-        //todo: field from super class here
-
+    
+    /**
+     * Returns properties in "natural" order, i.e. &quot;ORDER BY VERSION, DECLARING CLASS, NAME&quot; 
+     * 
+     * @return
+     */
+    public List<XProperty> getOrderedProperties() {
+        final List<XProperty> result = Introspector.getProperties(clazz);
+        Collections.sort(result, new XProperty.NaturalOrder());
         return result;
     }
+    
+    public byte getBeanVersion() {
+        return beanVersion;
+    }
+    
+    public byte getVersionHistoryLength() {
+        AutoSerializable annotation = getType().getAnnotation(AutoSerializable.class);
+		byte versionHistoryLength = annotation.versionHistoryLength();
+
+        if (versionHistoryLength < 1) {
+            throw new IllegalArgumentException("Version history length of annotation @AutoSerializable must be positive, current value = " + versionHistoryLength + " (class '" + clazz.getCanonicalName() + "')");
+        }
+        
+        // At least the current version hash code is recorded to ensure proper match
+        versionHistoryLength++;
+
+        if(versionHistoryLength > getBeanVersion()) {
+        	versionHistoryLength = getBeanVersion();
+        }
+        return versionHistoryLength;
+    }
+
+	public String getName() {
+		return this.clazz.getName();
+	}
+	
+    /**
+     * Returns a hash code of class model for specified bean version based on fields that this model contains.
+     *
+     * @param version bean version to get metadata hashcode.
+     * @return the hashcode (16bits)
+     */
+    public short getVersionModelHashCode(int version) {
+    	List<XProperty> classFields = getOrderedProperties();
+    	
+        StringBuilder builder = new StringBuilder();
+        for (XProperty field : classFields) {
+            if (version == -1 || version >= field.getPropertyVersion()) {
+                builder.append(field.getType()).append(field.getName());
+            }
+        }
+        int hashCode = builder.toString().hashCode();
+		return (short) ((hashCode & 0xFFFF ) ^ ((hashCode & 0xFFFF0000) >> 16)) ;
+    }
+
 }

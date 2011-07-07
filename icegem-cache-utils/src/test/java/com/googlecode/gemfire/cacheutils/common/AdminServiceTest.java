@@ -1,15 +1,28 @@
 package com.googlecode.gemfire.cacheutils.common;
 
-import org.fest.assertions.Assertions;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
-import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.admin.AdminException;
+import com.gemstone.gemfire.cache.AttributesFactory;
+import com.gemstone.gemfire.cache.Cache;
+import com.gemstone.gemfire.cache.CacheFactory;
+import com.gemstone.gemfire.cache.DataPolicy;
+import com.gemstone.gemfire.cache.Region;
+import com.gemstone.gemfire.cache.RegionAttributes;
+import com.gemstone.gemfire.cache.RegionShortcut;
+import com.gemstone.gemfire.cache.Scope;
 import com.googlecode.icegem.cacheutils.common.AdminService;
-
+@Ignore
 public class AdminServiceTest {
     private static final Logger log = LoggerFactory.getLogger(AdminServiceTest.class);
     private static final int LOCATOR_PORT = 11357;
@@ -28,19 +41,19 @@ public class AdminServiceTest {
     //@Test
     public void testGetRegionNames() throws AdminException {
         Map<String, String> regionNames = admin.getRegionNames("all", true);
-        Assertions.assertThat(new TreeSet<String>(regionNames.keySet())).isEqualTo(new TreeSet<String>(expectedRegionNames));
+        assertEquals(new TreeSet<String>(regionNames.keySet()), new TreeSet<String>(expectedRegionNames));
     }
 
     //@Test
     public void testGetRegionNamesReduced() throws AdminException {
         Map<String, String> regionNames = admin.getRegionNames("region1,region2", true);
-        Assertions.assertThat(new TreeSet<String>(regionNames.keySet())).isEqualTo(new TreeSet<String>(reducedExpectedRegionNames));
+        assertEquals(new TreeSet<String>(regionNames.keySet()), new TreeSet<String>(reducedExpectedRegionNames));
     }
 
     //@Test
     public void testGetRegionNamesReducedWithoutSubRegions() throws AdminException {
         Map<String, String> regionNames = admin.getRegionNames("region1,region2,subregion1OfSubregion3OfRegion3", false);
-        Assertions.assertThat(new TreeSet<String>(regionNames.keySet())).isEqualTo(new TreeSet<String>(Arrays.asList("region1","region2","subregion1OfSubregion3OfRegion3")));
+        assertEquals(new TreeSet<String>(regionNames.keySet()), new TreeSet<String>(Arrays.asList("region1","region2","subregion1OfSubregion3OfRegion3")));
     }
 
     //@AfterClass

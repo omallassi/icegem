@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.versioning.beans.previousversion.bea
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 /**
  * User: akondratyev
@@ -11,7 +11,6 @@ import com.googlecode.icegem.serialization.FieldVersion;
 @BeanVersion(2)
 public class Company {
     private int id;
-    @FieldVersion(since = 2)
     private String name;
 
     public Company() {
@@ -30,6 +29,7 @@ public class Company {
         this.id = id;
     }
 
+    @SinceVersion(2)
     public String getName() {
         return name;
     }
