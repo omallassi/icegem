@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.versioning.beans.versionhistory.v2;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 /**
  * @author Andrey Stepanov aka standy
@@ -11,7 +11,6 @@ import com.googlecode.icegem.serialization.FieldVersion;
 @BeanVersion(3)
 public class Mouse {
     private int id2;
-    @FieldVersion(since = 3)
     private String name;
 
     public Mouse() {
@@ -29,6 +28,7 @@ public class Mouse {
         this.id2 = id2;
     }
 
+    @SinceVersion(3)
     public String getName() {
         return name;
     }

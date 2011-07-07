@@ -1,16 +1,16 @@
 package com.googlecode.icegem.serialization.primitive;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-
-import javassist.CannotCompileException;
-import javassist.NotFoundException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import java.io.IOException;
 import java.io.InvalidClassException;
 
-import static org.fest.assertions.Assertions.assertThat;
+import javassist.CannotCompileException;
+import javassist.NotFoundException;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import static org.junit.Assert.*;
 
 /**
  * @author igolovach
@@ -18,7 +18,7 @@ import static org.fest.assertions.Assertions.assertThat;
 public class PrimitiveTest extends TestParent {
 
     @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
+    public static void before() throws InvalidClassException, CannotCompileException {
         // register
         HierarchyRegistry.registerAll(getContextClassLoader(), PrimitiveBean.class);
     }
@@ -32,18 +32,18 @@ public class PrimitiveTest extends TestParent {
         PrimitiveBean actual = serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.isBool()).isEqualTo(expected.isBool());
-        assertThat(actual.getBool()).isEqualTo(expected.getBool());
-        assertThat(actual.getByt()).isEqualTo(expected.getByt());
-        assertThat(actual.getSh()).isEqualTo(expected.getSh());
-        assertThat(actual.getCh()).isEqualTo(expected.getCh());
-        assertThat(actual.getIn()).isEqualTo(expected.getIn());
-        assertThat(actual.getL()).isEqualTo(expected.getL());
-        assertThat(actual.getF()).isEqualTo(expected.getF());
-        assertThat(actual.getD()).isEqualTo(expected.getD());
-        assertThat(actual.isB1()).isEqualTo(expected.isB1());
-        assertThat(actual.isB2()).isEqualTo(expected.isB2());
-        assertThat(actual.isB3()).isEqualTo(expected.isB3());
+        assertEquals(actual.isBool(), expected.isBool());
+        assertEquals(actual.getBool(), expected.getBool());
+        assertEquals(actual.getByt(), expected.getByt());
+        assertEquals(actual.getSh(), expected.getSh());
+        assertEquals(actual.getCh(), expected.getCh());
+        assertEquals(actual.getIn(), expected.getIn());
+        assertEquals(actual.getL(), expected.getL());
+        assertEquals(actual.getF(), expected.getF(), 0.001f);
+        assertEquals(actual.getD(), expected.getD(), 0.001);
+        assertEquals(actual.isB1(), expected.isB1());
+        assertEquals(actual.isB2(), expected.isB2());
+        assertEquals(actual.isB3(), expected.isB3());
     }
 
     private PrimitiveBean producePrimitiveBean() {

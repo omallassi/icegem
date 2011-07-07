@@ -1,16 +1,14 @@
 package itest.com.googlecode.icegem.cacheutils.updater;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import com.googlecode.icegem.utils.PropertiesHelper;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.Region.Entry;
@@ -21,6 +19,7 @@ import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.cacheutils.Launcher;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 public class UpdateToolPartitionTest {
@@ -41,13 +40,13 @@ public class UpdateToolPartitionTest {
 	private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(
 		false, false, false);
 
-	private ClientRegionFactory<Object, Object> clientRegionFactory;
-	private Map<String, Region<Object, Object>> nameToRegionMap = new HashMap<String, Region<Object, Object>>();
-	private ClientCache clientCache;
-	private PropertiesHelper propertiesHelper;
+	private static ClientRegionFactory<Object, Object> clientRegionFactory;
+	private static Map<String, Region<Object, Object>> nameToRegionMap = new HashMap<String, Region<Object, Object>>();
+	private static ClientCache clientCache;
+	private static PropertiesHelper propertiesHelper;
 
 	@BeforeClass
-	public void setUp() throws IOException, InterruptedException,
+	public static void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 
 		propertiesHelper = new PropertiesHelper(
@@ -62,12 +61,12 @@ public class UpdateToolPartitionTest {
 	}
 
 	@AfterClass
-	public void tearDown() throws IOException, InterruptedException {
+	public static void tearDown() throws IOException, InterruptedException {
 		clientCache.close();
 		stopCacheServers();
 	}
 
-	private void createRegions(String[] regionNames) {
+	private static void createRegions(String[] regionNames) {
 		clientCache = new ClientCacheFactory()
 			.addPoolLocator("localhost", 10355).set("log-level", "none")
 			.setPoolSubscriptionEnabled(true).create();
@@ -91,7 +90,7 @@ public class UpdateToolPartitionTest {
 		}
 	}
 
-	private void put(String regionName, Object key, Object value) {
+	private static void put(String regionName, Object key, Object value) {
 		Region<Object, Object> region = nameToRegionMap.get(regionName);
 		region.put(key, value);
 	}
@@ -121,9 +120,9 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTime = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTime).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTime>updateStartTime);
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -145,9 +144,9 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForData1>updateStartTime);
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -166,13 +165,13 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForData1>updateStartTime);
 
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTimeForData2).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForData2>updateStartTime);
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -190,13 +189,13 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForData1>updateStartTime);
 
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTimeForData2).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForData2>updateStartTime);
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -234,21 +233,21 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTimeForData1).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForData1>updateStartTime);
 
 		long lastModifiedTimeForAs1 = get(REGION_DATA1, KEY_AS1)
 			.getStatistics().getLastModifiedTime();
-		assertThat(lastModifiedTimeForAs1).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForAs1>updateStartTime);
 
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertThat(lastModifiedTimeForData2).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForData2>updateStartTime);
 
 		long lastModifiedTimeForAs2 = get(REGION_DATA2, KEY_AS2)
 			.getStatistics().getLastModifiedTime();
-		assertThat(lastModifiedTimeForAs2).isGreaterThan(updateStartTime);
+		assertTrue(lastModifiedTimeForAs2>updateStartTime);
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 
 		destroy(REGION_DATA1, KEY_AS1);
 		destroy(REGION_DATA2, KEY_AS2);
@@ -265,10 +264,10 @@ public class UpdateToolPartitionTest {
 				propertiesHelper.getStringProperty("locators"), "-r",
 				REGION_DATA1 });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
-	private void startCacheServers() throws IOException, InterruptedException {
+	private static void startCacheServers() throws IOException, InterruptedException {
 		cacheServer1 = javaProcessLauncher
 			.runWithConfirmation(
 				ServerTemplate.class,
@@ -281,7 +280,7 @@ public class UpdateToolPartitionTest {
 				null);
 	}
 
-	private void stopCacheServers() throws IOException, InterruptedException {
+	private static void stopCacheServers() throws IOException, InterruptedException {
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
 	}

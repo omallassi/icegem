@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.versioning.beans.inheritance.v2;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,6 @@ import java.util.List;
 @BeanVersion(2)
 public class Son extends Father {
     private List<Long> brothers;
-    @FieldVersion(since = 2)
     private List<Long> sisters;
 
     public Son() {
@@ -28,6 +27,7 @@ public class Son extends Father {
         this.brothers = brothers;
     }
 
+    @SinceVersion(2)
     public List<Long> getSisters() {
         return sisters;
     }

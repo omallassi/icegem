@@ -16,6 +16,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface AutoSerializable {
     int dataSerializerID();
-    byte headerVersion() default 1;
-    byte versionHistoryLength() default 5;
+    byte versionHistoryLength() default 2;
 }

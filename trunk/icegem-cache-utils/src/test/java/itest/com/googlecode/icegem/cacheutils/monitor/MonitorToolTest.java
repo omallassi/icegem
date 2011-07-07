@@ -1,21 +1,21 @@
 package itest.com.googlecode.icegem.cacheutils.monitor;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import com.googlecode.icegem.utils.PropertiesHelper;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import com.googlecode.icegem.cacheutils.Launcher;
 import com.googlecode.icegem.cacheutils.monitor.MonitorTool;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEvent;
 import com.googlecode.icegem.cacheutils.monitor.controller.event.NodeEventHandler;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.ServerTemplate;
+
+import static org.junit.Assert.*;
 
 public class MonitorToolTest {
 	/** Field cacheServer1 */
@@ -40,13 +40,13 @@ public class MonitorToolTest {
 	}
 
 	@BeforeClass
-	public void setUp() throws IOException, InterruptedException,
+	public static void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 		startCacheServers();
 	}
 
 	@AfterClass
-	public void tearDown() throws IOException, InterruptedException {
+	public static void tearDown() throws IOException, InterruptedException {
 		stopCacheServers();
 	}
 
@@ -68,7 +68,7 @@ public class MonitorToolTest {
 
 		Thread.sleep(5 * 1000);
 
-		assertThat(handler.getCount()).isEqualTo(4);
+		assertEquals(handler.getCount(), 4);
 
 		tool.shutdown();
 	}
@@ -82,7 +82,7 @@ public class MonitorToolTest {
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, vmArguments, new String[] { "monitor", "-a" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class MonitorToolTest {
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, vmArguments, new String[] { "monitor" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class MonitorToolTest {
 			Launcher.class, vmArguments, new String[] { "monitor", "-a", "-l",
 				"localhost[-1]" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class MonitorToolTest {
 			.runAndWaitProcessExitCode(Launcher.class, vmArguments,
 				new String[] { "monitor", "-a", "-l" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class MonitorToolTest {
 			Launcher.class, vmArguments, new String[] { "monitor", "-s",
 				"localhost[40404]", "-t", "3000" });
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class MonitorToolTest {
 			Launcher.class, vmArguments, new String[] { "monitor", "-s",
 				"localhost[50505]", "-t", "3000" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 
 	}
 
@@ -160,7 +160,7 @@ public class MonitorToolTest {
 			Launcher.class, vmArguments, new String[] { "monitor", "-s",
 				"localhost[-1]" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -172,10 +172,10 @@ public class MonitorToolTest {
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, vmArguments, new String[] { "monitor", "-s" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
-	private void startCacheServers() throws IOException, InterruptedException {
+	private static void startCacheServers() throws IOException, InterruptedException {
 		cacheServer1 = javaProcessLauncher
 			.runWithConfirmation(
 				ServerTemplate.class,
@@ -188,7 +188,7 @@ public class MonitorToolTest {
 				null);
 	}
 
-	private void stopCacheServers() throws IOException, InterruptedException {
+	private static void stopCacheServers() throws IOException, InterruptedException {
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
 	}

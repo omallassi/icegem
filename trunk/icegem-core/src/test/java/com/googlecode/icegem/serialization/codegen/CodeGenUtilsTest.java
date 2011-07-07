@@ -1,20 +1,33 @@
 package com.googlecode.icegem.serialization.codegen;
 
-import org.fest.assertions.Assertions;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import java.util.Collection;
 
-import com.googlecode.icegem.serialization.codegen.CodeGenUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import com.gemstone.bp.edu.emory.mathcs.backport.java.util.Arrays;
+import com.googlecode.icegem.serialization.primitive.TestParent;
+import static org.junit.Assert.*;
 
 /**
  * @author igolovach
  */
+@RunWith(Parameterized.class)
+public class CodeGenUtilsTest extends TestParent {
 
-public class CodeGenUtilsTest {
-
-    @DataProvider
-    public Object[][] data() {
-        return new Object[][] {
+	String name;
+	Class<?> clazz; 
+	
+	public CodeGenUtilsTest(Class<?> clazz, String name) {
+		this.clazz = clazz;
+		this.name = name;
+	}
+	
+    @Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
                 // Integer
                 new Object[] {Integer.class, "java.lang.Integer"},
                 new Object[] {Integer[].class, "java.lang.Integer[]"},
@@ -60,17 +73,17 @@ public class CodeGenUtilsTest {
                 new Object[] {double[].class, "double[]"},
                 new Object[] {double[][].class, "double[][]"},
                 new Object[] {double[][][].class, "double[][][]"},
-        };
+        });
     }
     
-    @Test(dataProvider = "data")
-    public void testClassName(Class<?> clazz, String name) {
-        Assertions.assertThat(CodeGenUtils.className(clazz)).isEqualTo(name);
+    @Test
+    public void testClassName() {
+        assertEquals(CodeGenUtils.className(clazz),name);
         // #1
-        Assertions.assertThat(CodeGenUtils.className(char[].class)).isEqualTo("char[]");
+        assertEquals(CodeGenUtils.className(char[].class),"char[]");
         // #2
-        Assertions.assertThat(CodeGenUtils.className(char[][].class)).isEqualTo("char[][]");
+        assertEquals(CodeGenUtils.className(char[][].class),"char[][]");
         // #10
-        Assertions.assertThat(CodeGenUtils.className(char[][][][][][][][][][].class)).isEqualTo("char[][][][][][][][][][]");
+        assertEquals(CodeGenUtils.className(char[][][][][][][][][][].class),"char[][][][][][][][][][]");
     }
 }

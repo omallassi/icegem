@@ -1,5 +1,7 @@
 package com.googlecode.icegem.serialization.versioning;
 
+
+import static org.junit.Assert.*;
 import com.gemstone.gemfire.DataSerializer;
 import com.googlecode.icegem.serialization.HierarchyRegistry;
 import com.googlecode.icegem.serialization.primitive.TestParent;
@@ -14,25 +16,28 @@ import com.googlecode.icegem.serialization.versioning.beans.wrong.v1.Bear;
 import com.googlecode.icegem.serialization.versioning.beans.wrong.v2.Man;
 import com.googlecode.icegem.serialization.versioning.beans.wrong.v2.Rabbit;
 import com.googlecode.icegem.serialization.versioning.beans.wrong.v2.Table;
-import com.googlecode.icegem.serialization.versioning.beans.wrong.v2.Woman;
 import com.googlecode.icegem.serialization.versioning.beans.versionhistory.v2.Keyboard;
+import com.googlecode.icegem.serialization.versioning.beans.wrong.v2.Woman;
 import javassist.CannotCompileException;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.*;
 import java.util.Arrays;
 
+import junit.framework.Assert;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 /**
- * User: akondratyev
+ * @author akondratyev
  * @author Andrey Stepanov aka standy
+ * @author Alexey Kharlamov <aharlamov@gmail.com>
  */
 public class XDeserializeForVersioningTest extends TestParent {
-    @BeforeTest
-    public void before() throws InvalidClassException, CannotCompileException {
-        HierarchyRegistry.registerAll(getContextClassLoader(),
+    @BeforeClass
+    public static void before() throws InvalidClassException, CannotCompileException {
+        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(),
                 Dog.class, Bear.class, Company.class, Son.class,
                 Car.class, Person.class, Rabbit.class, Man.class,
                 Woman.class, Table.class, Keyboard.class, Mouse.class);
@@ -48,10 +53,10 @@ public class XDeserializeForVersioningTest extends TestParent {
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
         Dog dog = DataSerializer.readObject(new DataInputStream(byteArray));
-        assertThat(dog.getName()).isEqualTo("Rex");
+        Assert.assertEquals("Rex", dog.getName());
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expected = ClassCastException.class)
     public void deserializeNewVersionOfClassByOldVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("bear.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("bear.versionTest"));
@@ -73,8 +78,8 @@ public class XDeserializeForVersioningTest extends TestParent {
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
         Company c2 = DataSerializer.readObject(new DataInputStream(byteArray));
-        assertThat(c2.getId()).isEqualTo(123);
-        assertThat(c2.getName()).isNull();
+        assertEquals(c2.getId(), 123);
+        assertNull(c2.getName());
     }
 
     @Test
@@ -87,13 +92,13 @@ public class XDeserializeForVersioningTest extends TestParent {
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
 
         Son son = DataSerializer.readObject(new DataInputStream(byteArray));
-        assertThat(son.getId()).isEqualTo(0);
-        assertThat(son.getName()).as("son's name");
-        assertThat(son.getAge()).isEqualTo(23);
-        assertThat(son.getSisters()).isNull();
-        assertThat(son.getBirthday()).isNull();
-        assertThat(son.getChildren()).isNull();
-        assertThat(son.getBrothers()).isEqualTo(Arrays.asList(4L, 3L, 5L, 1L));
+        assertEquals(son.getId(), 0);
+        assertEquals(son.getName(), "son's name");
+        assertEquals(son.getAge(), 23);
+        assertNull(son.getSisters());
+        assertNull(son.getBirthday());
+        assertNull(son.getChildren());
+        assertEquals(son.getBrothers(), Arrays.asList(4L, 3L, 5L, 1L));
     }
 
     @Test
@@ -105,13 +110,13 @@ public class XDeserializeForVersioningTest extends TestParent {
 
         ByteArrayInputStream byteArray = new ByteArrayInputStream(buf);
         Car car = DataSerializer.readObject(new DataInputStream(byteArray));
-        assertThat(car.getModel()).isEqualTo("golf");
-        assertThat(car.getVersion()).isEqualTo("5");
-        assertThat(car.getSeatCount()).isEqualTo(4);
-        assertThat(car.isSedan()).isTrue();
+        assertEquals(car.getModel(), "golf");
+        assertEquals(car.getVersion(), "5");
+        assertEquals(car.getSeatCount(), 4);
+        assertTrue(car.isSedan());
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expected = ClassCastException.class)
     public void deserializeWithNewClassModelAndOldBeanVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("person.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("person.versionTest"));
@@ -122,7 +127,7 @@ public class XDeserializeForVersioningTest extends TestParent {
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expected = ClassCastException.class)
     public void deserializeByNewVersionWithMissedFieldVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("rabbit.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("rabbit.versionTest"));
@@ -134,7 +139,7 @@ public class XDeserializeForVersioningTest extends TestParent {
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expected = ClassCastException.class)
     public void deserializeByNewVersionWithDeletedField() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("man.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("man.versionTest"));
@@ -146,7 +151,7 @@ public class XDeserializeForVersioningTest extends TestParent {
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expected = ClassCastException.class)
     public void deserializeByNewVersionWithModifiedFieldVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("woman.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("woman.versionTest"));
@@ -158,7 +163,7 @@ public class XDeserializeForVersioningTest extends TestParent {
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expected = ClassCastException.class)
     public void deserializeByNewVersionWithModifiedFieldType() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("table.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("table.versionTest"));
@@ -170,7 +175,7 @@ public class XDeserializeForVersioningTest extends TestParent {
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(expectedExceptions = IOException.class)
+    @Test(expected = IOException.class)
     public void deserializeByVersionTwoWithSmallHistoryVersion() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("keyboard.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("keyboard.versionTest"));
@@ -181,7 +186,7 @@ public class XDeserializeForVersioningTest extends TestParent {
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @Test(expectedExceptions = ClassCastException.class)
+    @Test(expected = ClassCastException.class)
     public void deserializeByVersionThreeWithLookupOnSecondVersionModelClass() throws IOException, CannotCompileException, ClassNotFoundException {
         byte[] buf = new byte[(int) new File("mouse.versionTest").length()];
         DataInputStream in = new DataInputStream(new FileInputStream("mouse.versionTest"));
@@ -192,8 +197,8 @@ public class XDeserializeForVersioningTest extends TestParent {
         DataSerializer.readObject(new DataInputStream(byteArray));
     }
 
-    @AfterTest
-    public void deleteDataFile() {
+    @AfterClass
+    public static void deleteDataFile() {
         for(File file: new File(".").listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 if (name.endsWith(".versionTest"))

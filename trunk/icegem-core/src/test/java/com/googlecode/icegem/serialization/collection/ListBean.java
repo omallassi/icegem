@@ -1,11 +1,11 @@
 package com.googlecode.icegem.serialization.collection;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.BeanVersion;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
 
 /**
  * @author igolovach

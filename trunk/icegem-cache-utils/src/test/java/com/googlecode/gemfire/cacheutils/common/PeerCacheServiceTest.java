@@ -1,19 +1,26 @@
 package com.googlecode.gemfire.cacheutils.common;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.fest.assertions.Assertions;
 
-import java.util.Set;
-import java.util.HashSet;
-
-import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.admin.AdminException;
+import com.gemstone.gemfire.cache.AttributesFactory;
+import com.gemstone.gemfire.cache.Cache;
+import com.gemstone.gemfire.cache.CacheFactory;
+import com.gemstone.gemfire.cache.DataPolicy;
+import com.gemstone.gemfire.cache.Region;
+import com.gemstone.gemfire.cache.RegionAttributes;
+import com.gemstone.gemfire.cache.RegionShortcut;
+import com.gemstone.gemfire.cache.Scope;
 import com.googlecode.icegem.cacheutils.common.AdminService;
 import com.googlecode.icegem.cacheutils.common.PeerCacheService;
 import com.googlecode.icegem.cacheutils.updater.Updater;
 
-//TODO upgrade this test
+@Ignore
 public class PeerCacheServiceTest {
     private static final Logger log = LoggerFactory.getLogger(PeerCacheServiceTest.class);
     private static final int LOCATOR_PORT = 10356;
@@ -37,7 +44,6 @@ public class PeerCacheServiceTest {
         Updater updater = new Updater();
         log.info("Updating regions...");
         updater.updateRegions(regions);
-        Assertions.assertThat(true);
         //Assertions.assertThat(new TreeSet<String>(regionNames)).isEqualTo(new TreeSet<String>(expectedRegionNames));
     }
 

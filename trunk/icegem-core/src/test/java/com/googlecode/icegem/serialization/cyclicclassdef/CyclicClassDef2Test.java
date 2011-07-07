@@ -1,14 +1,15 @@
 package com.googlecode.icegem.serialization.cyclicclassdef;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-import com.googlecode.icegem.serialization.primitive.TestParent;
+import java.io.InvalidClassException;
 
 import javassist.CannotCompileException;
-import org.fest.assertions.Assertions;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
-import java.io.InvalidClassException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import com.googlecode.icegem.serialization.primitive.TestParent;
+import static org.junit.Assert.*;
 
 /**
  * @author igolovach
@@ -17,9 +18,9 @@ import java.io.InvalidClassException;
 public class CyclicClassDef2Test extends TestParent {
 
     @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
+    public static void before() throws InvalidClassException, CannotCompileException {
         // register
-        HierarchyRegistry.registerAll(getContextClassLoader(), CyclicClassDef2BeanA.class, CyclicClassDef2BeanB.class);
+        HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(), CyclicClassDef2BeanA.class, CyclicClassDef2BeanB.class);
     }
 
     @Test
@@ -31,8 +32,8 @@ public class CyclicClassDef2Test extends TestParent {
         CyclicClassDef2BeanA actual = (CyclicClassDef2BeanA) serializeAndDeserialize(expected);
 
         // assert Company correct
-        Assertions.assertThat(actual.getData()).isEqualTo(expected.getData());
-        Assertions.assertThat(actual.getNext()).isEqualTo(null);
+        assertEquals(actual.getData(),expected.getData());
+        assertNull(actual.getNext());
     }
 
     @Test
@@ -57,13 +58,13 @@ public class CyclicClassDef2Test extends TestParent {
         CyclicClassDef2BeanB actualB1 = actualA1.getNext();
 
         // assert Company correct
-        Assertions.assertThat(actualA0.getData()).isEqualTo(expectedA0.getData());
-        Assertions.assertThat(actualA1.getData()).isEqualTo(expectedA1.getData());
-        Assertions.assertThat(actualB0.getData()).isEqualTo(expectedB0.getData());
-        Assertions.assertThat(actualB1.getData()).isEqualTo(expectedB1.getData());
-        Assertions.assertThat(actualA0.getNext()).isEqualTo(actualB0);
-        Assertions.assertThat(actualA1.getNext()).isEqualTo(actualB1);
-        Assertions.assertThat(actualB0.getNext()).isEqualTo(actualA1);
-        Assertions.assertThat(actualB1.getNext()).isEqualTo(null);
+        assertEquals(actualA0.getData(),expectedA0.getData());
+        assertEquals(actualA1.getData(),expectedA1.getData());
+        assertEquals(actualB0.getData(),expectedB0.getData());
+        assertEquals(actualB1.getData(),expectedB1.getData());
+        assertEquals(actualA0.getNext(),actualB0);
+        assertEquals(actualA1.getNext(),actualB1);
+        assertEquals(actualB0.getNext(),actualA1);
+        assertNull(actualB1.getNext());
     }
 }

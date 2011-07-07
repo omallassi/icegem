@@ -1,11 +1,18 @@
 package com.googlecode.icegem.serialization.codegen.impl;
 
-import com.googlecode.icegem.serialization.codegen.XField;
-import com.googlecode.icegem.serialization.codegen.impl.primitive.*;
-import com.googlecode.icegem.serialization.codegen.impl.primitivearray.*;
-import com.googlecode.icegem.serialization.codegen.impl.system.*;
-import com.googlecode.icegem.serialization.codegen.impl.wrapper.*;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.googlecode.icegem.serialization.codegen.XProperty;
+import com.googlecode.icegem.serialization.codegen.impl.primitive.ToDataPrimitiveProcessor;
+import com.googlecode.icegem.serialization.codegen.impl.primitivearray.ToDataFieldPrimitiveArrayProcessor;
+import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldCalendarProcessor;
+import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldConcreteEnumProcessor;
+import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldDateProcessor;
+import com.googlecode.icegem.serialization.codegen.impl.system.ToDataFieldStringProcessor;
+import com.googlecode.icegem.serialization.codegen.impl.wrapper.ToDataFieldWrapperProcessor;
 
 /**
  * Generate code that dispatched by 'SOME TYPE' and
@@ -54,7 +61,7 @@ public class ToDataFieldProcessor {
         //todo: Locale: StringToLocaleConverter
     }
 
-    public String process(XField field) {
+    public String process(XProperty field) {
         final Class<?> fieldClass = field.getType();
 
         // predefined

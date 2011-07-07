@@ -1,12 +1,14 @@
 package com.googlecode.icegem.serialization.primitive;
 
-import com.gemstone.gemfire.DataSerializer;
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+
+import junit.framework.TestCase;
+
+import com.gemstone.gemfire.DataSerializer;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
 
 /**
  * Parent for tests with common utility code
@@ -14,7 +16,6 @@ import java.io.DataOutputStream;
  * @author igolovach
  */
 public class TestParent {
-
     public static final String MSG = "You test throw Exception. We mask it by RuntimeException. If you need concrete type - write serialization logic yourself.";
 
     public <T> T registerSerializeAndDeserialize(T obj) {
@@ -51,7 +52,7 @@ public class TestParent {
         }
     }
 
-    public ClassLoader getContextClassLoader() {
+    public static ClassLoader getContextClassLoader() {
         return Thread.currentThread().getContextClassLoader();
     }
 }

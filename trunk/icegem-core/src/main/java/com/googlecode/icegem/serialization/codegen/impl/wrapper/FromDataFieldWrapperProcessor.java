@@ -1,6 +1,6 @@
 package com.googlecode.icegem.serialization.codegen.impl.wrapper;
 
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 import com.googlecode.icegem.serialization.codegen.impl.FromDataProcessor;
 
 import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.firstLetterToUpperCase;
@@ -20,7 +20,7 @@ public class FromDataFieldWrapperProcessor implements FromDataProcessor {
         this.dataInputMethod = dataInputMethod;
     }
 
-    public String process(XField field) {
+    public String process(XProperty field) {
         String fieldName = field.getName();
         return "if (in.readByte() != 0) {\n" +
                 tab("result.set" + firstLetterToUpperCase(fieldName) + "(" + wrapperClassName + ".valueOf(in." + dataInputMethod + "()));\n") +

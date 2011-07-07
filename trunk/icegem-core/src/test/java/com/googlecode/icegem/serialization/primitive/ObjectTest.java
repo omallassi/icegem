@@ -1,26 +1,26 @@
 package com.googlecode.icegem.serialization.primitive;
 
-import com.googlecode.icegem.serialization.HierarchyRegistry;
-
-import javassist.CannotCompileException;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import java.io.InvalidClassException;
 
-import static org.fest.assertions.Assertions.assertThat;
+import javassist.CannotCompileException;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.googlecode.icegem.serialization.HierarchyRegistry;
+import static org.junit.Assert.*;
 
 /**
  * @author igolovach
  */
 
 public class ObjectTest extends TestParent {
-
-    @BeforeClass
-    public void before() throws InvalidClassException, CannotCompileException {
+	@BeforeClass
+    public static void before() throws InvalidClassException, CannotCompileException {
         // register
         HierarchyRegistry.registerAll(getContextClassLoader(), ObjectBean.class);
     }
+
 
     @Test
     public void testNull() {
@@ -31,10 +31,10 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getObj()).isNull();
+        assertNull(actual.getObj());
     }
 
-    @Test(expectedExceptions = RuntimeException.class) //NotSerializableException wrapped in RuntimeException by TestParent
+    @Test(expected = RuntimeException.class) //NotSerializableException wrapped in RuntimeException by TestParent
     public void testObject() {
         // create test bean
         ObjectBean expected = new ObjectBean();
@@ -44,7 +44,7 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getObj()).isNull();
+        assertNull(actual.getObj());
     }
 
     @Test
@@ -57,8 +57,8 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getObj()).isInstanceOf(String.class);
-        assertThat(actual.getObj()).isEqualTo(expected.getObj());
+        assertTrue(actual.getObj() instanceof String);
+        assertEquals(actual.getObj(), expected.getObj());
     }
 
     @Test
@@ -71,11 +71,11 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getObj()).isInstanceOf(Integer.class);
-        assertThat(actual.getObj()).isEqualTo(expected.getObj());
+        assertTrue(actual.getObj() instanceof Integer);
+        assertEquals(actual.getObj(), expected.getObj());
     }
 
-    @Test(expectedExceptions = StackOverflowError.class)
+    @Test(expected = StackOverflowError.class)
     public void testCycle1() {
         // create test bean
         ObjectBean expected = new ObjectBean();
@@ -85,7 +85,7 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
     }    
 
-    @Test(expectedExceptions = StackOverflowError.class)
+    @Test(expected = StackOverflowError.class)
     public void testCycle2() {
         // create test bean
         ObjectBean expectedA = new ObjectBean();
@@ -111,9 +111,9 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expectedA);
 
         // assert
-        assertThat(actual.getObj()).isInstanceOf(ObjectBean.class);
-        assertThat(((ObjectBean) actual.getObj()).getObj()).isInstanceOf(ObjectBean.class);
-        assertThat(((ObjectBean) ((ObjectBean) actual.getObj()).getObj()).getObj()).isNull();
+        assertTrue(actual.getObj() instanceof ObjectBean);
+        assertTrue(((ObjectBean) actual.getObj()).getObj() instanceof ObjectBean);
+        assertNull(((ObjectBean) ((ObjectBean) actual.getObj()).getObj()).getObj());
     }
 
     @Test
@@ -127,8 +127,8 @@ public class ObjectTest extends TestParent {
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
 
         // assert
-        assertThat(actual.getObj()).isInstanceOf(Object[].class);
-        assertThat(((Object[]) actual.getObj())).hasSize(expectedArr.length);
+        assertNotNull((Object[])actual.getObj());
+        assertEquals(((Object[]) actual.getObj()).length, expectedArr.length);
     }
 
     @Test
@@ -141,10 +141,10 @@ public class ObjectTest extends TestParent {
         // Serialize / Deserialize
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
 
-        // assert
-        assertThat(actual.getObj()).isInstanceOf(Object[].class);
-        assertThat(((Object[]) actual.getObj())).hasSize(expectedArr.length);
-        assertThat(((Object[]) actual.getObj())).isEqualTo(expectedArr);
+        // assert§
+        assertTrue(actual.getObj() instanceof Object[]);
+        assertEquals(((Object[]) actual.getObj()).length, expectedArr.length);
+        assertEquals(((Object[]) actual.getObj()), expectedArr);
     }
 }
 

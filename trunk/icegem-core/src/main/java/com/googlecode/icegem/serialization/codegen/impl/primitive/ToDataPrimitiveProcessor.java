@@ -1,6 +1,6 @@
 package com.googlecode.icegem.serialization.codegen.impl.primitive;
 
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 import com.googlecode.icegem.serialization.codegen.impl.ToDataProcessor;
 
 import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.firstLetterToUpperCase;
@@ -16,7 +16,7 @@ public class ToDataPrimitiveProcessor implements ToDataProcessor {
         this.dataOutputMethod = dataOutputMethod;
     }
 
-    public String process(XField field) {
+    public String process(XProperty field) {
         String fieldName = field.getName();
         if (field.isBoolean()) {
             return "out." + dataOutputMethod + "(concrete.is" + firstLetterToUpperCase(fieldName) + "());\n";

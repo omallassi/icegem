@@ -1,6 +1,6 @@
 package com.googlecode.icegem.serialization.codegen.impl.system;
 
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 import com.googlecode.icegem.serialization.codegen.impl.FromDataProcessor;
 
 import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.firstLetterToUpperCase;
@@ -16,11 +16,8 @@ import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.tab;
  */
 
 public class FromDataFieldStringProcessor implements FromDataProcessor {
-    public String process(XField field) {
+    public String process(XProperty field) {
         String fieldName = field.getName();
-        return "if (in.readByte() != 0) {\n" +
-//                tab("result.set" + firstLetterToUpperCase(fieldName) + "(in.readUTF());\n") +
-                tab("result.set" + firstLetterToUpperCase(fieldName) + "(com.gemstone.gemfire.DataSerializer.readString(in));\n") +
-                "}\n";
+        return tab("result.set" + firstLetterToUpperCase(fieldName) + "(com.gemstone.gemfire.DataSerializer.readString(in));\n");
     }
 }

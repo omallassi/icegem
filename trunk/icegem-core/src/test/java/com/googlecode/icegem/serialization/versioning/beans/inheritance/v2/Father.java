@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.versioning.beans.inheritance.v2;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,13 +14,10 @@ import java.util.List;
 @AutoSerializable(dataSerializerID = 8763)
 @BeanVersion(2)
 public class Father {
-    @FieldVersion(since = 2)
     private int id;
     private String name;
     private int age;
-    @FieldVersion(since = 2)
     private Date birthday;
-    @FieldVersion(since = 2)
     private List<Son> children;
 
     public Father() {
@@ -42,6 +39,7 @@ public class Father {
         this.age = age;
     }
 
+    @SinceVersion(2)
     public Date getBirthday() {
         return birthday;
     }
@@ -50,6 +48,7 @@ public class Father {
         this.birthday = birthday;
     }
 
+    @SinceVersion(2)
     public int getId() {
         return id;
     }
@@ -58,6 +57,7 @@ public class Father {
         this.id = id;
     }
 
+    @SinceVersion(3)
     public List<Son> getChildren() {
         return children;
     }

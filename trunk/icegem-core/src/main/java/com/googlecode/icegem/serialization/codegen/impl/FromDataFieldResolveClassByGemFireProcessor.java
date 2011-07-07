@@ -1,7 +1,7 @@
 package com.googlecode.icegem.serialization.codegen.impl;
 
 import com.googlecode.icegem.serialization.codegen.CodeGenUtils;
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 
 /**
  * Generate code that
@@ -14,7 +14,7 @@ import com.googlecode.icegem.serialization.codegen.XField;
 
 class FromDataFieldResolveClassByGemFireProcessor {
 
-//    public String process(XField field) {
+//    public String process(XProperty field) {
 //        String fieldName = field.getField().getName();
 //        String fullClassName = field.getField().getType().getName();
 //        String shortClassName = field.getField().getType().getSimpleName();
@@ -27,7 +27,7 @@ class FromDataFieldResolveClassByGemFireProcessor {
 //                + "}\n";
 //    }
 
-    public String process(XField field) {
+    public String process(XProperty field) {
         String fieldName = field.getName();
         String fullClassName = CodeGenUtils.className(field.getType());
 

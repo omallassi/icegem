@@ -6,7 +6,7 @@ import com.googlecode.icegem.serialization.BeanVersion;
 /**
  * @author Andrey Stepanov aka standy
  */
-@AutoSerializable(dataSerializerID = 1358062, headerVersion = -1)
+@AutoSerializable(dataSerializerID = 1358062)
 @BeanVersion(value = 1)
 public class Chair {
 }

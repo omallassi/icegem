@@ -1,6 +1,6 @@
 package com.googlecode.icegem.serialization.codegen.impl.system;
 
-import com.googlecode.icegem.serialization.codegen.XField;
+import com.googlecode.icegem.serialization.codegen.XProperty;
 import com.googlecode.icegem.serialization.codegen.impl.ToDataProcessor;
 
 import static com.googlecode.icegem.serialization.codegen.CodeGenUtils.firstLetterToUpperCase;
@@ -16,7 +16,7 @@ public class ToDataFieldConcreteEnumProcessor implements ToDataProcessor { //tod
     //todo: how GemFire serialize enum? what if it contains mutable fields? enum {int s; getA(){ret s} setB(arg) {s = arg}}
     // todo: warn if enum contains mutable fields?
 
-    public String process(XField field) {
+    public String process(XProperty field) {
         String fieldName = field.getName();
         String getter = "get" + firstLetterToUpperCase(fieldName) + "()";
         return "if (concrete." + getter + " == null) {\n" +

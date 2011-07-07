@@ -2,7 +2,7 @@ package com.googlecode.icegem.serialization.versioning.beans.wrong;
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 /**
  * @author Andrey Stepanov aka standy
@@ -10,7 +10,6 @@ import com.googlecode.icegem.serialization.FieldVersion;
 @AutoSerializable(dataSerializerID = 2345856)
 @BeanVersion(1)
 public class Bird {
-    @FieldVersion(since = -1)
     private String name;
 
     public Bird() {
@@ -20,6 +19,7 @@ public class Bird {
         this.name = name;
     }
 
+    @SinceVersion(-1)
     public String getName() {
         return name;
     }

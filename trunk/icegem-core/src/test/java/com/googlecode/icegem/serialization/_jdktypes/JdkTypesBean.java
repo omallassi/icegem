@@ -1,14 +1,30 @@
 package com.googlecode.icegem.serialization._jdktypes;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.BeanVersion;
-
 import java.io.File;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.Vector;
+
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.BeanVersion;
 
 /**
  * @author igolovach

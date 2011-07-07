@@ -1,17 +1,16 @@
 package itest.com.googlecode.icegem.cacheutils.replication;
 
-import static org.fest.assertions.Assertions.assertThat;
-
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import com.googlecode.icegem.utils.PropertiesHelper;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import com.googlecode.icegem.cacheutils.Launcher;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 /**
@@ -39,13 +38,13 @@ public class CheckReplicationToolTest {
 		false, false, false);
 
 	@BeforeClass
-	public void setUp() throws IOException, InterruptedException,
+	public static void setUp() throws IOException, InterruptedException,
 		TimeoutException {
 		startGateways();
 	}
 
 	@AfterClass
-	public void tearDown() throws IOException, InterruptedException {
+	public static void tearDown() throws IOException, InterruptedException {
 		stopGateways();
 	}
 
@@ -69,7 +68,7 @@ public class CheckReplicationToolTest {
 				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
 				"-t", "30000" });
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -91,7 +90,7 @@ public class CheckReplicationToolTest {
 				"check-replication", "-c", "clusterA=localhost[18081]", "-c",
 				"clusterB=localhost[18082]", "-t", "30000" });
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -115,7 +114,7 @@ public class CheckReplicationToolTest {
 				"-c", "clusterB=localhost[18082],localhost[18086]", "-c",
 				"clusterC=localhost[18083],localhost[18087]", "-t", "30000" });
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -138,7 +137,7 @@ public class CheckReplicationToolTest {
 				"clusterB=localhost[18082]", "-c", "clusterD=localhost[18084]",
 				"-t", "10000" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -159,7 +158,7 @@ public class CheckReplicationToolTest {
 			Launcher.class, vmArguments, new String[] { "check-replication",
 				"-c", "clusterA=localhost[18081]", "-t", "10000" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -171,7 +170,7 @@ public class CheckReplicationToolTest {
 				"clusterA=localhost[18081]", "-c", "clusterB=localhost[18082]",
 				"-c", "clusterC=localhost[18083]", "-t", "10000" });
 
-		assertThat(exitCode).isEqualTo(0);
+		assertEquals(exitCode, 0);
 	}
 
 	@Test
@@ -181,7 +180,7 @@ public class CheckReplicationToolTest {
 		int exitCode = javaProcessLauncher.runAndWaitProcessExitCode(
 			Launcher.class, null, new String[] { "check-replication" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -204,7 +203,7 @@ public class CheckReplicationToolTest {
 				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
 				"-t", "10000", "-r", "wrong" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
 	@Test
@@ -227,10 +226,10 @@ public class CheckReplicationToolTest {
 				"clusterB=localhost[18082]", "-c", "clusterC=localhost[18083]",
 				"-t", "30000" });
 
-		assertThat(exitCode).isEqualTo(1);
+		assertEquals(exitCode, 1);
 	}
 
-	private void startGateways() throws IOException, InterruptedException {
+	private static void startGateways() throws IOException, InterruptedException {
 		gatewayA = javaProcessLauncher
 			.runWithConfirmation(
 				ServerTemplate.class,
@@ -264,7 +263,7 @@ public class CheckReplicationToolTest {
 				null);
 	}
 
-	private void stopGateways() throws IOException, InterruptedException {
+	private static void stopGateways() throws IOException, InterruptedException {
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServerA);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServerB);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServerC);

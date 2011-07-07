@@ -1,17 +1,20 @@
 package com.googlecode.icegem.serialization.codegen;
 
-import com.googlecode.icegem.serialization.AutoSerializable;
-import com.googlecode.icegem.serialization.FieldVersion;
-import com.googlecode.icegem.serialization.Transient;
+import static java.util.Arrays.asList;
 
 import java.io.InvalidClassException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static java.util.Arrays.asList;
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.SinceVersion;
+import com.googlecode.icegem.serialization.Transient;
 
 /**
  * Util
@@ -19,7 +22,7 @@ import static java.util.Arrays.asList;
  * @author igolovach
  */
 
-public class Introspector { //todo: move to CodeGenUtils
+public class Introspector {
 
     // -------------------------- PUBLIC
 
@@ -34,72 +37,55 @@ public class Introspector { //todo: move to CodeGenUtils
         checkConstructorWithoutExceptions(constructor);
         checkParentConstructor(clazz);
         // getters
-        Map<String, Method> gettersMap = getPotentialGetters(clazz);
+        Map<String, Method> gettersMap = getPropertyGetters(clazz);
         for (Map.Entry<String, Method> getterEntry : gettersMap.entrySet()) {
             Method getter = getterEntry.getValue();
             checkGetterPublic(getter);
             checkGetterNoArg(getter);
             checkGetterWithoutExceptions(getter);
-            // todo: check getter not parametrized
             Method setter = getSetterForGetter(clazz, getter);
             checkSetterPublic(setter);
             checkSetterOneArg(setter);
             checkSetterReturnVoid(setter);
             checkSetterWithoutExceptions(setter);
             checkGetterSetterTheSameType(getter, setter);
-            // todo: check setter not parametrized
         }
-
-        // todo: check returned by getter classes?
     }
 
-    public static List<XField> getFields(final Class<?> clazz) {
+    public static List<XProperty> getProperties(final Class<?> clazz) {
         try {
             checkClassIsSerialized(clazz);
         } catch (InvalidClassException e) {
             //todo: or InvalidClassException?
             throw new RuntimeException("Method call getFields(...) for not serialized class " + clazz.getName() + " is incorrect", e);
         }
-        Map<String, Method> gettersMap = getPotentialGetters(clazz);
-        final ArrayList<XField> result = new ArrayList<XField>();
+        Map<String, Method> gettersMap = getPropertyGetters(clazz);
+        final ArrayList<XProperty> result = new ArrayList<XProperty>();
         for (Map.Entry<String, Method> entry : gettersMap.entrySet()) {
             final Method method = entry.getValue();
-            List annotations = getFieldAnnotation(clazz, entry.getKey());
-            int fieldVersion = 1;
-            for (Object annotation: annotations)
-                if (annotation instanceof FieldVersion) {
-                    fieldVersion = ((FieldVersion) annotation).since();
-                    if (fieldVersion < 1) {
-                        String fieldName = CodeGenUtils.firstLetterToLowerCase((method.getName().startsWith("is") ?
-                                method.getName().substring(2) : method.getName().substring(3)));
-                        throw new RuntimeException("Since value of annotation @FieldVersion must be positive, current since value = "
-                                + fieldVersion + " (field '" + fieldName + "', class '"  + clazz.getName() + "')");
-                    }
-                    break;
-                }
+
+            int sinceVersion = getMethodSinceVersion(method);
+            
             boolean isBoolean = false;
             if (method.getName().startsWith("is")) {
                 isBoolean = true;
             }
-            result.add(new XField(entry.getKey(), method.getReturnType(), method.getDeclaringClass(), annotations, fieldVersion, isBoolean));
+            result.add(new XProperty(entry.getKey(), method.getReturnType(), method.getDeclaringClass(), sinceVersion, isBoolean));
         }
         return result;
     }
 
-    private static List getFieldAnnotation(Class cc, String fieldName) {
-        do {
-            for(int i = 0; i < cc.getDeclaredFields().length; i++)
-                if (fieldName.equals(cc.getDeclaredFields()[i].getName())) {
-                    try {
-                        return Arrays.asList(cc.getDeclaredField(fieldName).getDeclaredAnnotations());
-                    } catch (NoSuchFieldException e) {
-                        e.printStackTrace();
-                    }
-                }
-            cc = cc.getSuperclass();
-        } while(cc != Object.class);
-        return Collections.emptyList();
-    }
+    private static int getMethodSinceVersion(Method method) {
+        int sinceVersion = 1;
+        SinceVersion annotation = method.getAnnotation(SinceVersion.class);
+        if (annotation != null) {
+        	sinceVersion = ((SinceVersion) annotation).value();
+            if (sinceVersion < 1) {
+                throw new IllegalArgumentException("@SinceVersion must be positive at " + method);
+            }
+        }
+        return sinceVersion;
+	}
 
     // -------------------------- PROTECTED
 
@@ -131,7 +117,7 @@ public class Introspector { //todo: move to CodeGenUtils
     }
 
     protected static void checkSetterReturnVoid(Method setter) throws InvalidClassException {
-        if (setter.getReturnType() != void.class) { //todo: or Void?
+        if (setter.getReturnType() != void.class) {
             throw new InvalidClassException("Setter " + setter.getName() + " in class " + setter.getDeclaringClass().getName() + " return not void but " + setter.getReturnType().getName());
         }
     }
@@ -175,7 +161,7 @@ public class Introspector { //todo: move to CodeGenUtils
      * @param clazz
      * @return
      */
-    protected static Map<String, Method> getPotentialGetters(Class<?> clazz) { //todo: clazz.getDeclaredMethods() + hierarchy up OR clazz.getMethods()?
+    protected static Map<String, Method> getPropertyGetters(Class<?> clazz) { //todo: clazz.getDeclaredMethods() + hierarchy up OR clazz.getMethods()?
         Map<String, Method> result = new HashMap<String, Method>();
 
         if (clazz != Object.class) {
@@ -186,7 +172,7 @@ public class Introspector { //todo: move to CodeGenUtils
                         final Annotation[] annArr = method.getDeclaredAnnotations();
                         boolean find = false;
                         for (Annotation ann : annArr) {
-                            if (ann.annotationType() == Transient.class) { //todo: ann.annotationType() or getClass()?
+                            if (ann.annotationType() == Transient.class) { 
                                 find = true;
                                 break;
                             }
@@ -228,7 +214,7 @@ public class Introspector { //todo: move to CodeGenUtils
     }
 
     protected static void checkSetterOneArg(Method setter) throws InvalidClassException {
-        Class[] types = setter.getParameterTypes();
+        Class<?>[] types = setter.getParameterTypes();
         if (types.length != 1) {
             throw new InvalidClassException("Setter " + setter.getName() + " in class " + setter.getDeclaringClass() + " do not have 1 arg but" + types.length + ": " + asList(types));
         }
@@ -241,8 +227,7 @@ public class Introspector { //todo: move to CodeGenUtils
     }
 
     protected static void checkGetterNoArg(Method getter) throws InvalidClassException {
-        Class[] types = getter.getParameterTypes();
-//        todo: or getter.getTypeParameters() ?
+        Class<?>[] types = getter.getParameterTypes();
         if (types.length != 0) {
             throw new InvalidClassException("Getter " + getter.getName() + " in class " + getter.getDeclaringClass() + " have arg " + asList(types));
         }
@@ -294,18 +279,3 @@ public class Introspector { //todo: move to CodeGenUtils
         }
     }
 }
-
-//todo:remove
-//class FFF {
-//    public static void main(String[] args) {
-//        System.out.println(Arrays.asList(A.class.getMethods()));
-//    }
-//}
-//
-//class A {
-//    protected int get() {return 1;}
-//}
-//
-//class AA extends A {
-//    public int get() {return 2;}
-//}

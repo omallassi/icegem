@@ -1,5 +1,12 @@
 package itest.com.googlecode.icegem.cacheutils.signallistener;
 
+import java.io.IOException;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
@@ -7,14 +14,6 @@ import com.googlecode.icegem.cacheutils.signallistener.WaitforTool;
 import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.PropertiesHelper;
 import com.googlecode.icegem.utils.ServerTemplate;
-//import org.junit.Ignore;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-
-import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * User: Artem Kondratev kondratevae@gmail.com
@@ -22,13 +21,13 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class SignalListenerTest {
 
-    private Process node;
-    private Region signalRegion;
-    private ClientCache clientCache;
-    private JavaProcessLauncher launcher = new JavaProcessLauncher();
+    private static Process node;
+    private static Region signalRegion;
+    private static ClientCache clientCache;
+    private static JavaProcessLauncher launcher = new JavaProcessLauncher();
 
     @BeforeClass
-    public void init() throws IOException, InterruptedException {
+    public static void init() throws IOException, InterruptedException {
         node = launcher.runWithConfirmation(ServerTemplate.class,
                 new String[] {"-DgemfirePropertyFile=signalListener.properties"},
                 null);
@@ -50,19 +49,17 @@ public class SignalListenerTest {
 
     @Test
     public void signalAppeared() throws InterruptedException {
-        int result = WaitforTool.waitSignal(signalRegion, "existedSignalKey", 5000, 1000);
-        assertThat(result).isEqualTo(0);
+        assertTrue(WaitforTool.waitSignal(signalRegion, "existedSignalKey", 5000, 1000));
     }
 
     @Test
     public void signalTimeout() throws InterruptedException {
-        int result = WaitforTool.waitSignal(signalRegion, "absentSignalKey", 5000, 1000);
-        assertThat(result).isNotEqualTo(0);
+        assertFalse(WaitforTool.waitSignal(signalRegion, "absentSignalKey", 5000, 1000));
 
     }
 
     @AfterClass
-    public void close() throws IOException, InterruptedException {
+    public static void close() throws IOException, InterruptedException {
         launcher.stopBySendingNewLineIntoProcess(node);
         if (clientCache != null)
             clientCache.close();
