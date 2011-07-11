@@ -437,17 +437,7 @@ SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets("SEL
 
 This component allows to execute paginated queries both from client and peer/server sides. It caches paginated query results in a help region and allows to iterate on them using paginated query API.
 
-==Creation==
-
-A paginated query can be created and configured using following constructors:
 {{{
-PaginatedQuery(GemFireCache cache, String regionName, String queryString);
-PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString);
-PaginatedQuery(GemFireCache cache, String regionName, String queryString, int pageSize);
-PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, int pageSize);
-PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters);
-PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, Object[] queryParameters);
-PaginatedQuery(GemFireCache cache, String regionName, String queryString, Object[] queryParameters, int pageSize);
 PaginatedQuery(GemFireCache cache, int queryLimit, String regionName, String queryString, Object[] queryParameters, int pageSize);
 }}}
 
@@ -484,33 +474,9 @@ Region<PaginatedQueryPageKey, List<Object>> paginatedQueryInfoRegion;
  # A query string for paginated query can be arbitrarily complex but entry key must be part of projection list.
  # For partitioned regions a query string must meet the requirements described in a GemFire documentation for querying partitioned regions. 
 
-==Paginated queries API==
-
-Paginated query support the following methods:
-
-{{{
-public class PaginatedQuery<V> {
-...
-public List<V> page(int pageNumber) throws QueryException {...};
-public List<V> next() throws QueryException {...};
-public List<V> previous() throws QueryException {...};
-public boolean hasNext() throws QueryException {...};
-public boolean hasPrevious() throws QueryException {...};
-public int getPageSize() {...};
-public int getTotalNumberOfPages() throws QueryException {...};
-public int getTotalNumberOfEntries() throws QueryException {...};
-public boolean isLimitExceeded() throws QueryException {...};
-...
-}
-}}}
-
-*Where method:*
+*Query object method:*
 
  * `page(int pageNumber)` - returns entries for a specified page number;
- * `next()` - returns next to the current page. For the first call of this method it will be a first page;
- * `previous()` - returns previous to the current page;
- * `hasNext()` - checks that the query has the next page;
- * `hasPrevious()` - checks that query has the previous page;
  * `getPageSize()` - returns size of page (page size is 20 by default);
  * `getTotalNumberOfPages()` - returns a total number of query pages;
  * `getTotalNumberOfEntries()` - returns a total number of query entries;
@@ -632,9 +598,7 @@ In such case the `ExpirationController#process(String regionName, ExpirationPoli
 Cache utils consists of several utilities which can help with testing, deploying and monitoring of GemFire-related applications.
 
 This is the list of available commands:
-<wiki:comment>
   * compare
-</wiki:comment>
   * monitor
   * update
   * waitfor
