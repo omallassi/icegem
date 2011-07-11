@@ -623,41 +623,9 @@ new ExpirationPolicy() {
 
 == Processing with delays ==
 
-In case of using the method `ExpirationController#process(String regionName, ExpirationPolicy policy)` the processing node can be blocked if there is a lot of entries. This can block the other processing on this node. 
+The method `ExpirationController#process(String regionName, ExpirationPolicy policy)`  processing node can be overloaded. This can block the other activities. 
 
-Due to this we introduce the method `ExpirationController#process(String regionName, ExpirationPolicy policy, long packetSize, long packetDelay)`. It will do the same actions as the method with two parameters but will also stop the processing for `packetDelay` milliseconds after processing each `packetSize` entries.
-
-How it is implemented in ExpirationFunction:
-{{{
-
-[...]
-long packetDelay = expirationFunctionArguments.getPacketDelay();
-long packetSize = expirationFunctionArguments.getPacketSize();
-
-Region<Object, Object> region = PartitionRegionHelper.getLocalDataForContext(context);
-
-Set<Entry<Object, Object>> entrySet = region.entrySet();
-
-long packetCounter = 1;
-for (Entry<Object, Object> entry : entrySet) {
-
-  if ((packetDelay > 0) && ((packetCounter % packetSize) == 0)) {
-    Thread.sleep(packetDelay);
-  }
-
-  if (entry instanceof Region.Entry) {
-    Region.Entry<Object, Object> regionEntry = (Region.Entry<Object, Object>) entry;
-
-    if ((policy != null) && policy.isExpired(regionEntry)) {
-      region.destroy(entry.getKey());
-      destroyedEntriesCount++;
-    }
-  }
-
-  packetCounter++;
-}
-
-}}}
+In such case the `ExpirationController#process(String regionName, ExpirationPolicy policy, long batchSize, long batchDelay)` should be used. It does processing  in batches with delay of for `batchDelay` milliseconds between them.
 
 = Cache utils =
 
@@ -731,97 +699,16 @@ The following command will start comparator utility. Replicated region with path
 java -jar icegem-cache-utils-0.7-SNAPSHOT.jar comparator -p /data -s localhost[40402],localhost[40403],localhost[40405]
 }}}
 </wiki:comment>
+
 == monitor ==
 
-Informs about the changes in the GemFire nodes network. It sends email in case of some node has been added, hanged or removed, and in case of some exception. It is also possible to add custom handlers of the monitoring tool events.
-
-=== Example ===
-
-{{{
-MonitoringTool tool = new MonitoringTool();
-
-tool.addNodeEventHandler(new NodeEventHandler() {
-
-	private int count = 0;
-
-	public void handle(NodeEvent event) {
-		count++;
-	}
-
-	public int getCount() {
-		return count;
-	}
-});
-
-tool.start();
-
-// Monitor works
-
-tool.shutdown();
-}}}
-
+In addition to JMX agent monitor command is able to detect deadlocks of cache servers and provide hooks for custom handlers. 
 
 === Configuration ===
 
 All the configuration of the monitoring tool is in the two property files:
   * monitoring.properties - the main configuration file which points the tool to the GemFire network, sets delay and period, configures email texts and setups the email SMTP server settings
   * log4j.properties - configures logging
-
-==== monitoring.properties ====
-{{{
-# Gmail SMTP settings
-mail.smtp.host=smtp.gmail.com
-mail.smtp.socketFactory.port=465
-mail.smtp.socketFactory.class=javax.net.ssl.SSLSocketFactory
-mail.smtp.auth=true
-mail.smtp.port=465
-
-# Send emails using this account
-mail.user=john.smith.sendmail@gmail.com
-mail.password=JohnSmithSendmail
-
-# The email FROM address
-mail.from=alerts@icegem.googlecode.com
-# The addresses to whom send the alert email
-mail.to=john.smith.sendmail@gmail.com
-
-# Subject of the alert email
-com.googlecode.icegem.cacheutils.monitor.email.alert.subject=Icegem monitoring tool alert
-
-# Content of the alert email
-com.googlecode.icegem.cacheutils.monitor.email.alert.content=<body style="font: 14px Georgia"><p>The system has changed its status. This is the list of last events:</p>{0}<br /><p>Icegem monitoring tool,<br />{1}</p></body>
-
-# Subject of the exception email
-com.googlecode.icegem.cacheutils.monitor.email.exception.subject=Icegem monitoring tool exception
-
-# Content of the exception email
-com.googlecode.icegem.cacheutils.monitor.email.exception.content=<body style="font: 14px Georgia"><p>The following exception detected:</p><p>{0}</p><br /><p>Icegem monitoring tool,<br />{1}</p></body>
-}}}
-
-
-==== log4j.properties ====
-{{{
-# The format of the next line is [log_level, [appender1[,appender2][,appenderN]]]
-# log4j.rootLogger=error, stdout, file
-log4j.rootLogger=error, stdout
-
-# Console appender
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.target=System.out
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.conversionPattern=%m%n
-
-# File appender
-log4j.appender.file=org.apache.log4j.RollingFileAppender
-log4j.appender.file.maxFileSize=1024KB
-log4j.appender.file.maxBackupIndex=10
-log4j.appender.file.file=monitor.log
-log4j.appender.file.layout=org.apache.log4j.PatternLayout
-log4j.appender.file.layout.conversionPattern=%m%n
-
-# Logging levels
-log4j.logger.com.googlecode.icegem.cacheutils.monitor=info
-}}}
 
 === Usage help ===
 
@@ -857,7 +744,9 @@ Monitor will check periodically all the servers related to locator `localhost[10
 
 == update ==
 
-Simply gets the value for each entry of the region and puts it back to the same key. This cause "update" of the value.
+The command traverses region and simply gets the value for each entry of the region and puts it back to the same key. This is required to upgrade binary form of object in persistent storage to format used by the currently deployed code. 
+
+While this can be done in run-time, if any problem occurs, system lock down can happen. So the update has to be done before go live.
 
 === Usage help ===
 
@@ -909,47 +798,7 @@ java -jar icegem-cache-utils-0.7-SNAPSHOT.jar signal -region signalRegion -locat
 
 == check-replication ==
 
-Checks that replication works over the specified clusters. Also measures and prints latency for each replication direction.
-
-=== Gateway configuration ===
-
-This is an example of gateway configuration:
-{{{
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE cache PUBLIC "-//GemStone Systems, Inc.//GemFire Declarative Cache 6.5//EN" "http://www.gemstone.com/dtd/cache6_5.dtd">
-<cache>
-	<gateway-hub id="hubA" port="22222">
-		<gateway id="gatewayA">
-			<gateway-endpoint id="gatewayB" host="localhost"
-				port="33333" />
-			<!-- <gateway-endpoint id="gatewayC" host="localhost" port="44444" /> -->
-			<gateway-queue enable-persistence="true"
-				disk-store-name="aDiskStore" />
-		</gateway>
-	</gateway-hub>
-
-	<disk-store name="aDiskStore">
-		<disk-dirs>
-			<disk-dir>target</disk-dir>
-		</disk-dirs>
-	</disk-store>
-
-	<region name="proxy" refid="REPLICATE_PROXY">
-		<region-attributes enable-gateway="true">
-			<subscription-attributes interest-policy="all" />
-		</region-attributes>
-	</region>
-</cache>
-}}}
-
-Please note that each gateway should have a technical region "proxy" (corresponds to --region option):
-{{{
-<region name="proxy" refid="REPLICATE_PROXY">
-	<region-attributes enable-gateway="true">
-		<subscription-attributes interest-policy="all" />
-	</region-attributes>
-</region>
-}}}
+Checks that WAN replication works between the specified clusters. Also measures and prints latency for each replication link.  Due the chosen measurement method the displayed values give higher threshold for latency which can be significantly shorter. 
 
 === Usage help ===
 
@@ -961,7 +810,7 @@ usage: check-replication [options]
  -c,--cluster <cluster=locators>   Cluster name and list of its locators.
                                    There should be at least two clusters.
                                    Example: -c
-                                   cluster1=host1[port1],host2[port2] -c
+                                   cluster1=locator1[port1],locator2[port2] -c
                                    cluster2=host3[port3]
  -h,--help                         Print usage information
  -r,--region <arg>                 The name of region for this test.
