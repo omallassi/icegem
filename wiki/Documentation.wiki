@@ -103,12 +103,12 @@ System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
 
 = Bean versioning =
 
-Icegem supports data model versioning. It's achieved by using two annotations `@BeanVersion` and `@FieldVersion`.
+Icegem supports data model versioning. It's achieved by using two annotations `@BeanVersion` and `@SinceVersion`.
 
 In accordance to serialization/deserialization process we impose some restrictions for classes that use versioning:
 
  * already existed in previous versions of the class fields can't be deleted in new versions;
- * a field that doesn't exist in the first version should be annotated with `@FieldVersion` specifying version from which this field appeared. `@FieldVersion` value should be positive;
+ * a field that doesn't exist in the first version should be annotated with `@SinceVersion` specifying version from which this field appeared. `@SinceVersion` value should be positive;
  * all versions of a class should have annotation `@AutoSerializable` with the same `dataSerializerID`.
 
 These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object).
@@ -158,13 +158,13 @@ package com.googlecode.icegem.serialization.versioning.beans.previousversion.bea
 
 import com.googlecode.icegem.serialization.AutoSerializable;
 import com.googlecode.icegem.serialization.BeanVersion;
-import com.googlecode.icegem.serialization.FieldVersion;
+import com.googlecode.icegem.serialization.SinceVersion;
 
 @AutoSerializable(dataSerializerID = 1412, versionHistoryLength = 2)
 @BeanVersion(2)
 public class Company {
     private int id;
-    @FieldVersion(since = 2)
+    
     private String name;
 
     public Company() {
@@ -178,6 +178,7 @@ public class Company {
         this.id = id;
     }
 
+    @SinceVersion(2)
     public String getName() {
         return name;
     }
