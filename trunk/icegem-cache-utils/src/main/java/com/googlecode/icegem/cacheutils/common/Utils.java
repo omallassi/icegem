@@ -3,9 +3,20 @@ package com.googlecode.icegem.cacheutils.common;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import com.googlecode.icegem.cacheutils.monitor.controller.model.Node;
+import com.googlecode.icegem.serialization.AutoSerializable;
+import com.googlecode.icegem.serialization.HierarchyRegistry;
 
 /**
  * The different utility operations related to the monitoring tool and its
@@ -136,7 +147,7 @@ public class Utils {
 		if (message != null) {
 			System.err.println(message);
 		}
-		
+
 		if (t != null) {
 			t.printStackTrace(System.err);
 		}
@@ -150,5 +161,63 @@ public class Utils {
 
 	public static void exitWithFailure() {
 		exitWithFailure(null);
+	}
+
+	public static String stringListToCsv(List<String> list) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("[");
+
+		if (list != null) {
+			Iterator<String> it = list.iterator();
+			while (it.hasNext()) {
+				sb.append(it.next());
+
+				if (it.hasNext()) {
+					sb.append(",");
+				}
+			}
+		}
+
+		sb.append("]");
+
+		return sb.toString();
+	}
+
+	public static List<String> csvToStringList(String csv) {
+		List<String> result = null;
+
+		if (csv == null || csv.trim().length() == 0) {
+			result = new ArrayList<String>();
+		} else {
+			csv = csv.substring(1, csv.length() - 1);
+
+			result = Arrays.asList(csv.split(","));
+		}
+
+		return result;
+	}
+
+	public static void registerClasses(List<String> packages) throws Exception {
+		if ((packages != null) && (packages.size() > 0)) {
+			List<Class<?>> classesFromPackages = new ArrayList<Class<?>>();
+
+			for (String pack : packages) {
+				ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(
+					false);
+				provider.addIncludeFilter(new AnnotationTypeFilter(
+					AutoSerializable.class));
+				Set<BeanDefinition> candidateComponents = provider
+					.findCandidateComponents(pack);
+				for (BeanDefinition beanDefinition : candidateComponents) {
+					String className = beanDefinition.getBeanClassName();
+					final Class<?> clazz = Class.forName(className);
+					classesFromPackages.add(clazz);
+				}
+			}
+
+			HierarchyRegistry.registerAll(Thread.currentThread()
+				.getContextClassLoader(), classesFromPackages);
+		}
 	}
 }
