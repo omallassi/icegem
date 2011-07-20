@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -161,41 +159,6 @@ public class Utils {
 
 	public static void exitWithFailure() {
 		exitWithFailure(null);
-	}
-
-	public static String stringListToCsv(List<String> list) {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("[");
-
-		if (list != null) {
-			Iterator<String> it = list.iterator();
-			while (it.hasNext()) {
-				sb.append(it.next());
-
-				if (it.hasNext()) {
-					sb.append(",");
-				}
-			}
-		}
-
-		sb.append("]");
-
-		return sb.toString();
-	}
-
-	public static List<String> csvToStringList(String csv) {
-		List<String> result = null;
-
-		if (csv == null || csv.trim().length() == 0) {
-			result = new ArrayList<String>();
-		} else {
-			csv = csv.substring(1, csv.length() - 1);
-
-			result = Arrays.asList(csv.split(","));
-		}
-
-		return result;
 	}
 
 	public static void registerClasses(List<String> packages) throws Exception {
