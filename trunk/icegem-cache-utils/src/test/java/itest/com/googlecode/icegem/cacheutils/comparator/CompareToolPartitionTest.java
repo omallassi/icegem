@@ -94,7 +94,9 @@ public class CompareToolPartitionTest {
 		clientCache.close();
 	}
 
-	private void changeData(String locator, String regionName) {
+	private void changeData(String locator, String regionName)
+		throws InterruptedException {
+		
 		String host = locator.substring(0, locator.indexOf("["));
 		int port = Integer.parseInt(locator.substring(locator.indexOf("[") + 1,
 			locator.indexOf("]")));
@@ -108,6 +110,9 @@ public class CompareToolPartitionTest {
 		Region<Long, User> region = clientRegionFactory.create(regionName);
 
 		region.put(new Long(1), new User(2, "Ivan 2nd", 2, true));
+		region.destroy(new Long(2));
+		region.put(new Long(1000000000), new User(1000000000,
+			"Ivan 1000000000nd", 2, true));
 
 		clientCache.close();
 	}
@@ -135,8 +140,8 @@ public class CompareToolPartitionTest {
 						.getStringProperty("start-locator"),
 					"-tl",
 					cluster40705PropertiesHelper
-						.getStringProperty("start-locator"),
-						"-c", "itest.com.googlecode.icegem.cacheutils.comparator" });
+						.getStringProperty("start-locator"), "-c",
+					"itest.com.googlecode.icegem.cacheutils.comparator" });
 
 		long finishTime = System.currentTimeMillis();
 
@@ -150,9 +155,9 @@ public class CompareToolPartitionTest {
 	// 2 regions of 100000 records each compared in 4381ms
 	// 2 regions of 10000 records each compared in 3112ms
 	@Test
-	public void testMainPositivePerformance() throws FileNotFoundException,
+	public void testMainPerformance() throws FileNotFoundException,
 		IOException, InterruptedException {
-		System.out.println("testMainPositivePerformance");
+		System.out.println("testMainPerformance");
 
 		fillData(
 			cluster40704PropertiesHelper.getStringProperty("start-locator"),
@@ -179,14 +184,43 @@ public class CompareToolPartitionTest {
 						.getStringProperty("start-locator"),
 					"-tl",
 					cluster40705PropertiesHelper
-						.getStringProperty("start-locator"), "-lf", "80",
-					"-c", "itest.com.googlecode.icegem.cacheutils.comparator" });
+						.getStringProperty("start-locator"), "-lf", "50", "-c",
+					"itest.com.googlecode.icegem.cacheutils.comparator" });
 
 		long finishTime = System.currentTimeMillis();
 
 		System.out.println("Compared in " + (finishTime - startTime) + "ms");
 
 		assertEquals(0, exitCode);
+
+		changeData(
+			cluster40704PropertiesHelper.getStringProperty("start-locator"),
+			REGION_NAME);
+
+		startTime = System.currentTimeMillis();
+		exitCode = javaProcessLauncher
+			.runAndWaitProcessExitCode(
+				Launcher.class,
+				vmArguments,
+				new String[] {
+					"compare",
+					"-sr",
+					REGION_NAME,
+					"-tr",
+					REGION_NAME,
+					"-sl",
+					cluster40704PropertiesHelper
+						.getStringProperty("start-locator"),
+					"-tl",
+					cluster40705PropertiesHelper
+						.getStringProperty("start-locator"), "-lf", "50", "-c",
+					"itest.com.googlecode.icegem.cacheutils.comparator" });
+
+		finishTime = System.currentTimeMillis();
+
+		System.out.println("Compared in " + (finishTime - startTime) + "ms");
+
+		assertEquals(1, exitCode);
 	}
 
 	@Test
@@ -216,8 +250,8 @@ public class CompareToolPartitionTest {
 						.getStringProperty("start-locator"),
 					"-tl",
 					cluster40705PropertiesHelper
-						.getStringProperty("start-locator"),
-						"-c", "itest.com.googlecode.icegem.cacheutils.comparator" });
+						.getStringProperty("start-locator"), "-c",
+					"itest.com.googlecode.icegem.cacheutils.comparator" });
 
 		long finishTime = System.currentTimeMillis();
 

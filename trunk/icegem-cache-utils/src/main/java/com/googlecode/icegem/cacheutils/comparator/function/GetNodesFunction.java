@@ -1,6 +1,9 @@
-package com.googlecode.icegem.cacheutils.comparator;
+package com.googlecode.icegem.cacheutils.comparator.function;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import com.gemstone.gemfire.cache.Declarable;
@@ -11,11 +14,9 @@ import com.gemstone.gemfire.cache.execute.RegionFunctionContext;
 import com.gemstone.gemfire.cache.execute.ResultSender;
 import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
 import com.googlecode.icegem.cacheutils.common.Utils;
+import com.googlecode.icegem.cacheutils.comparator.model.Node;
 
-/**
- * Just returns zero.
- */
-public class HashcodeFunction extends FunctionAdapter implements Declarable {
+public class GetNodesFunction extends FunctionAdapter implements Declarable {
 
 	private static final long serialVersionUID = -6448375948152121283L;
 
@@ -32,8 +33,9 @@ public class HashcodeFunction extends FunctionAdapter implements Declarable {
 		try {
 			RegionFunctionContext context = (RegionFunctionContext) functionContext;
 
-			HashcodeFunctionArguments arguments = (HashcodeFunctionArguments) context.getArguments();
-			
+			GetNodesFunctionArguments arguments = (GetNodesFunctionArguments) context
+				.getArguments();
+
 			Utils.registerClasses(arguments.getPackages());
 
 			Region<?, ?> region = context.getDataSet();
@@ -42,32 +44,73 @@ public class HashcodeFunction extends FunctionAdapter implements Declarable {
 				region = PartitionRegionHelper.getLocalData(region);
 			}
 
-			long hashcode = calculateHashcode(region, arguments.getLoadFactor());
+			Node[] nodes = getNodes(region, arguments.getLoadFactor(),
+				arguments.getIds(), arguments.getShift());
 
-			resultSender.lastResult(hashcode);
+			resultSender.lastResult(nodes);
 		} catch (Throwable t) {
 			resultSender.sendException(t);
 		}
 	}
 
-	public long calculateHashcode(Region<?, ?> region, Integer loadFactor) {
-		long hashcode = 0;
+	public Node[] getNodes(Region<?, ?> region, Integer loadFactor, long[] ids,
+		int shift) {
+
+		Map<Long, Node> idToNodeMap = createIdToNodeMap(ids);
+
+		final long baseMask = shift > 63 ? 0 : 0xFFFFFFFFFFFFFFFFL << shift;
+		final long childrenBaseMask = 0xFFFFFFFFFFFFFFFFL << (shift - 16);
 
 		long lastWakeUpTime = System.currentTimeMillis();
 		for (Object key : region.keySet()) {
 			Object value = region.get(key);
 
-			int keyHashcode = key.hashCode();
-			int valueHashcode = value.hashCode();
+			long entryHashcode = calculateEntryHashcode(key, value);
+			long id = entryHashcode & baseMask;
+			long childId = entryHashcode & childrenBaseMask;
 
-			long entryHashcode = (((long) keyHashcode) << 32) + valueHashcode;
-
-			hashcode += entryHashcode;
+			Node node = idToNodeMap.get(id);
+			if (node != null) {
+				Node newNode = new Node(id);
+				Node child = new Node(childId);
+				child.addHashcode(entryHashcode);
+				if (childrenBaseMask == 0xFFFFFFFFFFFFFFFFL) {
+					child.setData(key);
+				}
+				newNode.addChild(child);
+				newNode.addHashcode(entryHashcode);
+				
+				node.merge(newNode);
+				
+				idToNodeMap.put(id, node);
+			}
 
 			lastWakeUpTime = sleep(lastWakeUpTime, loadFactor);
 		}
 
-		return hashcode;
+		return mapToNodeArray(idToNodeMap);
+	}
+
+	private Map<Long, Node> createIdToNodeMap(long[] ids) {
+		Map<Long, Node> result = new HashMap<Long, Node>();
+
+		for (long id : ids) {
+			result.put(id, new Node(id));
+		}
+
+		return result;
+	}
+
+	private Node[] mapToNodeArray(Map<Long, Node> map) {
+		Collection<Node> values = map.values();
+		return values.toArray(new Node[values.size()]);
+	}
+
+	private long calculateEntryHashcode(Object key, Object value) {
+		int keyHashcode = key.hashCode();
+		int valueHashcode = value.hashCode();
+
+		return (((long) valueHashcode) << 32) + keyHashcode;
 	}
 
 	private long sleep(long lastWakeUpTime, Integer loadFactor) {
@@ -81,7 +124,7 @@ public class HashcodeFunction extends FunctionAdapter implements Declarable {
 				Thread.sleep(BASE_MULTIPLIER * (100 - loadFactor));
 			} catch (InterruptedException e) {
 			}
-			
+
 			hasSleep = true;
 		}
 
