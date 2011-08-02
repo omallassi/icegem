@@ -8,14 +8,16 @@ import com.gemstone.gemfire.cache.execute.FunctionContext;
 import com.gemstone.gemfire.cache.execute.ResultSender;
 import com.gemstone.gemfire.cache.partition.PartitionRegionHelper;
 
-import java.util.List;
 import java.util.Set;
 
 /**
+ * Function for clearing regions of different types.
+ * @see com.googlecode.icegem.utils.CacheUtils for more details.
+ *
  * @author Andrey Stepanov aka standy
  */
-public class ClearPartitionedRegionFunction extends FunctionAdapter {
-    private final static String FUNCTION_ID = ClearPartitionedRegionFunction.class.getName();
+public class ClearRegionFunction extends FunctionAdapter {
+    private final static String FUNCTION_ID = ClearRegionFunction.class.getName();
 
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     @Override

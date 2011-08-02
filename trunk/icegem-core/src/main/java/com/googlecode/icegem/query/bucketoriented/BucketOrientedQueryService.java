@@ -26,7 +26,7 @@ public class BucketOrientedQueryService {
     private static Logger logger = LoggerFactory.getLogger(BucketOrientedQueryService.class);
 
     /**
-     * Executes a particular query on specified region using set of keys that represents buckets. The set of buckets is
+     * Executes a particular query on specified region using a set of keys that represents buckets. The set of buckets is
      * determined by keys of entries that are stored in such buckets: - real and fake keys can be used (such key should
      * have the same routing object as bucket's keys have); - it will be enough to specify one key for each bucket. Work
      * of this method is based on execution of function.
@@ -65,10 +65,8 @@ public class BucketOrientedQueryService {
             throw new QueryException("You must specify query string for execution");
         }
 
-        int[] limitInfo = extractLimit(queryString);
-        if (limitInfo[0] != -1) {
-            queryString = queryString.substring(0, limitInfo[1]);
-        }
+        int limit = extractLimit(queryString);
+
         BucketOrientedQueryFunctionArgument functionArgument = new BucketOrientedQueryFunctionArgument(queryString, queryParameters);
 
         BucketOrientedQueryFunction function = new BucketOrientedQueryFunction();
@@ -84,25 +82,25 @@ public class BucketOrientedQueryService {
             logger.warn(e.getMessage());
             throw new QueryException(e.getMessage());
         }
-        return formatSelectResults(queryResults, limitInfo[0]);
+        return formatSelectResults(queryResults, limit);
     }
 
     /**
-     * Extracts limit and position of limit keyword from query string.
+     * Extracts limit value from query string.
      * 
      * @param queryString of type String
-     * @return int[]
+     * @return int
      */
-    private static int[] extractLimit(String queryString) {
+    private static int extractLimit(String queryString) {
         int limitIndex = queryString.lastIndexOf("limit");
         if (limitIndex == -1) {
             limitIndex = queryString.lastIndexOf("LIMIT");
         }
         if (limitIndex == -1) {
-            return new int[] { -1, -1 };
+            return limitIndex;
         }
         String limitNumber = queryString.substring(limitIndex + 5);
-        return new int[] { Integer.parseInt(limitNumber.trim()), limitIndex };
+        return Integer.parseInt(limitNumber.trim());
     }
 
     /**
@@ -124,6 +122,9 @@ public class BucketOrientedQueryService {
                 throw new IllegalStateException("Collection types for query result are different");
             }
             list.addAll(queryResult);
+            if (limit != -1 && list.size() >= limit) {
+                break;
+            }
         }
         return limit == -1 ? new ResultsCollectionWrapper(baseElementType, list) :
                 new ResultsCollectionWrapper(baseElementType, list, limit);
