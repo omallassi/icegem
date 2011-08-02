@@ -84,7 +84,7 @@ This is a [http://www.springsource.org/ Spring] bean for using in spring-based p
 
 Each class that will be auto serialized should be annotated with `@AutoSerializeble` annotation. This annotations contains the following properties:
  *# `dataSerializerID` - an unique id for generated data serializer (required). This id should be the same for all versions of a class;
- *# `versionHistoryLength` - a number of bean versions (except current) for which class model hash codes will be stored in DataSerializer. This property value should be positive, by default `versionHistoryLength = 5`.
+ *# `versionHistoryLength` - a number of bean versions (except current) for which class model hash codes will be stored in DataSerializer. This property value should be positive, by default `versionHistoryLength = 2`.
 
 == Autodetection of circular references ==
 
