@@ -78,11 +78,13 @@ public class PaginatedQuery<V> {
 
 	/** Field currentPageNumber */
 	private int pageSize;
-	private String queryString;
-	private Object[] queryParams;
+	/** Field queryString */
+    private String queryString;
+	/** Field queryParams */
+    private Object[] queryParams;
 	/** limit on query result */
 	private int queryLimit;
-
+    /** flag that indicates that information has been loaded */
 	private boolean infoLoaded;
 	/** flag that indicates that limit has been exceeded */
 	private boolean limitExceeded;
@@ -174,12 +176,12 @@ public class PaginatedQuery<V> {
 	 *             when query region or help region were not founded
 	 */
 	public PaginatedQuery(QueryService queryService, int queryLimit,
-			Region<Object, V> queriedRegion, String queryString,
+			Region<Object, V> region, String queryString,
 			Object[] queryParameters, int pageSize)
 			throws RegionNotFoundException {
 		this.queryService = queryService;
 
-		this.queryRegion = queriedRegion;
+		this.queryRegion = region;
 		if (queryRegion == null) {
 			throw new NullPointerException("Query region have to be provided");
 		}
@@ -219,8 +221,8 @@ public class PaginatedQuery<V> {
 	 * 
 	 * @param queryService
 	 *            The service to run the query.
-	 * @param regionName
-	 *            name of region for querying
+	 * @param region
+	 *            The region for querying
 	 * @param queryString
 	 *            query string that must return entry keys
 	 * @throws RegionNotFoundException
@@ -247,9 +249,9 @@ public class PaginatedQuery<V> {
 	 *             when query region or help region were not founded
 	 */
 	public PaginatedQuery(QueryService queryService,
-			Region<Object, V> queryRegion, String queryString, int pageSize)
+			Region<Object, V> region, String queryString, int pageSize)
 			throws RegionNotFoundException {
-		this(queryService, DEFAULT_QUERY_LIMIT, queryRegion, queryString,
+		this(queryService, DEFAULT_QUERY_LIMIT, region, queryString,
 				new Object[] {}, pageSize);
 	}
 

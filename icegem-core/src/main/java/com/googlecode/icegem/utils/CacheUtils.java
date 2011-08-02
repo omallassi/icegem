@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.execute.FunctionService;
 import com.gemstone.gemfire.cache.execute.ResultCollector;
-import com.googlecode.icegem.utils.function.ClearPartitionedRegionFunction;
+import com.googlecode.icegem.utils.function.ClearRegionFunction;
 
 /**
  * Help class for common operations with regions.
@@ -40,6 +40,25 @@ public class CacheUtils {
 				: queryString;
 	}
 
+    /**
+	 * Returns first locator host and port from locators string.
+	 *
+	 * @param locatorsString
+	 *            of type String
+	 * @return String[0] - locator host
+     *         String[1] - locator port
+	 */
+    public static String[] getFirstLocatorFromLocatorsString(String locatorsString) {
+        if (locatorsString == null || locatorsString.length() == 0) {
+            return new String[2];
+        }
+        String[] firstLocator = new String[2];
+        firstLocator[0] = locatorsString.substring(0, locatorsString.indexOf('[')).trim();
+        locatorsString = locatorsString.substring(locatorsString.indexOf('[') + 1);
+        firstLocator[1] = locatorsString.substring(0, locatorsString.indexOf(']'));
+        return firstLocator;
+    }
+
 	/**
      * Clears all types of regions.
      * This method can clean both types of regions (REPLICATED, PARTITIONED).
@@ -55,7 +74,7 @@ public class CacheUtils {
      *            partitioned region
      */
     public static void clearRegion(Region region) {
-        ClearPartitionedRegionFunction cleaner = new ClearPartitionedRegionFunction();
+        ClearRegionFunction cleaner = new ClearRegionFunction();
         FunctionService.registerFunction(cleaner);
         ResultCollector rc = FunctionService.onRegion(region)
                 .withArgs(region.getName()).execute(cleaner);

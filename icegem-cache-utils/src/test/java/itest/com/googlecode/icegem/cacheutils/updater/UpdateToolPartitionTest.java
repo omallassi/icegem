@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import com.googlecode.icegem.utils.CacheUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,9 +68,14 @@ public class UpdateToolPartitionTest {
 	}
 
 	private static void createRegions(String[] regionNames) {
-		clientCache = new ClientCacheFactory()
-			.addPoolLocator("localhost", 10355).set("log-level", "none")
-			.setPoolSubscriptionEnabled(true).create();
+        String[] locator = CacheUtils.getFirstLocatorFromLocatorsString(propertiesHelper.getStringProperty("locators"));
+        clientCache = new ClientCacheFactory()
+                .addPoolLocator(locator[0], Integer.parseInt(locator[1]))
+                .set("log-level", "none")
+                .set("license-file", propertiesHelper.getStringProperty("license-file"))
+                .set("license-type", propertiesHelper.getStringProperty("license-type"))
+                .setPoolSubscriptionEnabled(true)
+                .create();
 
 		clientRegionFactory = clientCache
 			.createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY);
@@ -120,7 +126,7 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTime = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTime>updateStartTime);
+		assertTrue(lastModifiedTime > updateStartTime);
 
 		assertEquals(exitCode, 0);
 	}
@@ -144,7 +150,7 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTimeForData1>updateStartTime);
+		assertTrue(lastModifiedTimeForData1 > updateStartTime);
 
 		assertEquals(exitCode, 0);
 	}
@@ -165,11 +171,11 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTimeForData1>updateStartTime);
+		assertTrue(lastModifiedTimeForData1 > updateStartTime);
 
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTimeForData2>updateStartTime);
+		assertTrue(lastModifiedTimeForData2 > updateStartTime);
 
 		assertEquals(exitCode, 0);
 	}
@@ -189,11 +195,11 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTimeForData1>updateStartTime);
+		assertTrue(lastModifiedTimeForData1 > updateStartTime);
 
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTimeForData2>updateStartTime);
+		assertTrue(lastModifiedTimeForData2 > updateStartTime);
 
 		assertEquals(exitCode, 0);
 	}
@@ -233,19 +239,19 @@ public class UpdateToolPartitionTest {
 
 		long lastModifiedTimeForData1 = get(REGION_DATA1, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTimeForData1>updateStartTime);
+		assertTrue(lastModifiedTimeForData1 > updateStartTime);
 
 		long lastModifiedTimeForAs1 = get(REGION_DATA1, KEY_AS1)
 			.getStatistics().getLastModifiedTime();
-		assertTrue(lastModifiedTimeForAs1>updateStartTime);
+		assertTrue(lastModifiedTimeForAs1 > updateStartTime);
 
 		long lastModifiedTimeForData2 = get(REGION_DATA2, KEY).getStatistics()
 			.getLastModifiedTime();
-		assertTrue(lastModifiedTimeForData2>updateStartTime);
+		assertTrue(lastModifiedTimeForData2 > updateStartTime);
 
 		long lastModifiedTimeForAs2 = get(REGION_DATA2, KEY_AS2)
 			.getStatistics().getLastModifiedTime();
-		assertTrue(lastModifiedTimeForAs2>updateStartTime);
+		assertTrue(lastModifiedTimeForAs2 > updateStartTime);
 
 		assertEquals(exitCode, 0);
 

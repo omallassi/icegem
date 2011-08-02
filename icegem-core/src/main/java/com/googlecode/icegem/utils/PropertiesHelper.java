@@ -1,6 +1,5 @@
 package com.googlecode.icegem.utils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -18,8 +17,7 @@ public class PropertiesHelper {
 	private static final String PROPERTIES_SEPARATOR = ";";
 	private Properties properties;
 
-	public PropertiesHelper(String filename) throws FileNotFoundException,
-		IOException {
+	public PropertiesHelper(String filename) throws	IOException {
 		properties = new Properties();
 		properties.load(getClass().getResourceAsStream(filename));
 	}

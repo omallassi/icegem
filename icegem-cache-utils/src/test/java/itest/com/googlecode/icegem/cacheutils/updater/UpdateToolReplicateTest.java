@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import com.googlecode.icegem.utils.CacheUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class UpdateToolReplicateTest {
 	@BeforeClass
 	public static void setUp() throws IOException, InterruptedException,
 		TimeoutException {
-
+        String[] locator = CacheUtils.getFirstLocatorFromLocatorsString("");
 		propertiesHelper = new PropertiesHelper(
 			"/updateToolReplicateServerProperties41414.properties");
 
@@ -70,9 +71,14 @@ public class UpdateToolReplicateTest {
 	}
 
 	private static void createRegions(String[] regionNames) {
-		clientCache = new ClientCacheFactory()
-			.addPoolLocator("localhost", 10355).set("log-level", "none")
-			.setPoolSubscriptionEnabled(true).create();
+        String[] locator = CacheUtils.getFirstLocatorFromLocatorsString(propertiesHelper.getStringProperty("locators"));
+        clientCache = new ClientCacheFactory()
+                .addPoolLocator(locator[0], Integer.parseInt(locator[1]))
+                .set("log-level", "none")
+                .set("license-file", propertiesHelper.getStringProperty("license-file"))
+                .set("license-type", propertiesHelper.getStringProperty("license-type"))
+                .setPoolSubscriptionEnabled(true)
+                .create();
 
 		clientRegionFactory = clientCache
 			.createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY);

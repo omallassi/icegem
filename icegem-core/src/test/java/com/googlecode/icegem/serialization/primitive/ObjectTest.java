@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  */
 
 public class ObjectTest extends TestParent {
-	@BeforeClass
+    @BeforeClass
     public static void before() throws InvalidClassException, CannotCompileException {
         // register
         HierarchyRegistry.registerAll(getContextClassLoader(), ObjectBean.class);
@@ -83,7 +83,7 @@ public class ObjectTest extends TestParent {
 
         // Serialize / Deserialize
         ObjectBean actual = (ObjectBean) serializeAndDeserialize(expected);
-    }    
+    }
 
     @Test(expected = StackOverflowError.class)
     public void testCycle2() {
