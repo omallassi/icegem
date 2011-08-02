@@ -89,9 +89,9 @@ Each class that will be auto serialized should be annotated with `@AutoSerialize
 == Autodetection of circular references ==
 
 If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
-Icegem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.control.methodframes`. This property can be set via JVM parameters: 
+Icegem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.trace.methodframes`. This property can be set via JVM parameters: 
 {{{
--Dicegem.serialization.control.methodframes=true
+-Dicegem.serialization.trace.methodframes=true
 }}}
 or from the code using the following command:
 {{{
