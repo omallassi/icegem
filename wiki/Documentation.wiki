@@ -547,10 +547,14 @@ Allows to customize the expiration of region entries. It is possible to define o
 == Example ==
 
 {{{
-ExpirationController expirationController = new ExpirationController(
-	"127.0.0.1", 10355);
 
-long destroyedEntriesNumberForData = expirationController.process("data",
+ClientCache cache = ...; 
+Region dataRegion = ...;
+Region errorsRegion = ...;
+
+ExpirationController expirationController = new ExpirationController();
+
+long destroyedEntriesNumberForData = expirationController.process(dataRegion,
 	new ExpirationPolicy() {
 
 		public boolean isExpired(Entry<Object, Object> entry) {
@@ -559,7 +563,7 @@ long destroyedEntriesNumberForData = expirationController.process("data",
 		}
 	});
 
-long destroyedEntriesNumberForErrors = expirationController.process("errors",
+long destroyedEntriesNumberForErrors = expirationController.process(errorsRegion,
 	new ExpirationPolicy() {
 
 		public boolean isExpired(Entry<Object, Object> entry) {
@@ -567,8 +571,8 @@ long destroyedEntriesNumberForErrors = expirationController.process("errors",
 			return false;
 		}
 	});
-
-expirationController.close();
+ 
+cache.close();
 
 }}}
 
@@ -589,9 +593,25 @@ new ExpirationPolicy() {
 
 == Processing with delays ==
 
-The method `ExpirationController#process(String regionName, ExpirationPolicy policy)`  processing node can be overloaded. This can block the other activities. 
+The method `ExpirationController#process(Region<?, ?> region, ExpirationPolicy policy)` can overload the processing node. This can block the other activities. 
 
-In such case the `ExpirationController#process(String regionName, ExpirationPolicy policy, long batchSize, long batchDelay)` should be used. It does processing  in batches with delay of for `batchDelay` milliseconds between them.
+In such case it is possible to change the packetSize (the size of the consistently expired entries packet) and packetDelay (the delay in processing after the packetSize entries, milliseconds) using setters of these fields. Example:
+{{{
+ExpirationController expirationController = new ExpirationController();
+
+expirationController.setPacketSize(1000);
+expirationController.setPacketDelay(1000);
+
+long destroyedEntriesNumberForData = expirationController.process(dataRegion,
+	new ExpirationPolicy() {
+
+		public boolean isExpired(Entry<Object, Object> entry) {
+			// TODO: Add some logic
+			return false;
+		}
+	});
+}}}
+
 
 = Cache utils =
 
