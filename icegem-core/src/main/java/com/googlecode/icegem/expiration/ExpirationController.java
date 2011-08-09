@@ -4,10 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gemstone.gemfire.cache.Region;
-import com.gemstone.gemfire.cache.client.ClientCache;
-import com.gemstone.gemfire.cache.client.ClientCacheFactory;
-import com.gemstone.gemfire.cache.client.ClientRegionFactory;
-import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.gemstone.gemfire.cache.execute.FunctionService;
 
 /**
@@ -20,10 +16,12 @@ import com.gemstone.gemfire.cache.execute.FunctionService;
  * 
  * <pre>
  * 
- * ExpirationController expirationController = new ExpirationController(
- * 	&quot;127.0.0.1&quot;, 10355);
+ * Region<Long, Data> dataRegion = ...;
+ * Region<Long, Error> errorsRegion = ...;
  * 
- * long destroyedEntriesNumberForData = expirationController.process(&quot;data&quot;,
+ * ExpirationController expirationController = new ExpirationController();
+ * 
+ * long destroyedEntriesNumberForData = expirationController.process(dataRegion,
  * 	new ExpirationPolicy() {
  * 
  * 		public boolean isExpired(Entry&lt;Object, Object&gt; entry) {
@@ -32,7 +30,7 @@ import com.gemstone.gemfire.cache.execute.FunctionService;
  * 		}
  * 	});
  * 
- * long destroyedEntriesNumberForErrors = expirationController.process(&quot;errors&quot;,
+ * long destroyedEntriesNumberForErrors = expirationController.process(errorsRegion,
  * 	new ExpirationPolicy() {
  * 
  * 		public boolean isExpired(Entry&lt;Object, Object&gt; entry) {
@@ -40,8 +38,6 @@ import com.gemstone.gemfire.cache.execute.FunctionService;
  * 			return false;
  * 		}
  * 	});
- * 
- * expirationController.close();
  * 
  * </pre>
  * 
@@ -72,101 +68,68 @@ public class ExpirationController {
 
 	private Logger logger = LoggerFactory.getLogger(ExpirationController.class);
 
-	private ClientCache cache;
-	private ClientRegionFactory<Object, Object> clientRegionFactory;
+	private static final long DEFAULT_PACKET_SIZE = 1;
+	private static final long DEFAULT_PACKET_DELAY = 0;
+
+	private long packetSize = DEFAULT_PACKET_SIZE;
+	private long packetDelay = DEFAULT_PACKET_DELAY;
 
 	/**
-	 * Creates the instance of ExpirationController using external client cache
-	 * and region.
+	 * Gets the size of the consistently expired entries packet
 	 * 
-	 * Good to use with Spring.
-	 * 
-	 * @param cache
-	 *            - the client cache configured outside
-	 * @param clientRegionFactory
-	 *            - the client region factory configured outside
+	 * @return - the packet size
 	 */
-	public ExpirationController(ClientCache cache,
-		ClientRegionFactory<Object, Object> clientRegionFactory) {
-		logger.info("Creating the ExpirationController");
-
-		this.cache = cache;
-		this.clientRegionFactory = clientRegionFactory;
-
-		logger.info("ExpirationController with parameters cache = " + cache
-			+ ", clientRegionFactory = " + clientRegionFactory
-			+ " has been created");
+	public long getPacketSize() {
+		return packetSize;
 	}
 
 	/**
-	 * Creates the instance of ExpirationController for the specified locator.
+	 * Gets the size of the consistently expired entries packet
 	 * 
-	 * @param locatorHost
-	 *            - the host of locator
-	 * @param locatorPort
-	 *            - the port of locator
+	 * @param packetSize
+	 *            - the packet size
 	 */
-	public ExpirationController(String locatorHost, int locatorPort) {
-		logger.info("Creating the ExpirationController");
+	public void setPacketSize(long packetSize) {
+		this.packetSize = packetSize;
+	}
 
-		try {
-			if ((locatorHost == null) || (locatorHost.trim().length() == 0)) {
-				throw new IllegalArgumentException("The locator host \""
-					+ locatorHost + "\" is incorrect");
-			}
+	/**
+	 * Gets the delay in processing after the packetSize entries, milliseconds
+	 * 
+	 * @return - the packet delay
+	 */
+	public long getPacketDelay() {
+		return packetDelay;
+	}
 
-			if ((locatorPort < 0) || (locatorPort > 65535)) {
-				throw new IllegalArgumentException("The locator port \""
-					+ locatorPort
-					+ "\" is incorrect. It should be in range [0, 65535]");
-			}
-
-			cache = new ClientCacheFactory().set("log-level", "warning")
-				.addPoolLocator(locatorHost, locatorPort).create();
-
-			clientRegionFactory = cache
-				.createClientRegionFactory(ClientRegionShortcut.PROXY);
-		} catch (RuntimeException re) {
-			logger.error(
-				"RuntimeException during creating of ExpirationController", re);
-			throw re;
-		}
-
-		logger.info("ExpirationController with parameters locatorHost = "
-			+ locatorHost + ", locatorPort = " + locatorPort
-			+ " has been created");
+	/**
+	 * Sets the delay in processing after the packetSize entries, milliseconds
+	 * 
+	 * @param packetDelay
+	 *            - the packet delay
+	 */
+	public void setPacketDelay(long packetDelay) {
+		this.packetDelay = packetDelay;
 	}
 
 	/**
 	 * Applies the specified policy on the specified region and returns number
 	 * of destroyed entries.
 	 * 
-	 * @param regionName
-	 *            - the name of region
+	 * @param region
+	 *            - the region
 	 * @param policy
 	 *            - the expiration policy
-	 * @param packetSize
-	 *            - the size of the consistently expired entries
-	 * @param packetDelay
-	 *            - the delay in processing after the packetSize entries,
-	 *            milliseconds
 	 * @return - the number of destroyed region entries
 	 */
-	public long process(String regionName, ExpirationPolicy policy,
-		long packetSize, long packetDelay) {
+	public long process(Region<?, ?> region, ExpirationPolicy policy) {
 
 		long destroyedEntriesNumber = 0;
 
 		try {
 
-			if (cache == null) {
-				throw new IllegalStateException(
-					"It seems that the workflow of the controller is already finished");
-			}
-
-			if ((regionName == null) || (regionName.trim().length() == 0)) {
-				throw new IllegalArgumentException("The region name \""
-					+ regionName + "\" is incorrect");
+			if (region == null) {
+				throw new IllegalStateException("The Region cannot be null");
 			}
 
 			if (policy == null) {
@@ -174,21 +137,9 @@ public class ExpirationController {
 					"The ExpirationPolicy cannot be null");
 			}
 
-			Region<Object, Object> region = cache.getRegion(regionName);
-
-			if (region == null) {
-				region = clientRegionFactory.create(regionName);
-			}
-
-			if (region == null) {
-				throw new IllegalStateException(
-					"Cannot retrieve access to the region with name \""
-						+ regionName + "\"");
-			}
-
 			logger
-				.info("Running ExpirationController process with parameters regionName = "
-					+ regionName
+				.info("Running ExpirationController process with parameters region = "
+					+ region
 					+ ", policy = "
 					+ policy
 					+ ", packetSize = "
@@ -207,14 +158,9 @@ public class ExpirationController {
 			}
 
 			logger
-				.info("ExpirationController process with parameters regionName = "
-					+ regionName
-					+ ", policy = "
-					+ policy
-					+ ", packetSize = "
-					+ packetSize
-					+ ", packetDelay = "
-					+ packetDelay
+				.info("ExpirationController process with parameters region = "
+					+ region + ", policy = " + policy + ", packetSize = "
+					+ packetSize + ", packetDelay = " + packetDelay
 					+ " has destroyed " + destroyedEntriesNumber + " entries");
 
 		} catch (RuntimeException re) {
@@ -223,32 +169,5 @@ public class ExpirationController {
 		}
 
 		return destroyedEntriesNumber;
-	}
-
-	/**
-	 * Applies the specified policy on the specified region and returns number
-	 * of destroyed entries.
-	 * 
-	 * Do not use this method for processing the big region.
-	 * 
-	 * @param regionName
-	 *            - the name of region
-	 * @param policy
-	 *            - the expiration policy
-	 * @return - the number of destroyed region entries
-	 */
-	public long process(String regionName, ExpirationPolicy policy) {
-		return process(regionName, policy, 1, 0);
-	}
-
-	/**
-	 * Finishes the workflow of controller.
-	 */
-	public void close() {
-		logger.info("Closing the ExpirationController");
-		if (cache != null) {
-			cache.close();
-		}
-		logger.info("The ExpirationController has been closed");
 	}
 }

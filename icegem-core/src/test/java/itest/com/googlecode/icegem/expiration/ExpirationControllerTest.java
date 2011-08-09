@@ -21,8 +21,8 @@ import com.gemstone.gemfire.cache.client.ClientRegionFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.googlecode.icegem.expiration.ExpirationController;
 import com.googlecode.icegem.expiration.ExpirationPolicy;
-import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.CacheUtils;
+import com.googlecode.icegem.utils.JavaProcessLauncher;
 import com.googlecode.icegem.utils.ServerTemplate;
 
 /**
@@ -206,10 +206,10 @@ public class ExpirationControllerTest implements Serializable {
 
 		Region<Long, Transaction> transactionsRegion = getRegion(cache,
 			"transactions");
-        CacheUtils.clearRegion(transactionsRegion);
+		CacheUtils.clearRegion(transactionsRegion);
 		Region<Long, TransactionProcessingError> errorsRegion = getRegion(
 			cache, "errors");
-        CacheUtils.clearRegion(errorsRegion);
+		CacheUtils.clearRegion(errorsRegion);
 
 		for (long i = 1, id = 1; i <= count; i++, id += 5) {
 			if ((i % 1000) == 0) {
@@ -262,21 +262,31 @@ public class ExpirationControllerTest implements Serializable {
 		Region<Long, TransactionProcessingError> errorsRegion = getRegion(
 			cache, "errors");
 
-		assertEquals(transactionsRegion.keySetOnServer().size(), transactionsNumber);
+		assertEquals(transactionsRegion.keySetOnServer().size(),
+			transactionsNumber);
 		assertEquals(errorsRegion.keySetOnServer().size(), errorsNumber);
 
 		cache.close();
 	}
 
 	private long expire(boolean recursively, long packetSize, long packetDelay) {
-		ExpirationController expirationController = new ExpirationController(
-			"127.0.0.1", 10355);
+		ClientCache cache = new ClientCacheFactory()
+			.addPoolLocator("localhost", 10355).set("log-level", "warning")
+			.create();
+
+		Region<Long, Transaction> transactionsRegion = getRegion(cache,
+			"transactions");
+
+		ExpirationController expirationController = new ExpirationController();
+
+		expirationController.setPacketSize(packetSize);
+		expirationController.setPacketDelay(packetDelay);
 
 		long destroyedEntriesNumber = expirationController.process(
-			"transactions", new TransactionExpirationPolicy(EXPIRATION_TIME,
-				recursively), packetSize, packetDelay);
+			transactionsRegion, new TransactionExpirationPolicy(
+				EXPIRATION_TIME, recursively));
 
-		expirationController.close();
+		cache.close();
 
 		return destroyedEntriesNumber;
 	}
@@ -285,14 +295,22 @@ public class ExpirationControllerTest implements Serializable {
 		return expire(recursively, 1, 0);
 	}
 
-	private static void startCacheServers() throws IOException, InterruptedException {
-        cacheServer1 = javaProcessLauncher.runWithConfirmation(
-                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=expirationServerProperties.properties"}, null);
-        cacheServer2 = javaProcessLauncher.runWithConfirmation(
-                ServerTemplate.class, new String[]{"-DgemfirePropertyFile=expirationServerProperties.properties"}, null);
+	private static void startCacheServers() throws IOException,
+		InterruptedException {
+		cacheServer1 = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=expirationServerProperties.properties" },
+				null);
+		cacheServer2 = javaProcessLauncher
+			.runWithConfirmation(
+				ServerTemplate.class,
+				new String[] { "-DgemfirePropertyFile=expirationServerProperties.properties" },
+				null);
 	}
 
-	private static void stopCacheServers() throws IOException, InterruptedException {
+	private static void stopCacheServers() throws IOException,
+		InterruptedException {
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
 		javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
 	}
