@@ -95,7 +95,7 @@ public class ExpirationFunction extends FunctionAdapter implements Declarable {
 								
 								logger.trace("Destroing the entry with key " + key);
 								
-								region.destroy(key);
+								region.localDestroy(key);
 								destroyedEntriesCount++;
 							}
 						}
