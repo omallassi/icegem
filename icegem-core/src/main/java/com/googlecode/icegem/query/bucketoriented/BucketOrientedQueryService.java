@@ -34,11 +34,11 @@ public class BucketOrientedQueryService {
      * of this method is based on execution of function.
      * 
      * @see BucketOrientedQueryFunction
-     * @param queryString OQL query string for execute
-     * @param region partitioned region on which query will be executed
-     * @param keys set of keys that specify buckets
-     * @return SelectResults<Object>
-     * @throws com.gemstone.gemfire.cache.query.QueryException when exception with execution occurs
+     * @param queryString OQL query string.
+     * @param region Partitioned region on which query will be executed.
+     * @param keys Set of keys that specify buckets.
+     * @return Query results as instance of {@link SelectResults}.
+     * @throws QueryException When in case of query execution failure.
      */
     @SuppressWarnings({ "unchecked" })
     public static SelectResults<Object> executeOnBuckets(String queryString, Region region, Set<Object> keys)
@@ -53,18 +53,18 @@ public class BucketOrientedQueryService {
      * each bucket. Work of this method is based on execution of function.
      * 
      * @see BucketOrientedQueryFunction
-     * @param queryString OQL query string for execute
-     * @param queryParameters of type Object[]
-     * @param region partitioned region on which query will be executed
-     * @param keys set of keys that specify buckets
-     * @return SelectResults<Object>
-     * @throws com.gemstone.gemfire.cache.query.QueryException when exception with execution occurs
+     * @param queryString OQL query string.
+     * @param queryParameters Query parameters.
+     * @param region Partitioned region on which query will be executed.
+     * @param keys Set of keys that specify buckets.
+     * @return Query results as instance of {@link SelectResults}.
+     * @throws QueryException When in case of query execution failure.
      */
     @SuppressWarnings({ "unchecked" })
     public static SelectResults<Object> executeOnBuckets(String queryString, Object[] queryParameters, Region region,
 	    Set<Object> keys) throws QueryException {
 	if ((queryString == null) || (queryString.length() == 0)) {
-	    throw new QueryException("You must specify query string for execution");
+	    throw new QueryException("You must specify query string for execution.");
 	}
 
 	int limit = extractLimit(queryString);
@@ -82,18 +82,19 @@ public class BucketOrientedQueryService {
 	    queryResults = (List<List<Object>>) FunctionService.onRegion(region).withFilter(keys)
 		    .withArgs(functionArgument).execute(function).getResult();
 	} catch (FunctionException e) {
-	    logger.warn(e.getMessage());
+	    logger.error("Failed to execute bucket oriented query function: " + function, e);
 
 	    throw new QueryException(e.getMessage());
 	}
+	
 	return formatSelectResults(queryResults, limit);
     }
 
     /**
      * Extracts limit value from query string.
      * 
-     * @param queryString of type String
-     * @return int
+     * @param queryString OQL query string.
+     * @return Value of 'limit' clause.
      */
     private static int extractLimit(String queryString) {
 	int limitIndex = queryString.lastIndexOf("limit");
@@ -106,17 +107,19 @@ public class BucketOrientedQueryService {
 	    return limitIndex;
 	}
 
-	String limitNumber = queryString.substring(limitIndex + 5);
+	// TODO: Why do we use the hardcoded "5" here? Is it requirement to
+	// always put 'limit' clause at the end of query string?
+	String limitValue = queryString.substring(limitIndex + 5);
 
-	return Integer.parseInt(limitNumber.trim());
+	return Integer.parseInt(limitValue.trim());
     }
 
     /**
      * Collects and formats query results into SelectResults. Limits query results based on limit value.
      * 
-     * @param queryResults of type List<List<Object>>
-     * @param limit of type int
-     * @return SelectResults<Object>
+     * @param queryResults Query results from several nodes.
+     * @param limit Query results limit.
+     * @return Aggregated query results represented by instance of {@link SelectResults}.
      */
     @SuppressWarnings({ "unchecked" })
     private static SelectResults<Object> formatSelectResults(List<List<Object>> queryResults, int limit) {

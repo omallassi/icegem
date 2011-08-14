@@ -3,26 +3,25 @@ package com.googlecode.icegem.query.bucketoriented;
 import java.io.Serializable;
 
 /**
- * Argument for query function that stores information
- * about query string and query parameters.
+ * Argument for query function that stores information about query string and query parameters.
  *
  * @author Andrey Stepanov aka standy.
  */
 public class BucketOrientedQueryFunctionArgument implements Serializable {
-    /** Field serialVersionUID  */
+    /** Serial version UID. */
     private static final long serialVersionUID = -2428574227320772082L;
 
-    /** Field queryString  */
+    /** OQL query string. */
     private String queryString;
 
-    /** Field queryParameters  */
+    /** Query parameters. */
     private Object[] queryParameters;
 
     /**
-     * Constructor BucketOrientedQueryFunctionArgument creates a new BucketOrientedQueryFunctionArgument instance.
+     * Creates new bucket oriented query function argument.
      *
-     * @param queryString of type String
-     * @param queryParameters of type Object[]
+     * @param queryString OQL query string.
+     * @param queryParameters Query parameters.
      */
     public BucketOrientedQueryFunctionArgument(String queryString, Object[] queryParameters) {
 	this.queryString = queryString;
@@ -30,18 +29,18 @@ public class BucketOrientedQueryFunctionArgument implements Serializable {
     }
 
     /**
-     * Method getQueryParameters returns the queryParameters of this BucketOrientedQueryFunctionArgument object.
+     * Gets query parameters.
      *
-     * @return the queryParameters (type Object[]) of this BucketOrientedQueryFunctionArgument object.
+     * @return Query parameters.
      */
     public Object[] getQueryParameters() {
 	return queryParameters;
     }
 
     /**
-     * Method getQueryString returns the queryString of this BucketOrientedQueryFunctionArgument object.
+     * Query string.
      *
-     * @return the queryString (type String) of this BucketOrientedQueryFunctionArgument object.
+     * @return Query string.
      */
     public String getQueryString() {
 	return queryString;

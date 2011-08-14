@@ -9,14 +9,24 @@ import java.util.Properties;
 
 /**
  * Loads the Properties from property file and allows to retrieve properties in
- * more advanced way
+ * more advanced way.
  */
 public class PropertiesHelper {
-
+    /** */
     private static final String KEY_VALUE_SEPARATOR = "=";
+    
+    /** */
     private static final String PROPERTIES_SEPARATOR = ";";
+    
+    /** */
     private Properties properties;
 
+    /**
+     * Creates new helper.
+     * 
+     * @param filename Properties file name.
+     * @throws IOException If failed to open specified file.
+     */
     public PropertiesHelper(String filename) throws IOException {
 	properties = new Properties();
 	
