@@ -21,9 +21,10 @@ import java.util.List;
  * @author Andrey Stepanov aka standy
  */
 public class BucketOrientedQueryFunction extends FunctionAdapter {
-    /** Field FUNCTION_ID  */
+    /** Function ID. */
     private final static String FUNCTION_ID = BucketOrientedQueryFunction.class.getName();
-    /** Field logger  */
+    
+    /** Logger. */
     private Logger logger = LoggerFactory.getLogger(BucketOrientedQueryFunction.class);
 
     /**
@@ -35,25 +36,33 @@ public class BucketOrientedQueryFunction extends FunctionAdapter {
     @SuppressWarnings({ "ThrowableInstanceNeverThrown", "unchecked" })
     public void execute(FunctionContext functionContext) {
         ResultSender<Serializable> resultSender = functionContext.getResultSender();
+        
         RegionFunctionContext regionFunctionContext = (RegionFunctionContext) functionContext;
 
         if (functionContext.getArguments() == null) {
-            handleException(new FunctionException("You must specify function argument for query execution"), resultSender);
+            handleException(new FunctionException("You must specify function argument for query execution."), resultSender);
+            
             return;
         }
+        
         if (!(functionContext.getArguments() instanceof BucketOrientedQueryFunctionArgument)) {
             handleException(new FunctionException("Function arguments must be of BucketOrientedQueryFunctionArgument.class"), resultSender);
+            
             return;
         }
 
         BucketOrientedQueryFunctionArgument argument = (BucketOrientedQueryFunctionArgument) functionContext.getArguments();
+        
         LocalDataSet localData = (LocalDataSet) PartitionRegionHelper.getLocalDataForContext(regionFunctionContext);
+        
         QueryService queryService = localData.getCache().getQueryService();
 
         try {
             Query query = queryService.newQuery(argument.getQueryString());
+            
             SelectResults result = (SelectResults) localData.executeQuery((DefaultQuery) query,
                     argument.getQueryParameters(), localData.getBucketSet());
+            
             resultSender.lastResult((Serializable) formatResults(result));
         } catch (QueryInvalidException e) {
             handleException(e, resultSender);
@@ -81,15 +90,15 @@ public class BucketOrientedQueryFunction extends FunctionAdapter {
     }
 
     /**
-     * If you will use redundancy for partitioned region than
-     * GemFire will send this function to those members that contains primary or redundant copy of bucket(s).
-     * It can reduce number of members that will execute this function.
-     * But if you want to send this function only to those members that store primary copy of bucket,
-     * you must enable a function option "optimizeForWrite".
+     * If you use redundancy for partitioned region then GemFire will send this
+     * function to those members that contain primary or redundant copy of bucket(s).
+     * It can increase number of members that will execute this function.
+     * But if you want to send this function only to those members that store primary
+     * copy of bucket, you must enable a function option "optimizeForWrite".
      *
      * See a forum link
      * http://forums.gemstone.com/viewtopic.php?f=3&t=496&hilit=bucket+Id&sid=f3b823b748bb253e5019e489c8480fbd
-     * for details
+     * for details.
      *
      * @return boolean
      */
@@ -107,7 +116,9 @@ public class BucketOrientedQueryFunction extends FunctionAdapter {
     @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
     private void handleException(Throwable e, ResultSender<Serializable> resultSender) {
         e.printStackTrace();
+        
         logger.warn(e.getMessage());
+        
         resultSender.sendException(new FunctionException(e.getMessage()));
     }
 
@@ -120,8 +131,10 @@ public class BucketOrientedQueryFunction extends FunctionAdapter {
     @SuppressWarnings({ "unchecked" })
     private List<Object> formatResults(SelectResults selectResults) {
         List<Object> results = new ArrayList<Object>(selectResults.size() + 1);
+        
         results.addAll(selectResults.asList());
         results.add(selectResults.getCollectionType().getElementType());
+        
         return results;
     }
 }

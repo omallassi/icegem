@@ -22,8 +22,10 @@ public class ConsoleUtils {
         if (bufferedReader == null) {
             bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         }
+        
         return bufferedReader;
     }
+    
     /**
      * Waits for enter.
      */
@@ -38,6 +40,7 @@ public class ConsoleUtils {
      */
     public static void waitForEnter(String message) {
         System.out.println(message);
+        
         try {
             getReader().readLine();
         } catch (IOException e) {
