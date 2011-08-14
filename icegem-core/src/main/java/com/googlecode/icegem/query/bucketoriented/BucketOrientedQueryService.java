@@ -16,13 +16,15 @@ import com.gemstone.gemfire.cache.query.internal.ResultsCollectionWrapper;
 import com.gemstone.gemfire.cache.query.types.ObjectType;
 
 /**
- * Query service that allows to execute OQL queries on a specified set of buckets. This service can be used both on
- * client and server/peer sides. Note: this service works only on partition regions.
+ * Query service that allows to execute OQL queries on a specified set of buckets.
+ * This service can be used both on client and server/peer sides.
+ * <p>
+ * Note: this service works only on partition regions.
  * 
  * @author Andrey Stepanov aka standy
  */
 public class BucketOrientedQueryService {
-    /** Field logger */
+    /** Field logger. */
     private static Logger logger = LoggerFactory.getLogger(BucketOrientedQueryService.class);
 
     /**
@@ -40,8 +42,8 @@ public class BucketOrientedQueryService {
      */
     @SuppressWarnings({ "unchecked" })
     public static SelectResults<Object> executeOnBuckets(String queryString, Region region, Set<Object> keys)
-            throws QueryException {
-        return executeOnBuckets(queryString, null, region, keys);
+	    throws QueryException {
+	return executeOnBuckets(queryString, null, region, keys);
     }
 
     /**
@@ -59,30 +61,32 @@ public class BucketOrientedQueryService {
      * @throws com.gemstone.gemfire.cache.query.QueryException when exception with execution occurs
      */
     @SuppressWarnings({ "unchecked" })
-    public static SelectResults<Object> executeOnBuckets(String queryString, Object[] queryParameters,
-                                                         Region region, Set<Object> keys) throws QueryException {
-        if ((queryString == null) || (queryString.length() == 0)) {
-            throw new QueryException("You must specify query string for execution");
-        }
+    public static SelectResults<Object> executeOnBuckets(String queryString, Object[] queryParameters, Region region,
+	    Set<Object> keys) throws QueryException {
+	if ((queryString == null) || (queryString.length() == 0)) {
+	    throw new QueryException("You must specify query string for execution");
+	}
 
-        int limit = extractLimit(queryString);
+	int limit = extractLimit(queryString);
 
-        BucketOrientedQueryFunctionArgument functionArgument = new BucketOrientedQueryFunctionArgument(queryString, queryParameters);
+	BucketOrientedQueryFunctionArgument functionArgument = new BucketOrientedQueryFunctionArgument(queryString,
+		queryParameters);
 
-        BucketOrientedQueryFunction function = new BucketOrientedQueryFunction();
-        FunctionService.registerFunction(function);
-        List<List<Object>> queryResults;
-        try {
-            queryResults = (List<List<Object>>) FunctionService.onRegion(region)
-                    .withFilter(keys)
-                    .withArgs(functionArgument)
-                    .execute(function)
-                    .getResult();
-        } catch (FunctionException e) {
-            logger.warn(e.getMessage());
-            throw new QueryException(e.getMessage());
-        }
-        return formatSelectResults(queryResults, limit);
+	BucketOrientedQueryFunction function = new BucketOrientedQueryFunction();
+
+	FunctionService.registerFunction(function);
+
+	List<List<Object>> queryResults;
+
+	try {
+	    queryResults = (List<List<Object>>) FunctionService.onRegion(region).withFilter(keys)
+		    .withArgs(functionArgument).execute(function).getResult();
+	} catch (FunctionException e) {
+	    logger.warn(e.getMessage());
+
+	    throw new QueryException(e.getMessage());
+	}
+	return formatSelectResults(queryResults, limit);
     }
 
     /**
@@ -92,15 +96,19 @@ public class BucketOrientedQueryService {
      * @return int
      */
     private static int extractLimit(String queryString) {
-        int limitIndex = queryString.lastIndexOf("limit");
-        if (limitIndex == -1) {
-            limitIndex = queryString.lastIndexOf("LIMIT");
-        }
-        if (limitIndex == -1) {
-            return limitIndex;
-        }
-        String limitNumber = queryString.substring(limitIndex + 5);
-        return Integer.parseInt(limitNumber.trim());
+	int limitIndex = queryString.lastIndexOf("limit");
+
+	if (limitIndex == -1) {
+	    limitIndex = queryString.lastIndexOf("LIMIT");
+	}
+
+	if (limitIndex == -1) {
+	    return limitIndex;
+	}
+
+	String limitNumber = queryString.substring(limitIndex + 5);
+
+	return Integer.parseInt(limitNumber.trim());
     }
 
     /**
@@ -112,21 +120,27 @@ public class BucketOrientedQueryService {
      */
     @SuppressWarnings({ "unchecked" })
     private static SelectResults<Object> formatSelectResults(List<List<Object>> queryResults, int limit) {
-        List<Object> list = new ArrayList<Object>();
-        ObjectType baseElementType = null;
-        for (List<Object> queryResult : queryResults) {
-            ObjectType elementType = (ObjectType) queryResult.remove(queryResult.size() - 1);
-            if (baseElementType == null) {
-                baseElementType = elementType;
-            } else if (!baseElementType.equals(elementType)) {
-                throw new IllegalStateException("Collection types for query result are different");
-            }
-            list.addAll(queryResult);
-            if (limit != -1 && list.size() >= limit) {
-                break;
-            }
-        }
-        return limit == -1 ? new ResultsCollectionWrapper(baseElementType, list) :
-                new ResultsCollectionWrapper(baseElementType, list, limit);
+	List<Object> list = new ArrayList<Object>();
+
+	ObjectType baseElementType = null;
+
+	for (List<Object> queryResult : queryResults) {
+	    ObjectType elementType = (ObjectType) queryResult.remove(queryResult.size() - 1);
+
+	    if (baseElementType == null) {
+		baseElementType = elementType;
+	    } else if (!baseElementType.equals(elementType)) {
+		throw new IllegalStateException("Collection types for query result are different");
+	    }
+
+	    list.addAll(queryResult);
+
+	    if (limit != -1 && list.size() >= limit) {
+		break;
+	    }
+	}
+
+	return limit == -1 ? new ResultsCollectionWrapper(baseElementType, list) : new ResultsCollectionWrapper(
+		baseElementType, list, limit);
     }
 }
