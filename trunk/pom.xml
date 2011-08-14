@@ -56,6 +56,11 @@
             <name>Ivan Golovach</name>
             <email>Golovach.Ivan</email>
         </developer>
+        <developer>
+            <id>rakhmerov</id>
+            <name>Renat Akhmerov</name>
+            <email>renat.akhmerov@gmail.com</email>
+        </developer>
     </developers>
 
     <modules>
@@ -237,6 +242,7 @@
             <name>Maven Repository</name>
             <url>http://repo2.maven.org/maven2</url>
         </repository>
+        
         <repository>
             <id>spring-maven-milestone-repo</id>
             <name>Springframework Maven Repository</name>

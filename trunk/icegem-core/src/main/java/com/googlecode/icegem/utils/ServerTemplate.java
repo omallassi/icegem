@@ -5,15 +5,16 @@ import com.gemstone.gemfire.cache.*;
 /**
  * Server template for using in tests.
  *
- * Use JavaProcessLauncher.runServerWithConfirmation(Class klass, String pathToServerPropertiesFile)
- * to launch this cache server from tests. All peer/server configurations should be passed via properties file.
+ * Use {@link JavaProcessLauncher#runWithConfirmation(Class, String[], String[])}
+ * to launch this cache server from tests. All peer/server configurations should be
+ * passed via properties file.
  *
  * @see JavaProcessLauncher
  *
  * @author Andrey Stepanov aka standy
  */
 public class ServerTemplate {
-    /** Field cache  */
+    /** Cache. */
     private static Cache cache;
 
     /**
@@ -29,6 +30,9 @@ public class ServerTemplate {
 	stopCacheServer();
     }
 
+    /**
+     * Starts cache server.
+     */
     public static void startCacheServer() {
 	cache = new CacheFactory().create();
     }

@@ -9,7 +9,6 @@ import itest.com.googlecode.icegem.query.common.utils.PersonUtils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -34,26 +33,32 @@ import com.googlecode.icegem.utils.ServerTemplate;
  * @author Andrey Stepanov aka standy
  */
 public class BucketOrientedQueryServiceTest {
-    /** Field LOCATOR_PORT  */
+    /** GemFire properties file. */
+    private static final String PROPERTY_FILE = "bucketOrientedServerProperties.properties";
+
+    /** Locator port. */
     private static final int LOCATOR_PORT = 10355;
 
-    /** Field cache  */
+    /** Client cache. */
     private static ClientCache cache;
 
-    /** Field data  */
+    /** Test cache region. */
     private static Region<Object, Object> data;
 
-    /** Field cacheServer1  */
+    /** Cache server 1. */
     private static Process cacheServer1;
 
-    /** Field cacheServer2  */
+    /** Cache server 2. */
     private static Process cacheServer2;
 
-    /** Field javaProcessLauncher  */
+    /** Process launcher. */
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher(true, true, true);
 
+    /**
+     * @throws Exception If failed to prepare test.
+     */
     @BeforeClass
-    public static void setUp() throws IOException, InterruptedException, TimeoutException {
+    public static void setUp() throws Exception {
 	startCacheServers();
 
 	startClient();
@@ -61,37 +66,61 @@ public class BucketOrientedQueryServiceTest {
 	PersonUtils.populateRegionByPersons(data, 100);
     }
 
+    /**
+     * @throws Exception If failed to cleanup test.
+     */
     @AfterClass
-    public static void tearDown() throws IOException, InterruptedException {
+    public static void tearDown() throws Exception {
 	cache.close();
 
 	stopCacheServers();
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If failed.
+     */
     @Test
     public void testBucketDataRetrieveForExistedAndFakeKeys() throws QueryException {
+	// Existing key.
 	SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets(
 		"SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
+	
 	checkResults(resultsBasedOnExistedKey, 10, new int[] { 1, 11 }, new int[] { 2 });
 
+	// Fake key.
 	SelectResults<Object> resultsBasedOnFakeKey = BucketOrientedQueryService.executeOnBuckets(
 		"SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(101)));
+	
 	checkResults(resultsBasedOnFakeKey, 10, new int[] { 1 }, new int[] { 101, 2 });
+	
 	assertFalse(resultsBasedOnFakeKey.equals(resultsBasedOnExistedKey));
     }
 
-    protected void checkResults(SelectResults<Object> resultsBasedOnExistedKey, int size, int[] exist, int[] notExist) {
-	assertEquals(size, resultsBasedOnExistedKey.size());
+    /**
+     * @param results Query results to check.
+     * @param size Expected size of the given results.
+     * @param exist Social numbers for which persons should exist in the results.
+     * @param notExist Social numbers for which persons should not exist in the results.
+     */
+    protected void checkResults(SelectResults<Object> results, int size, int[] exist, int[] notExist) {
+	assertEquals(size, results.size());
 
 	for (int i = 0; i < exist.length; i++) {
-	    assertTrue(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnExistedKey.asList(), exist[i]));
+	    assertTrue(PersonUtils.containsPersonWithSocialNumber(results.asList(), exist[i]));
 	}
 
 	for (int i = 0; i < notExist.length; i++) {
-	    assertFalse(PersonUtils.containsPersonWithSocialNumber(resultsBasedOnExistedKey.asList(), notExist[i]));
+	    assertFalse(PersonUtils.containsPersonWithSocialNumber(results.asList(), notExist[i]));
 	}
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If failed.
+     */
     @Test
     public void testBucketsDataRetrieve() throws QueryException, InterruptedException {
 	// SelectResults<Object> resultsFromOneBucket =
@@ -111,6 +140,11 @@ public class BucketOrientedQueryServiceTest {
 	// int[0]);
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If failed.
+     */
     @Test
     public void testBucketDataRetrieveUsingQueryLimit() throws QueryException {
 	SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets(
@@ -127,6 +161,11 @@ public class BucketOrientedQueryServiceTest {
 	checkResults(resultsFromTwoBuckets, 20, new int[0], new int[0]);
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If failed.
+     */
     @Test
     public void testComplexQuering() throws QueryException {
 	SelectResults<Object> results = BucketOrientedQueryService.executeOnBuckets(
@@ -169,21 +208,41 @@ public class BucketOrientedQueryServiceTest {
 	assertEquals(results.getCollectionType().getElementType().resolveClass(), Struct.class);
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If succeeded.
+     */
     @Test(expected = QueryException.class)
     public void testExecutionWithEmptyQueryString() throws QueryException {
 	BucketOrientedQueryService.executeOnBuckets("", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If succeeded.
+     */
     @Test(expected = QueryException.class)
     public void testExecutionWithWrongQueryString() throws QueryException {
 	BucketOrientedQueryService.executeOnBuckets("SELECT *", data, new HashSet<Object>(Arrays.asList(1)));
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If succeeded.
+     */
     @Test(expected = QueryException.class)
     public void testExecutionWithNullQueryString() throws QueryException {
 	BucketOrientedQueryService.executeOnBuckets(null, data, new HashSet<Object>(Arrays.asList(1)));
     }
 
+    /**
+     * JUnit.
+     * 
+     * @throws QueryException If succeeded.
+     */
     @Test(expected = QueryException.class)
     public void testExecutionWithNotExistedRegionQueryString() throws QueryException {
 	BucketOrientedQueryService
@@ -198,7 +257,7 @@ public class BucketOrientedQueryServiceTest {
     private static void startClient() throws IOException {
 	ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
 
-	PropertiesHelper properties = new PropertiesHelper("/bucketOrientedServerProperties.properties");
+	PropertiesHelper properties = new PropertiesHelper("/" + PROPERTY_FILE);
 
 	cache = clientCacheFactory.set("log-level", properties.getStringProperty("log-level"))
 		.set("license-file", properties.getStringProperty("license-file"))
@@ -216,7 +275,7 @@ public class BucketOrientedQueryServiceTest {
      * @throws InterruptedException when
      */
     private static void startCacheServers() throws IOException, InterruptedException {
-	String[] javaArgs = new String[] { "-DgemfirePropertyFile=bucketOrientedServerProperties.properties" };
+	String[] javaArgs = new String[] { "-DgemfirePropertyFile=" + PROPERTY_FILE };
 
 	cacheServer1 = javaProcessLauncher.runWithConfirmation(ServerTemplate.class, javaArgs, null);
 	cacheServer2 = javaProcessLauncher.runWithConfirmation(ServerTemplate.class, javaArgs, null);
@@ -225,10 +284,9 @@ public class BucketOrientedQueryServiceTest {
     /**
      * Stops cache servers.
      *
-     * @throws IOException when
-     * @throws InterruptedException
+     * @throws Exception If failed to stop servers.
      */
-    private static void stopCacheServers() throws IOException, InterruptedException {
+    private static void stopCacheServers() throws Exception  {
 	javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
 	javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }
