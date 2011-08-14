@@ -11,12 +11,13 @@ import java.util.List;
 public class Person implements Serializable {
     /** Field serialVersionUID  */
     private static final long serialVersionUID = -930346814776120969L;
+
     /** Field socialNumber  */
     private int socialNumber;
+
     /** Field children  */
     private List<String> children;
 
-    
     /**
      * Constructor Person creates a new Person instance.
      *
@@ -24,8 +25,8 @@ public class Person implements Serializable {
      * @param children of type List<String>
      */
     public Person(int socialNumber, List<String> children) {
-        this.socialNumber = socialNumber;
-        this.children = children;
+	this.socialNumber = socialNumber;
+	this.children = children;
     }
 
     /**
@@ -34,7 +35,7 @@ public class Person implements Serializable {
      * @return the socialNumber (type String) of this Person object.
      */
     public int getSocialNumber() {
-        return socialNumber;
+	return socialNumber;
     }
 
     /**
@@ -44,7 +45,7 @@ public class Person implements Serializable {
      *
      */
     public void setSocialNumber(int socialNumber) {
-        this.socialNumber = socialNumber;
+	this.socialNumber = socialNumber;
     }
 
     /**
@@ -53,7 +54,7 @@ public class Person implements Serializable {
      * @return the children (type List<String>) of this Person object.
      */
     public List<String> getChildren() {
-        return children;
+	return children;
     }
 
     /**
@@ -63,7 +64,7 @@ public class Person implements Serializable {
      *
      */
     public void setChildren(List<String> children) {
-        this.children = children;
+	this.children = children;
     }
 
     /**
@@ -72,27 +73,30 @@ public class Person implements Serializable {
      */
     @Override
     public String toString() {
-        return socialNumber + " : " + children;
+	return socialNumber + " : " + children;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Person)) return false;
+	if (this == o)
+	    return true;
+	if (!(o instanceof Person))
+	    return false;
 
-        Person person = (Person) o;
+	Person person = (Person) o;
 
-        if (socialNumber != person.socialNumber) return false;
-        if (children != null ? !children.equals(person.children) : person.children != null) return false;
+	if (socialNumber != person.socialNumber)
+	    return false;
+	if (children != null ? !children.equals(person.children) : person.children != null)
+	    return false;
 
-        return true;
+	return true;
     }
 
     @Override
     public int hashCode() {
-        int result = socialNumber;
-        result = 31 * result + (children != null ? children.hashCode() : 0);
-        return result;
+	int result = socialNumber;
+	result = 31 * result + (children != null ? children.hashCode() : 0);
+	return result;
     }
 }
-

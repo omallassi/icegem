@@ -389,15 +389,19 @@ public class JavaProcessLauncher {
 	System.out.println("Waiting startup complete confirmation for a process (" + className + ")...");
 
 	BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	
 	String line;
+	
 	while ((line = bufferedReader.readLine()) != null) {
 	    if (line.equals(PROCESS_STARTUP_COMPLETED)) {
 		System.out.println("The process (" + className + ") has been started successfully");
+		
 		return;
 	    } else if (redirectProcessInputStreamToParentProcessStdOut) {
 		System.out.println(className + PROCESS_STDOUT_STREAM_PREFIX + line);
 	    }
 	}
+	
 	throw new InterruptedException("Process (" + className + ") "
 		+ "has been already finished without startup complete confirmation");
     }

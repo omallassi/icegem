@@ -20,12 +20,13 @@ public class PersonUtils {
      * @return boolean
      */
     public static boolean containsPersonWithSocialNumber(List<?> results, int socialNumber) {
-        for (Object result : results) {
-            if (((Person) result).getSocialNumber() == socialNumber) {
-                return true;
-            }
-        }
-        return false;
+	for (Object result : results) {
+	    if (((Person) result).getSocialNumber() == socialNumber) {
+		return true;
+	    }
+	}
+
+	return false;
     }
 
     /**
@@ -33,10 +34,10 @@ public class PersonUtils {
      *
      * @param region of type Region
      * @param numberOfEntries number of entries for population
-     */   
+     */
     public static void populateRegionByPersons(Region region, int numberOfEntries) {
-        for (int i = 1; i <= numberOfEntries; i++) {
-            region.put(i, new Person(i, Arrays.asList(Integer.toString(i), Integer.toString(i*2))));
-        }
+	for (int i = 1; i <= numberOfEntries; i++) {
+	    region.put(i, new Person(i, Arrays.asList(Integer.toString(i), Integer.toString(i * 2))));
+	}
     }
 }
