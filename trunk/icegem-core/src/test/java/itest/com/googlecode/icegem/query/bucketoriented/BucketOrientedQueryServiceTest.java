@@ -86,15 +86,15 @@ public class BucketOrientedQueryServiceTest {
 	// Existing key.
 	SelectResults<Object> resultsBasedOnExistedKey = BucketOrientedQueryService.executeOnBuckets(
 		"SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1)));
-	
+
 	checkResults(resultsBasedOnExistedKey, 10, new int[] { 1, 11 }, new int[] { 2 });
 
 	// Fake key.
 	SelectResults<Object> resultsBasedOnFakeKey = BucketOrientedQueryService.executeOnBuckets(
 		"SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(101)));
-	
+
 	checkResults(resultsBasedOnFakeKey, 10, new int[] { 1 }, new int[] { 101, 2 });
-	
+
 	assertFalse(resultsBasedOnFakeKey.equals(resultsBasedOnExistedKey));
     }
 
@@ -123,21 +123,22 @@ public class BucketOrientedQueryServiceTest {
      */
     @Test
     public void testBucketsDataRetrieve() throws QueryException, InterruptedException {
-	// SelectResults<Object> resultsFromOneBucket =
-	// BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data",
-	// data, new HashSet<Object>(Arrays.asList(1)));
-	// checkResults(resultsFromOneBucket , 10, new int[] {1}, new int[]
-	// {2});
+	// One bucket.
+	SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data",
+		data, new HashSet<Object>(Arrays.asList(1)));
 
+	checkResults(resultsFromOneBucket, 10, new int[] { 1 }, new int[] { 2 });
+
+	// Two buckets.
 	SelectResults<Object> resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets(
 		"SELECT * FROM /data", data, new HashSet<Object>(Arrays.asList(1, 2)));
+
 	checkResults(resultsFromTwoBuckets, 20, new int[] { 1, 2 }, new int[0]);
 
-	// resultsFromTwoBuckets =
-	// BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data",
-	// data, new HashSet<Object>(Arrays.asList(1, 11, 2)));
-	// checkResults(resultsFromTwoBuckets, 20, new int[] {1, 2, 11}, new
-	// int[0]);
+	resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data", data,
+		new HashSet<Object>(Arrays.asList(1, 11, 2)));
+
+	checkResults(resultsFromTwoBuckets, 20, new int[] { 1, 2, 11 }, new int[0]);
     }
 
     /**
@@ -147,17 +148,21 @@ public class BucketOrientedQueryServiceTest {
      */
     @Test
     public void testBucketDataRetrieveUsingQueryLimit() throws QueryException {
+	// One bucket.
 	SelectResults<Object> resultsFromOneBucket = BucketOrientedQueryService.executeOnBuckets(
 		"SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1)));
+
 	checkResults(resultsFromOneBucket, 3, new int[0], new int[0]);
 
+	// Two buckets.
 	SelectResults<Object> resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets(
 		"SELECT * FROM /data limit 3", data, new HashSet<Object>(Arrays.asList(1, 2)));
+
 	checkResults(resultsFromTwoBuckets, 3, new int[0], new int[0]);
 
 	resultsFromTwoBuckets = BucketOrientedQueryService.executeOnBuckets("SELECT * FROM /data LIMIT 21", data,
-		new HashSet<Object>(Arrays.asList(1, 2)) {
-		});
+		new HashSet<Object>(Arrays.asList(1, 2)));
+	
 	checkResults(resultsFromTwoBuckets, 20, new int[0], new int[0]);
     }
 
@@ -286,7 +291,7 @@ public class BucketOrientedQueryServiceTest {
      *
      * @throws Exception If failed to stop servers.
      */
-    private static void stopCacheServers() throws Exception  {
+    private static void stopCacheServers() throws Exception {
 	javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer1);
 	javaProcessLauncher.stopBySendingNewLineIntoProcess(cacheServer2);
     }

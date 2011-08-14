@@ -23,70 +23,68 @@ import java.util.List;
 public class BucketOrientedQueryFunction extends FunctionAdapter {
     /** Function ID. */
     private final static String FUNCTION_ID = BucketOrientedQueryFunction.class.getName();
-    
+
+    /** Serial version UID. */
+    private static final long serialVersionUID = -8818891792083706794L;
+
     /** Logger. */
     private Logger logger = LoggerFactory.getLogger(BucketOrientedQueryFunction.class);
 
     /**
-     * Executes specified via arguments query string.
+     * Executes query using arguments query string and query parameters.
      *
-     * @param functionContext of type FunctionContext
+     * @param functionContext Function context.
      */
     @Override
     @SuppressWarnings({ "ThrowableInstanceNeverThrown", "unchecked" })
     public void execute(FunctionContext functionContext) {
-        ResultSender<Serializable> resultSender = functionContext.getResultSender();
-        
-        RegionFunctionContext regionFunctionContext = (RegionFunctionContext) functionContext;
+	ResultSender<Serializable> resultSender = functionContext.getResultSender();
 
-        if (functionContext.getArguments() == null) {
-            handleException(new FunctionException("You must specify function argument for query execution."), resultSender);
-            
-            return;
-        }
-        
-        if (!(functionContext.getArguments() instanceof BucketOrientedQueryFunctionArgument)) {
-            handleException(new FunctionException("Function arguments must be of BucketOrientedQueryFunctionArgument.class"), resultSender);
-            
-            return;
-        }
+	RegionFunctionContext regionFunctionContext = (RegionFunctionContext) functionContext;
 
-        BucketOrientedQueryFunctionArgument argument = (BucketOrientedQueryFunctionArgument) functionContext.getArguments();
-        
-        LocalDataSet localData = (LocalDataSet) PartitionRegionHelper.getLocalDataForContext(regionFunctionContext);
-        
-        QueryService queryService = localData.getCache().getQueryService();
+	if (functionContext.getArguments() == null) {
+	    handleException(new FunctionException("You must specify function argument for query execution."),
+		    resultSender, null);
 
-        try {
-            Query query = queryService.newQuery(argument.getQueryString());
-            
-            SelectResults result = (SelectResults) localData.executeQuery((DefaultQuery) query,
-                    argument.getQueryParameters(), localData.getBucketSet());
-            
-            resultSender.lastResult((Serializable) formatResults(result));
-        } catch (QueryInvalidException e) {
-            handleException(e, resultSender);
-        } catch (FunctionDomainException e) {
-            handleException(e, resultSender);
-        } catch (TypeMismatchException e) {
-            handleException(e, resultSender);
-        } catch (NameResolutionException e) {
-            handleException(e, resultSender);
-        } catch (QueryInvocationTargetException e) {
-            handleException(e, resultSender);
-        } catch (Throwable e) {
-            handleException(e, resultSender);
-        }
+	    return;
+	}
+
+	if (!(functionContext.getArguments() instanceof BucketOrientedQueryFunctionArgument)) {
+	    handleException(new FunctionException("Function arguments must be of type "
+		    + BucketOrientedQueryFunctionArgument.class.getName() + "."), resultSender, null);
+
+	    return;
+	}
+
+	BucketOrientedQueryFunctionArgument argument = (BucketOrientedQueryFunctionArgument) functionContext
+		.getArguments();
+
+	LocalDataSet localData = (LocalDataSet) PartitionRegionHelper.getLocalDataForContext(regionFunctionContext);
+
+	QueryService queryService = localData.getCache().getQueryService();
+
+	String queryStr = argument.getQueryString();
+
+	try {
+	    Query query = queryService.newQuery(queryStr);
+
+	    SelectResults<?> result = (SelectResults<?>) localData.executeQuery((DefaultQuery) query,
+		    argument.getQueryParameters(), localData.getBucketSet());
+
+	    resultSender.lastResult((Serializable) formatResults(result));
+	} catch (Exception e) {
+	    handleException(e, resultSender, queryStr);
+	}
     }
 
     /**
-     * Method getId returns the id of this BucketOrientedQueryFunction object.
+     * Gets function id.
      *
-     * @return the id (type String) of this BucketOrientedQueryFunction object.
+     * @return Function id.
      */
     @Override
     public String getId() {
-        return FUNCTION_ID;
+	return FUNCTION_ID;
     }
 
     /**
@@ -104,22 +102,20 @@ public class BucketOrientedQueryFunction extends FunctionAdapter {
      */
     @Override
     public boolean optimizeForWrite() {
-        return false;
+	return false;
     }
 
     /**
      * Handles exceptions during query execution.
      *
-     * @param e of type Throwable
+     * @param e Exception to handle.
      * @param resultSender of type ResultSender<Serializable>
      */
     @SuppressWarnings({ "ThrowableInstanceNeverThrown" })
-    private void handleException(Throwable e, ResultSender<Serializable> resultSender) {
-        e.printStackTrace();
-        
-        logger.warn(e.getMessage());
-        
-        resultSender.sendException(new FunctionException(e.getMessage()));
+    private void handleException(Throwable e, ResultSender<Serializable> resultSender, String queryString) {
+	logger.error("Failed to execute bucket oriented query" + (queryString != null ? ": " + queryString : "."), e);
+
+	resultSender.sendException(new FunctionException(e.getMessage()));
     }
 
     /**
@@ -128,13 +124,12 @@ public class BucketOrientedQueryFunction extends FunctionAdapter {
      * @param selectResults of type SelectResults
      * @return List<Object>
      */
-    @SuppressWarnings({ "unchecked" })
-    private List<Object> formatResults(SelectResults selectResults) {
-        List<Object> results = new ArrayList<Object>(selectResults.size() + 1);
-        
-        results.addAll(selectResults.asList());
-        results.add(selectResults.getCollectionType().getElementType());
-        
-        return results;
+    private List<Object> formatResults(SelectResults<?> selectResults) {
+	List<Object> results = new ArrayList<Object>(selectResults.size() + 1);
+
+	results.addAll(selectResults.asList());
+	results.add(selectResults.getCollectionType().getElementType());
+
+	return results;
     }
 }
