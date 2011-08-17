@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE client-cache PUBLIC 
+        "-//GemStone Systems, Inc.//GemFire Declarative Cache 6.5//EN"
+        "http://www.gemstone.com/dtd/cache6_5.dtd">
+<client-cache>
+    <pool name="signal-client">
+        <locator host="localhost" port="${locator.port}"/>
+    </pool>
+    <region name="signal-region">
+        <region-attributes pool-name="signal-client"/>
+    </region>
+</client-cache>        
