@@ -54,7 +54,7 @@ public class VersionMap {
 	}
 	
 	public void readAndCheck(DataInput in, byte actualVersion, byte len) throws IOException {
-		for(int i = 0 ; i < actualVersion; i++) {
+		for(int i = 0 ; i < len; i++) {
 			short hashFromBinary = in.readShort();
 			validate((byte) (actualVersion - i), hashFromBinary);
 		}

@@ -20,6 +20,7 @@ import com.googlecode.icegem.serialization.versioning.beans.manyVersions.v1.Car;
 import com.googlecode.icegem.serialization.versioning.beans.modified.beanv1.Person;
 import com.googlecode.icegem.serialization.versioning.beans.previousversion.beanv1.Company;
 import com.googlecode.icegem.serialization.versioning.beans.singleversion.Dog;
+import com.googlecode.icegem.serialization.versioning.beans.versionhistory.OldBean;
 import com.googlecode.icegem.serialization.versioning.beans.versionhistory.v1.Keyboard;
 import com.googlecode.icegem.serialization.versioning.beans.versionhistory.v1.Mouse;
 import com.googlecode.icegem.serialization.versioning.beans.wrong.Bird;
@@ -43,7 +44,8 @@ public class SerializeForVersioningTest extends TestParent {
         HierarchyRegistry.registerAll(Thread.currentThread().getContextClassLoader(),
                 Dog.class, Bear.class, Company.class, Son.class,
                 Car.class, Person.class, Rabbit.class, Man.class,
-                Woman.class, Table.class, Keyboard.class, Mouse.class);
+                Woman.class, Table.class, Keyboard.class, Mouse.class,
+                OldBean.class);
     }
 
     @Test
@@ -148,4 +150,15 @@ public class SerializeForVersioningTest extends TestParent {
     public void serializeMouseClassVersionOne() throws IOException, CannotCompileException {
         DataSerializer.writeObject(new Mouse(), new DataOutputStream(new FileOutputStream("mouse.versionTest")));
     }
+
+    @Test
+    public void serializeOldBean() throws IOException {
+        OldBean oldman = new OldBean();
+        oldman.setS1("adsf");
+        oldman.setS2("adsf");
+        oldman.setS3("adsf");
+        oldman.setS4("adsf");
+        DataSerializer.writeObject(oldman, new DataOutputStream(new FileOutputStream("oldBean.versionTest")));
+    }
+
 }
