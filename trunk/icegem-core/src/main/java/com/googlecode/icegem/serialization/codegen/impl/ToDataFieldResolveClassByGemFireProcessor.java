@@ -38,7 +38,7 @@ class ToDataFieldResolveClassByGemFireProcessor {
         String fieldName = field.getName();
         String getter = "get" + CodeGenUtils.firstLetterToUpperCase(fieldName) + "()";
 
-        String allowJavaSerialization = Boolean.toString(Configuration.getCurrent().isJavaSerializationEnabled());
+        String allowJavaSerialization = Boolean.toString(Configuration.get().isJavaSerializationEnabled());
 
         return "if (concrete." + getter + " == null) {\n" +
                 tab("out.writeByte(0);\n") +

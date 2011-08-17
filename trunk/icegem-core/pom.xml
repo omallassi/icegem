@@ -25,6 +25,11 @@
             <artifactId>gemfire</artifactId>
         </dependency>
 
+	<dependency>
+	    <groupId>antlr</groupId>
+	    <artifactId>antlr</artifactId>
+	</dependency>
+
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>

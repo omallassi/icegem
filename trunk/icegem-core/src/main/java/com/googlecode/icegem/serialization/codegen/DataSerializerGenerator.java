@@ -206,7 +206,7 @@ public class DataSerializerGenerator {
     }
 
     private static String createDataSerializerClassNameForClass(Class<?> clazz) {
-        String dataSerializerPackage = Configuration.getCurrent().getDataSerializerPackage();
+        String dataSerializerPackage = Configuration.get().getDataSerializerPackage();
         return dataSerializerPackage + "." + clazz.getName() + "DataSerializer";
     }
 
@@ -217,10 +217,7 @@ public class DataSerializerGenerator {
             parentClass = classPool.get(PARENT_CLASS);
         } catch (NotFoundException e) {
             throw new CannotCompileException("There is no " + DataSerializerGenerator.PARENT_CLASS
-                    + " in classpath of context ClassLoader for " + baseClass.getName(), e); // todo: correlation with
-                                                                                             // line:
-                                                                                             // classPool.insertClassPath(new
-                                                                                             // LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+                    + " in classpath of context ClassLoader for " + baseClass.getName(), e); 
         }
 
         try {
