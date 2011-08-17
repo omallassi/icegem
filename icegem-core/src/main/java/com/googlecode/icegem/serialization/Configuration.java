@@ -1,38 +1,26 @@
 package com.googlecode.icegem.serialization;
 
-import com.googlecode.icegem.serialization.codegen.impl.ToDataFieldProcessor;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
- * Object that specify behaviour of framework.
+ * Global configuration of icegem facilities.
  *
  * @author igolovach
  */
 
 public class Configuration {
-	private static boolean JAVA_SERIALIZATION_ENABLED = !Boolean.getBoolean("icegem.java.serialization.disabled");
+	private static boolean JAVA_SERIALIZATION_ENABLED = !Boolean.getBoolean("icegem.serialization.java.native.disabled");
 	
-    private Set<Class<?>> gemFireResolvedClasses = new HashSet<Class<?>>();
-
+	private static boolean DISTRIBUTE_DESERIALIZER_REGISTRATION = Boolean.getBoolean("icegem.serialization.distribute.registration");
+	
     public Configuration() {
-        //todo: more?
-        gemFireResolvedClasses.add(Object.class);
-        gemFireResolvedClasses.add(Object[].class);
-        gemFireResolvedClasses.add(List.class);
-        gemFireResolvedClasses.add(Map.class);
-        gemFireResolvedClasses.add(Set.class);
     }
 
     /**
      * Current Configuration: loaded at framework startup.
      * You can cache it: don't reloaded, don't change at runtime.
      */
-    public static Configuration getCurrent() {
-        return new Configuration(); //todo: load from file
+    public static Configuration get() {
+        return new Configuration();
     }
 
     public boolean isJavaSerializationEnabled() {
@@ -42,17 +30,13 @@ public class Configuration {
     public void setJavaSerializationEnabled(boolean value) {
     	JAVA_SERIALIZATION_ENABLED = value;
     }
-
-    public boolean isCustomRegisteredClass(Class<?> clazz) {
-        return clazz.getName().startsWith("com.googlecode.gemfire.");
+    
+    public boolean isDeserializerRegistrationDistributed() {
+    	return DISTRIBUTE_DESERIALIZER_REGISTRATION ;
     }
-
-    public boolean useGemFireDataSerializerResolving(Class<?> clazz) { 
-        return gemFireResolvedClasses.contains(clazz);
-    }
-
-    public boolean serializeByHand(Class<?> clazz) { //todo: rename
-        return new ToDataFieldProcessor().map.containsKey(clazz);
+    
+    public void setDeserializerRegistrationDistributed(boolean value) {
+    	DISTRIBUTE_DESERIALIZER_REGISTRATION = value;
     }
 
     /**

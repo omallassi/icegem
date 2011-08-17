@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gemstone.gemfire.DataSerializer;
+import com.gemstone.gemfire.internal.InternalDataSerializer;
 import com.googlecode.icegem.serialization.codegen.DataSerializerGenerator;
 import com.googlecode.icegem.serialization.serializers.RegisteredDataSerializers;
 
@@ -57,7 +58,7 @@ public class HierarchyRegistry {
 
         // register classes of DataSerializers in GemFire
         for (Class<?> clazz : serializerClassList) {
-            DataSerializer.register(clazz);
+            InternalDataSerializer.register(clazz, Configuration.get().isDeserializerRegistrationDistributed());
         }
 
         registerDataSerializers();
