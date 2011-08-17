@@ -13,45 +13,59 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+/**
+ * TODO: Create appropriate javadoc. 
+ */
 public class FileService {
+    /**
+     * @param filename
+     * @param o
+     * @throws IOException
+     */
+    public static void writeObject(String filename, Object o) throws IOException {
+	delete(filename);
 
-	public static void writeObject(String filename, Object o)
-		throws IOException {
+	OutputStream file = new FileOutputStream(filename);
+	OutputStream buffer = new BufferedOutputStream(file);
+	ObjectOutput output = new ObjectOutputStream(buffer);
+	
+	try {
+	    output.writeObject(o);
+	} finally {
+	    output.close();
+	}
+    }
 
-		delete(filename);
+    /**
+     * @param filename
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static Object readObject(String filename) throws IOException, ClassNotFoundException {
+	InputStream file = new FileInputStream(filename);
+	InputStream buffer = new BufferedInputStream(file);
+	ObjectInput input = new ObjectInputStream(buffer);
 
-		OutputStream file = new FileOutputStream(filename);
-		OutputStream buffer = new BufferedOutputStream(file);
-		ObjectOutput output = new ObjectOutputStream(buffer);
-		try {
-			output.writeObject(o);
-		} finally {
-			output.close();
-		}
+	Object o = null;
+
+	try {
+	    o = input.readObject();
+	} finally {
+	    input.close();
+	    
+	    delete(filename);
 	}
 
-	public static Object readObject(String filename) throws IOException,
-		ClassNotFoundException {
+	return o;
+    }
 
-		InputStream file = new FileInputStream(filename);
-		InputStream buffer = new BufferedInputStream(file);
-		ObjectInput input = new ObjectInputStream(buffer);
-
-		Object o = null;
-
-		try {
-			o = input.readObject();
-		} finally {
-			input.close();
-			delete(filename);
-		}
-
-		return o;
-	}
-
-	private static void delete(String filename) {
-		File file = new File(filename);
-		file.delete();
-	}
-
+    /**
+     * @param filename
+     */
+    private static void delete(String filename) {
+	File file = new File(filename);
+	
+	file.delete();
+    }
 }

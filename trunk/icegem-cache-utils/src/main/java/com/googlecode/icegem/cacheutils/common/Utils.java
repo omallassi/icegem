@@ -96,7 +96,7 @@ public class Utils {
 	try {
 	    thread.join(timeout);
 	} catch (InterruptedException e) {
-	    // should not be interrupted normally
+	    // Should not be interrupted normally.
 	}
 
 	if (thread.isAlive()) {
@@ -104,6 +104,10 @@ public class Utils {
 	}
     }
 
+    /**
+     * @param runnable - Runnable job to execute in a separate thread.
+     * @param timeout - Maximum timeout to execute a new thread.
+     */
     public static void execute(Runnable runnable, long timeout) {
 	execute(new Thread(runnable), timeout);
     }
