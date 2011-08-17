@@ -67,8 +67,7 @@
         <module>icegem-core</module>
         <module>icegem-performance</module>
         <module>icegem-cache-utils</module>
-	    <module>icegem-serializer-generator</module>
-        <!--<module>icegem-message-barrier-example</module>-->
+    	<module>icegem-serializer-generator</module>
     </modules>
 
     <properties>
