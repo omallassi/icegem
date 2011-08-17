@@ -107,8 +107,6 @@ public class BucketOrientedQueryService {
 	    return limitIndex;
 	}
 
-	// TODO: Why do we use the hardcoded "5" here? Is it requirement to
-	// always put 'limit' clause at the end of query string?
 	String limitValue = queryString.substring(limitIndex + 5);
 
 	return Integer.parseInt(limitValue.trim());
@@ -133,7 +131,7 @@ public class BucketOrientedQueryService {
 	    if (baseElementType == null) {
 		baseElementType = elementType;
 	    } else if (!baseElementType.equals(elementType)) {
-		throw new IllegalStateException("Collection types for query result are different");
+		throw new IllegalStateException("Collection types for query result are different.");
 	    }
 
 	    list.addAll(queryResult);
