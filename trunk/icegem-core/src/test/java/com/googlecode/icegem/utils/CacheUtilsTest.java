@@ -1,9 +1,8 @@
 package com.googlecode.icegem.utils;
 
-import static junit.framework.Assert.fail;
+import static junit.framework.Assert.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.AfterClass;
@@ -16,7 +15,6 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
-import com.googlecode.icegem.query.pagination.PageKey;
 
 /**
  * TODO: need to implement abstract integration test in order to avoid
@@ -24,23 +22,29 @@ import com.googlecode.icegem.query.pagination.PageKey;
  * 
  * Tests for {@link CacheUtils} class. 
  */
-public class RegionUtilsTest {
-    /** Field LOCATOR_PORT */
+public class CacheUtilsTest {
+    /** */
+    private static final String PROP_FILE = "cacheUtilsTestServerProperties.properties";
+
+    /** Locator port. */
     private static final int LOCATOR_PORT = 10355;
 
-    /** Field cache */
+    /** Cache. */
     private static ClientCache cache;
 
-    /** Region for querying */
-    private static Region data;
+    /** Partitioned region. */
+    private static Region<Object, Object> partitionedRegion;
 
-    /** Field cacheServer1 */
+    /** Replicated region. */
+    private static Region<Object, Object> replicatedRegion;
+
+    /** Cache server 1. */
     private static Process cacheServer1;
 
-    /** Field cacheServer2 */
+    /** Cache server 2. */
     private static Process cacheServer2;
 
-    /** Field javaProcessLauncher */
+    /** Java process launcher. */
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 
     @BeforeClass
@@ -49,7 +53,7 @@ public class RegionUtilsTest {
 
 	startClient();
 
-	CacheUtils.clearRegion(data);
+	CacheUtils.clearRegion(partitionedRegion);
     }
 
     @AfterClass
@@ -61,7 +65,8 @@ public class RegionUtilsTest {
 
     @Before
     public void after() throws InterruptedException, IOException {
-	CacheUtils.clearRegion(data);
+	CacheUtils.clearRegion(partitionedRegion);
+	CacheUtils.clearRegion(replicatedRegion);
     }
 
     /**
@@ -72,7 +77,7 @@ public class RegionUtilsTest {
     private static void startClient() throws IOException {
 	ClientCacheFactory clientCacheFactory = new ClientCacheFactory().addPoolLocator("localhost", LOCATOR_PORT);
 
-	PropertiesHelper properties = new PropertiesHelper("/paginatedQueryServerProperties.properties");
+	PropertiesHelper properties = new PropertiesHelper("/" + PROP_FILE);
 
 	cache = clientCacheFactory.set("log-level", properties.getStringProperty("log-level"))
 		.set("license-file", properties.getStringProperty("license-file"))
@@ -80,10 +85,8 @@ public class RegionUtilsTest {
 
 	ClientRegionFactory<Object, Object> regionFactory = cache.createClientRegionFactory(ClientRegionShortcut.PROXY);
 
-	data = regionFactory.create("data");
-
-	ClientRegionFactory<PageKey, List<Object>> regionFactoryForHelpRegion = cache
-		.createClientRegionFactory(ClientRegionShortcut.PROXY);
+	partitionedRegion = regionFactory.create("partitioned_region");
+	replicatedRegion = regionFactory.create("replicated_region");
     }
 
     /**
@@ -95,7 +98,7 @@ public class RegionUtilsTest {
      *             when
      */
     private static void startCacheServers() throws IOException, InterruptedException {
-	String[] javaArgs = new String[] { "-DgemfirePropertyFile=paginatedQueryServerProperties.properties" };
+	String[] javaArgs = new String[] { "-DgemfirePropertyFile=" + PROP_FILE };
 
 	cacheServer1 = javaProcessLauncher.runWithConfirmation(ServerTemplate.class, javaArgs, null);
 	cacheServer2 = javaProcessLauncher.runWithConfirmation(ServerTemplate.class, javaArgs, null);
@@ -118,17 +121,38 @@ public class RegionUtilsTest {
      */
     @Test
     public void testClearRegion() {
-	fail("Not yet implemented");
+	/**
+	 * TODO: This test is implemented in {@link RegionClearingClientTest}.
+	 * 	Is it better to place it here? 
+	 */
     }
 
     /**
      * JUnit.
      */
     @Test
-    public void testRegionSize() {
-
+    public void testPartitionedRegionSize() {
+	int keyCnt = 10;
+	
+	for (int i = 0; i < keyCnt; i++)
+	    partitionedRegion.put(i, "Value" + i);
+	
+	assertEquals(keyCnt, CacheUtils.regionSize(partitionedRegion));
     }
-
+    
+    /**
+     * JUnit.
+     */
+    @Test
+    public void testReplicatedRegionSize() {
+	int keyCnt = 10;
+	
+	for (int i = 0; i < keyCnt; i++)
+	    replicatedRegion.put(i, "Value" + i);
+	
+	assertEquals(keyCnt, CacheUtils.regionSize(partitionedRegion));
+    }
+    
     /**
      * JUnit.
      */
