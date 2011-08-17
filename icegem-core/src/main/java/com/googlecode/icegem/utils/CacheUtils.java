@@ -98,7 +98,7 @@ public class CacheUtils {
      * @param region Region.
      * @return Size of the given region.
      */
-    public static int regionSize(Region<?, ?> region) {
+    public static int getRegionSize(Region<?, ?> region) {
 	Function function = new RegionSizeFunction();
 
 	FunctionService.registerFunction(function);
