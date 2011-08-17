@@ -9,7 +9,6 @@ public class StaticConstructorGenerator {
     	byte historyLength = xClass.getVersionHistoryLength();
     	
     	StringBuilder builder = new StringBuilder();
-    	builder.append("com.gemstone.gemfire.DataSerializer.register(" + serializerClsName + ".class);");
         builder.append(tab("VERSION_METADATA = new com.googlecode.icegem.serialization.codegen.VersionMap(\""+ xClass.getName()+"\", "+ beanVersion +","+ historyLength +");\n"));
         for(int i = 0 ; i < historyLength; i++) {
         	int version = beanVersion - i;
