@@ -19,18 +19,15 @@ public class RegionSizeResultCollector implements ResultCollector<Integer, Integ
     /** Done flag. */
     private boolean done;
 
-    @Override
     public void addResult(DistributedMember memberID, Integer singleRes) {
 	if (singleRes != null)
 	    size += singleRes;
     }
 
-    @Override
     public void clearResults() {
 	size = 0;
     }
 
-    @Override
     public void endResults() {
 	synchronized (mux) {
 	    done = true;
@@ -39,7 +36,6 @@ public class RegionSizeResultCollector implements ResultCollector<Integer, Integ
 	}
     }
 
-    @Override
     public Integer getResult() throws FunctionException {
 	try {
 	    return getResult(0, null);
@@ -49,7 +45,6 @@ public class RegionSizeResultCollector implements ResultCollector<Integer, Integ
 	}
     }
 
-    @Override
     public Integer getResult(long timeout, TimeUnit unit) throws FunctionException, InterruptedException {
 	if (timeout > 0 && unit == null)
 	    throw new IllegalArgumentException("Parameter unit cannot be nul if timeout > 0");
