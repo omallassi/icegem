@@ -6,79 +6,22 @@
 
 Icegem is an extension for in-memory data grid [http://community.gemstone.com/display/gemfire/GemFire+Enterprise GemFire Enterprise]^tm^ which provides serialization mechanism for domain classes that will be stored in the GemFire out of the box and eliminates the needs to take care of that routine yet unavoidable task. It guarantees best performance in compare with standard java serialization, supports versioning of the domain model classes and cases where part of the classes have already been serializable.
 
-This library also extends GemFire API (e.g. supports [Documentation#Paginated_Queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], [Documentation#Smart_expiration smart expiration], etc.) and contains a set of [Documentation#Cache_utils cache utils] for managing GemFire distributed system.
+This library also provides extensions and fill gaps in GemFire API (e.g. supports [Documentation#Paginated_Queries paginated queries], [Documentation#Bucket_oriented_query_service bucket oriented query service], [Documentation#Smart_expiration smart expiration], etc.).
 
-= Domain class requirements =
+= Build description =
 
-Icegem imposes some constraints on a domain class for which serialization is required. This constraints are the following:
-  * a class should have a public no-arguments constructor;
-  * if the class extends another class, superclass should either satisfy this constrains or it should be serializable;
-  * nested classes for this class should not be serializable;
-  * all class fields should have getters and setters;
-  * a getter name should start with "get" ("is" for boolean fields), take 0 parameters, return a value and should not be parametrized;
-  * a setter name should start with "set", take 1 parameter and should not be parametrized. 
+ # getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
+ # building artifacts: mvn install
+        p.s. to build a single module: cd module_folder, mvn install
+ # testing: mvn test
+ # integration testing: mvn verify
 
-*Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references.
+*Note*: some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file.
 
-Each class that will be auto serialized should be annotated with annotations:
- * `@AutoSerializable` - a main annotation that marks auto serializable classes. Additional information about this annotation can be found [Documentation#Auto_serializeble_annotation here];
- * `@BeanVersion` - specifies version of the current class via a required property `value`. This version should be positive. For more details about domain class versioning see this [Documentation#Bean_versioning section].
 
-See domain class [Documentation#Domain_class_examples examples] for more details.    
+= Automatic serialization with versioning support =
 
-= Architecture and implementation =
-
-The architecture of Icegem library consists of the four main components:
-
-  * [Documentation#Data_Serializer_Generator Data Serializer Generator]
-  * [Documentation#Hierarchy_Registry Hierarchy Registry]
-  * [Documentation#Introspector Introspector]
-  * [Documentation#Auto_Serializable_Registrar_Bean Auto Serializable Registrar Bean]
-
-== Data Serializer Generator ==
-
-The main component of the system. It performs main operations of the framework - generation of [http://www.gemstone.com/docs/6.5.1/product/docs/japi/com/gemstone/gemfire/DataSerializer.html DataSerializers] for domain classes. The algorithm of generating DataSerializer for custom class contains the following steps:
- * validate for compliance with the domain class requirements
- * generate `<class name>DataSerializer` class for specified class. This generated class extends `DataSerializer` class and implements it's four methods:
-{{{
-public Class[] getSupportedClasses();
-
-public int getId();
-
-public boolean toData(Object o, DataOutput out) throws IOException;
-
-public Object fromData(DataInput in) throws IOException, ClassNotFoundException;
-}}}
-
-  * `getSupportedClasses()` - returns class for which serializer is created;
-  * `getId()` - returns unique identifier of this `DataSerializer`
-  * `toData(Object o, DataOutput out)` - serializes an object to a `DataOutput`
-  * `fromData(DataInput in)` - reads an object from a `DataInput`
-
-Data serializer class generation is performed with help of [http://www.csg.is.titech.ac.jp/~chiba/javassist/ javassist library]. 
-
-== Hierarchy Registry ==
-
-Takes as parameter list of classes to be serialized and sends them to the [Documentation#Data_Serializer_Generator Data Serializer Generator] which generates corresponding `DataSerializers`. `HierarchyRegistry` then registers these `DataSerializers` with GemFire serialization framework.
-
-{{{
-class RegistryBean {
-
-List<Class<?>> classesList = ...
-
-HierarchyRegistry.registerAll(RegistryBean.class.getClassLoader(), classesList);
-
-...
-}
-}}}
-
-== Introspector ==   
-
-Introspector contains help methods for class validation during generation of data serializers. 
-
-== Auto Serializable Registrar Bean ==
-
-This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. Icegem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
+The library provides mechanism to automatically generate GemFire DataSerializer classes for model objects. 
 
 == Auto serializable annotation ==
 
@@ -86,21 +29,8 @@ Each class that will be auto serialized should be annotated with `@AutoSerialize
  *# `dataSerializerID` - an unique id for generated data serializer (required). This id should be the same for all versions of a class;
  *# `versionHistoryLength` - a number of bean versions (except current) for which class model hash codes will be stored in DataSerializer. This property value should be positive, by default `versionHistoryLength = 2`.
 
-== Autodetection of circular references ==
 
-If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
-Icegem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.trace.methodframes`. This property can be set via JVM parameters: 
-{{{
--Dicegem.serialization.trace.methodframes=true
-}}}
-or from the code using the following command:
-{{{
-import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
-...
-System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
-}}}  
-
-= Bean versioning =
+== Bean versioning ==
 
 Icegem supports data model versioning. It's achieved by using two annotations `@BeanVersion` and `@SinceVersion`.
 
@@ -113,13 +43,31 @@ In accordance to serialization/deserialization process we impose some restrictio
 These restrictions refer not only to @AutoSerializable class but also to it's superclasses (except java.lang.Object).
 See domain class [Documentation#Domain_class_examples examples] for more details.
 
-= Recognition of class model changes =
+== Domain class requirements ==
+
+Icegem imposes some constraints on a domain classes. Partially they are inherited from requirements on DataSerializable implementation and partially they introduced by need to support versioining of model classes :
+  * Class should have a public no-arguments constructor;
+  * if the class extends another class, superclass should either satisfy this constrains or it should be serializable;
+  * nested classes for this class should not be serializable;
+  * all class fields should have getters and setters;
+  * Class has to comply with JavaBean property definition requirements
+
+*Note*: Object should not contain circular references. See section [Documentation#Autodetection_of_circular_references Autodetection of circular references] for more information about built-in mechanism for detecting circular references.
+
+Each class that will be auto serialized should be annotated with annotations:
+ * `@AutoSerializable` - a main annotation that marks auto serializable classes. Additional information about this annotation can be found [Documentation#Auto_serializeble_annotation here];
+ * `@BeanVersion` - specifies version of the current class via a required property `value`. This version should be positive. For more details about domain class versioning see this [Documentation#Bean_versioning section].
+
+See domain class [Documentation#Domain_class_examples examples] for more details.    
+
+
+== Recognition of class model changes ==
 
 Using versioning each class may have arbitrary number of versions. All generated by Icegem library data serializers has build-in functionality for detecting inconsistency between class models using some king of hash code based on class fields that are included into particular class version. 
 
 Property `versionHistoryLength` of annotation `@AutoSerializable` specifies a number of bean versions (except current) for which class model hash codes will be stored in DataSerializer. During deserialization data serializer compares class models and if they are different, a `ClassCastException` will be thrown.
 
-= Domain class examples =
+== Domain class examples ==
 
 The first version of the class `Company`:
 {{{
@@ -186,6 +134,11 @@ public class Company {
         this.name = name;
     }
 
+    @Transient
+    public String getCompositeKey(){
+         return this.id + this.name;
+    }
+
     @Override
     public String toString() {
         return "Company{" +
@@ -196,13 +149,42 @@ public class Company {
 }
 }}}
 
-= Library integration =
+== Registrar Bean ==
 
-There are two ways of integrating the Icegem library into a progect: via spring and manually. Both cases are described below:
+This is a [http://www.springsource.org/ Spring] bean for using in spring-based projects that helps to find all classes for which serialization is required. `AutoSerializableRegistrarBean` scans specified domain model packages for classes annotated with `@AutoSerializable` annotation and passes founded classes to [Documentation#Hierarchy_Registry Hierarchy Registry] class for further  generation and registration of data serializers. Icegem library integration using Spring you can find in this [Documentation#Library_integration_using_Spring section]. There is also a [Documentation#Manual_library_integration section], describes how to integrate the Icegem library manually.
 
-== Library integration using Spring ==
+== Autodetection of circular references ==
 
-icegem-core.jar contains a class `AutoSerializableRegistrarBean` that can be used for registration of classes with annotation @AutoSerializable. To use it, you should register this bean in spring like:
+If classes contain circular references, during serialization of such classes a stack overflow error will be thrown.
+Icegem support a build-in mechanism for detecting circular references. By default it is disabled. It can be enabled by using java property `icegem.serialization.trace.methodframes`. This property can be set via JVM parameters: 
+{{{
+-Dicegem.serialization.trace.methodframes=true
+}}}
+or from the code using the following command:
+{{{
+import com.googlecode.icegem.serialization.codegen.MethodFrameCounter;
+...
+System.setProperty(MethodFrameCounter.SYSTEM_PROPERTY_NAME, "true");
+}}}  
+
+== Java native serialization ==
+
+== DataSerializer registration distribution ==
+By default registration of any DataSerializable type in GemFire is distributed across DS. icegem allows to control and disable the distribution mechanism. This is done purposely to enforce strong discipline of class management. While in simple case automatic registration simplifies system management, in complex system it may cause hardly identifiable glitches and problems. 
+
+By default automatic distribution is ENABLED.
+
+To disable it, use system property 
+
+{{{
+  -Dicegem.serialization.distribute.registration.disabled=true
+}}}
+
+== Library integration ==
+
+There are two ways of integrating the Icegem library into a progect: via spring and manually
+
+icegem-core contains a class `AutoSerializableRegistrarBean` that can be used for registration of classes with annotation @AutoSerializable. To use it, you should register this bean in spring like:
 
   # define bean with class  com.griddynamics.gemfire.serialization.spring.AutoSerializableRegistrarBean
         e.g. 
@@ -222,28 +204,16 @@ icegem-core.jar contains a class `AutoSerializableRegistrarBean` that can be use
 }}}
   # add javassist.jar, icegem-core.jar to ClassPath.
 
-== Manual library integration ==
-
 To use  library without spring:
 
   # add javassist.jar, icegem-core.jar to ClassPath
   # call `HierarchyRegistry.registerAll` with two arguments: class loader and list of domain classes that meet the [Documentation#Domain_class_requirements requirements] for use in the Icegem library.
 
-= Build description =
-
- # getting source:  svn checkout http://icegem.googlecode.com/svn/trunk/icegem-read-only
- # building artifacts: mvn install
-        p.s. to build a single module: cd module_folder, mvn install
- # testing: mvn test
- # integration testing: mvn verify
-
-*Note*: some integration test require gemfire license more then embedded. You can specify a custom gemfire license instead of embedded in a main `pom.xml` file.
-
-= Mixing auto and manual serialization =
+== Mixing auto and manual serialization ==
 
 In a project both annotated and casual serializable classes (implementing DataSerializable/Serializable or extending DataSerilizer) can be used.
 
-= Performance characteristics =
+== Performance characteristics ==
 
 [http://code.google.com/p/thrift-protobuf-compare/ Thrift-protobuf-compare] project were used for benchmark testing. 
 The data value used in the benchmark:
@@ -396,7 +366,7 @@ Create an object (using the classes specified by the serialization tool)
 </p>
 <br>
 
-= Bucket oriented query service =
+= Bucket aware query service =
 
 This service allows to execute OQL queries on a specified set of buckets. The set of buckets is determined by keys of entries that are stored in such buckets: 
  * real and fake keys can be used (such key should have the same routing object as bucket's keys have);
