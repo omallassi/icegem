@@ -44,7 +44,7 @@ public class BucketOrientedQueryServiceTest {
 
     /** Test cache region. */
     private static Region<Object, Object> data;
-
+    
     /** Cache server 1. */
     private static Process cacheServer1;
 
