@@ -132,6 +132,8 @@ public class CacheUtilsTest {
      */
     @Test
     public void testPartitionedRegionSize() {
+	assertEquals(0, CacheUtils.regionSize(partitionedRegion));
+	
 	int keyCnt = 10;
 	
 	for (int i = 0; i < keyCnt; i++)
@@ -145,12 +147,14 @@ public class CacheUtilsTest {
      */
     @Test
     public void testReplicatedRegionSize() {
+	assertEquals(0, CacheUtils.regionSize(replicatedRegion));
+
 	int keyCnt = 10;
 	
 	for (int i = 0; i < keyCnt; i++)
 	    replicatedRegion.put(i, "Value" + i);
 	
-	assertEquals(keyCnt, CacheUtils.regionSize(partitionedRegion));
+	assertEquals(keyCnt, CacheUtils.regionSize(replicatedRegion));
     }
     
     /**
