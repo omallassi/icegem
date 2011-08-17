@@ -27,18 +27,25 @@ import com.googlecode.icegem.utils.ServerTemplate;
 public class RegionClearingClientTest {
     /** Field cache  */
     private static ClientCache cache;
+    
     /** Field replicatedRegion1  */
     private static Region<Object, Object> replicatedRegion1;
+    
     /** Field replicatedRegion2  */
     private static Region<Object, Object> replicatedRegion2;
+    
     /** Field partitionedRegion1  */
     private static Region<Object, Object> partitionedRegion1;
+    
     /** Field partitionedRegion2  */
     private static Region<Object, Object> partitionedRegion2;
+    
     /** Field cacheServer1  */
     private static Process cacheServer1;
+    
     /** Field cacheServer2  */
     private static Process cacheServer2;
+    
     /** Field javaProcessLauncher  */
     private static JavaProcessLauncher javaProcessLauncher = new JavaProcessLauncher();
 

@@ -95,9 +95,11 @@ public class CacheUtils {
 
     /**
      * @param region Region.
+     * @return Size of the given region.
      */
-    public static void regionSize(Region<?, ?> region) {
-	
+    public static int regionSize(Region<?, ?> region) {
+	// TODO: implement
+	return 0;
     }
     
     /**
