@@ -10,7 +10,7 @@ package com.googlecode.icegem.serialization;
 public class Configuration {
 	private static boolean JAVA_SERIALIZATION_ENABLED = !Boolean.getBoolean("icegem.serialization.java.native.disabled");
 	
-	private static boolean DISTRIBUTE_DESERIALIZER_REGISTRATION = Boolean.getBoolean("icegem.serialization.distribute.registration");
+	private static boolean DISTRIBUTE_DESERIALIZER_REGISTRATION = !Boolean.getBoolean("icegem.serialization.distribute.registration.disabled");
 	
     public Configuration() {
     }
