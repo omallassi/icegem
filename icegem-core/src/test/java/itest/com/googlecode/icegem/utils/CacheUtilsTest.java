@@ -1,4 +1,4 @@
-package com.googlecode.icegem.utils;
+package itest.com.googlecode.icegem.utils;
 
 import static junit.framework.Assert.*;
 
@@ -15,6 +15,10 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
+import com.googlecode.icegem.utils.CacheUtils;
+import com.googlecode.icegem.utils.JavaProcessLauncher;
+import com.googlecode.icegem.utils.PropertiesHelper;
+import com.googlecode.icegem.utils.ServerTemplate;
 
 /**
  * TODO: need to implement abstract integration test in order to avoid
