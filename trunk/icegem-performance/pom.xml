@@ -18,7 +18,6 @@
 			<groupId>com.googlecode.icegem</groupId>
 			<artifactId>icegem-core</artifactId>
 			<version>0.8.6-SNAPSHOT</version>
-			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
