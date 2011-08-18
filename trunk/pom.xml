@@ -265,18 +265,6 @@
             <name>JBoss Repository</name>
             <url>https://repository.jboss.org/nexus/content/repositories/releases</url>
         </repository>
-
-        <repository>
-            <id>TestNG-extensions-repo</id>
-            <name>TestNG-extensions Repository</name>
-            <url>http://www.e-hoffman.org/released/repo/</url>
-        </repository>
-
-        <repository>
-            <id>icegem-public-repo</id>
-            <name>Icegem public repo</name>
-            <url>https://nexus.griddynamics.net/nexus/content/repositories/Icegem-pub</url>
-        </repository>
     </repositories>
 
     <build>
