@@ -1,0 +1,133 @@
+3. Integration with Spring
+
+//todo: NotMarkedParent[] = new NotMarkedParent[] {new MarkedChild()}
+//todo: bit matrix for null field flag
+
+//todo: pack String: "" -> 1byte, "!" -> 2byte
+//todo: @PackString(dict = {"0","1","2","3","4","5","6","7","8","9","(",")","-"})
+//todo: @PackShort/@PackChar/@PackInt/@PackLong
+//todo: pack java.util.Date
+//todo: pack EnumSet
+//todo: pack Boolean/boolean -> 1 bit
+
+??? how get logs / how to monitor
+??? how to customize process
+??? in what packages created XXXDataSerializers?
+
+???- com.gemstone.gemfire.cache.util.ObjectSizer
+
+???- ��������� �� ������� ������� ���� ����� ���������� ��� ������������?
+
+???- ������ ���� ������������ ���� ��� ������? � �� new XXXDataSerializer().process()
+
+???- ���� ��� ������ ������ - ���������� �������� ������� (+ ���������������� ������� ������� - �� ����� � ������ � �����)
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+- byte[] field -> out.writeInt(field.length); out.writeByte(field) //todo: field.length - short form?
+- circular ref detection: minimal counters inc-s for?
+- DOS.writeUTF(...) - perheps not optimal on size(DS:"1"->4byte, DOS:"1"->3)? use custom scheme?
+- any changes to serialize field with type: "ArrayList list = new ArrayList() {};"
+
+
+Ideal bean:
+
+??? add (parent + custom property + array property)
+@DataSerializerID(id=123456)
+public class Address {
+    private String street;
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+}
+
+@DataSerializerID(id=123456)
+public class Company {
+    private long id;
+    private Address address;
+    private String someCached;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    @Transient
+    public String getSomeCached() {
+        return someCached;
+    }
+
+    public void setName(String someCached) {
+        this.someCached = someCached;
+    }
+}
+
+1) custom bean
+    - class:
+        ??? not enum
+        - not extends/implements??? class from Collection API
+        - public
+    - constructor exists:
+        - public
+        - no-arg
+        - does not throws any checked exception
+    - getter (every method started from 'get+SomeString'):
+        - public
+        - no-arg
+        - not void/return some type
+        - throws no checked exception
+        - exist setter
+            - public
+            - the same name
+            - the same arg type (Integer/int - diff types)
+            - return void
+        - P.S. we don't support conventions for array/List (java code conventions)
+2) property (type returned by getter):
+    - primitive
+    - wrapper
+    - "system": Date, Locale, ???
+    - Collection API: ???
+    - Object/Object[]
+    - custom bean
+    - array of ???up
+    - "Bad" example: you bean has parent???/property from other package
+
+Architecture:
+    - GemFireBeanRegistry.setRegisteredClasses(List<Class>)
+        -> HierarchyRegistry.registerAll(List<Class>)
+            -> DataSerializerGenerator.generateDataSerializerClasses(List<Class>) + foreach:DataSerializer.register(clazz)
+    - data-ser name: a.b.c.Company -> com.googlecode.gemfire.serialization.$$$.a.b.c.CompanyDataSerializer
+    - two classes with the same name but diff class loaders: bahavior undefined but GemFire don't like it
+    - ref cycles (how deep frame counter(???conf))
+    - @Transient - there is no event of restoring (analog of ???readResolve())
+    - @DataSerializerID
+
+    - new XXXDataSer for every root+XXX, not every XXX
+    - how registrate package with beans
+    - how registrate DS in GemFire (+by Spring)
+
+    ??? how get src of generated serializers
+    ??? how get logs / how to monitor
+    ??? how to customize process
+    ??? in what packages created XXXDataSerializers?
