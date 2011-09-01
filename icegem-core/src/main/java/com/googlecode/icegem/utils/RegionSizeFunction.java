@@ -28,18 +28,19 @@ public class RegionSizeFunction extends FunctionAdapter {
     public void execute(FunctionContext ctx) {
 	ResultSender<Serializable> sndr = ctx.getResultSender();
 
-	if (!(ctx instanceof RegionFunctionContext))
+	if (!(ctx instanceof RegionFunctionContext)) {
 	    sndr.sendException(new FunctionException("Function context must be of type RegionFunctionContext."));
-
+	    
+	    return;
+	}
+	    
 	RegionFunctionContext regionCtx = (RegionFunctionContext) ctx;
 
 	Region<Object, Object> region = regionCtx.getDataSet();
 
-	DataPolicy policy = region.getAttributes().getDataPolicy();
-
 	Region<Object, Object> localRegion = region;
 
-	if (policy == DataPolicy.PARTITION || policy == DataPolicy.PERSISTENT_PARTITION) {
+	if (region.getAttributes().getDataPolicy().withPartitioning()) {
 	    localRegion = PartitionRegionHelper.getLocalData(region);
 	}
 
