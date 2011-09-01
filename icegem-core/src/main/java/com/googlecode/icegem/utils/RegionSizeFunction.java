@@ -2,7 +2,6 @@ package com.googlecode.icegem.utils;
 
 import java.io.Serializable;
 
-import com.gemstone.gemfire.cache.DataPolicy;
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.execute.FunctionAdapter;
 import com.gemstone.gemfire.cache.execute.FunctionContext;
@@ -24,6 +23,15 @@ public class RegionSizeFunction extends FunctionAdapter {
 	return RegionSizeFunction.class.getName();
     }
 
+    /**
+     * NOTE: This method should return true so that the function would not be sent
+     * to nodes which don't have any primary data.   
+     */
+    @Override
+    public boolean optimizeForWrite() {
+	return true;
+    }
+    
     @Override
     public void execute(FunctionContext ctx) {
 	ResultSender<Serializable> sndr = ctx.getResultSender();
@@ -41,7 +49,7 @@ public class RegionSizeFunction extends FunctionAdapter {
 	Region<Object, Object> localRegion = region;
 
 	if (region.getAttributes().getDataPolicy().withPartitioning()) {
-	    localRegion = PartitionRegionHelper.getLocalData(region);
+	    localRegion = PartitionRegionHelper.getLocalPrimaryData(region);
 	}
 
 	sndr.lastResult(localRegion.size());
