@@ -1,0 +1,1 @@
+The project provides extensions to major data-grid products, primarily SpringSource GemFire.
